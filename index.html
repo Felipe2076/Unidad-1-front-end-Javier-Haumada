@@ -3,21 +3,103 @@
     <head>
         <meta charset="UTF-8">
         <title>Club Deportivo</title>
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, Helvetica, sans-serif;
+                background: linear-gradient(180deg, #0a122b 0%, #1b2b57 100%);
+                color: #ffffff;
+            }
+
+            header {
+                background: rgba(0, 0, 0, 0.45);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+                padding: 20px 30px;
+                text-align: center;
+            }
+
+            header h1 {
+                margin: 0;
+                color: #ffb6c1;
+                font-size: clamp(2rem, 6vw, 5rem);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            nav {
+                margin-top: 14px;
+            }
+
+            nav a {
+                display: inline-block;
+                margin: 0 12px;
+                color: #f7f7ff;
+                text-decoration: none;
+                font-weight: 600;
+                padding: 8px 14px;
+                border-radius: 8px;
+                transition: all 0.25s ease;
+            }
+
+            nav a:hover {
+                background: rgba(255, 255, 255, 0.18);
+                color: #ffd0e3;
+            }
+
+            main {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 66vh;
+                padding: 30px;
+            }
+
+            section.hero {
+                background: rgba(255, 255, 255, 0.09);
+                border: 1px solid rgba(255, 255, 255, 0.22);
+                border-radius: 16px;
+                padding: 28px 32px;
+                max-width: 720px;
+                width: 100%;
+                text-align: center;
+                backdrop-filter: blur(8px);
+            }
+
+            .hero h2 {
+                color: #7efcff;
+                font-size: clamp(1.6rem, 5vw, 3rem);
+                margin: 0 0 14px;
+            }
+
+            .hero p {
+                color: #e7f1ff;
+                font-size: 1.25rem;
+                margin: 0;
+            }
+
+            footer {
+                text-align: center;
+                padding: 14px 0;
+                background: rgba(0, 0, 0, 0.35);
+                color: #d8e8ff;
+                font-size: 0.95rem;
+            }
+        </style>
     </head>
     <body>
         <header>
-            <h1 style="color: pink; font-size: 80px;"> Club Deportivo</h1> 
+            <h1>Club Deportivo</h1>
             <nav>
-                <a href=#>Inicio</a>
-                <a href=#>Planes</a>
-                <a href=#>Reversas</a>
-            <nav>
+                <a href="#">Inicio</a>
+                <a href="#">Planes</a>
+                <a href="#">Reversas</a>
+            </nav>
         </header>
         <main>
-            <selection>
-                <h2 style="color:aqua; font-size: 40px;">Bienvenido a mi club</h2>
+            <section class="hero">
+                <h2>Bienvenido a mi club</h2>
                 <p>Entrena con los mejores Profesionales.</p>
-            </selection>
+            </section>
         </main>
         <footer>
             <p>Copyright 2024 - Club Deportivo</p>
