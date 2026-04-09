@@ -81,7 +81,7 @@ input:focus,
 select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(255, 107, 44, 0.1);
+    box-shadow: 0 0 0 3px rgba(46, 26, 71, 0.14);
 }
 
 .btn-login {
@@ -142,7 +142,7 @@ select:focus {
 .message {
     margin-top: 20px;
     padding: 15px;
-    background-color: var(--accent-color);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-dark) 100%);
     color: var(--bg-white);
     border-radius: 8px;
     text-align: center;
@@ -213,7 +213,7 @@ select:focus {
 .social-btn:focus-visible,
 .auth-links a:focus-visible,
 .btn-login:focus-visible {
-    outline: 3px solid rgba(255, 107, 44, 0.35);
+    outline: 3px solid rgba(242, 183, 5, 0.45);
     outline-offset: 2px;
 }
 

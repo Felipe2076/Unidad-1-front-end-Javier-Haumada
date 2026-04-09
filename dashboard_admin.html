@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportClub - Dashboard Administrador</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="role-admin">
+    <div class="page">
+        <header class="topbar">
+            <div class="wrap topbar-inner">
+                <a class="brand" href="index.html" aria-label="Inicio SportClub">
+                    <img src="img/logo-sportclub.png" alt="Logo SportClub">
+                    <span class="brand-title">
+                        <strong>SportClub</strong>
+                        <span>Dashboard Admin</span>
+                    </span>
+                </a>
+
+                <nav class="nav" aria-label="Navegación de administrador">
+                    <a href="dashboard_admin.html#inicio">Inicio</a>
+                    <details class="nav-dropdown">
+                        <summary>Usuarios</summary>
+                        <ul class="nav-dropdown-menu">
+                            <li><a href="dashboard_admin.html#usuarios">Gestión de usuarios</a></li>
+                            <li><a href="dashboard_admin.html#perfil">Perfil admin</a></li>
+                        </ul>
+                    </details>
+                    <details class="nav-dropdown">
+                        <summary>Operación</summary>
+                        <ul class="nav-dropdown-menu">
+                            <li><a href="dashboard_admin.html#estadisticas">Estadísticas</a></li>
+                            <li><a href="dashboard_admin.html#reportes">Reportes</a></li>
+                            <li><a href="dashboard_admin.html#configuracion">Configuración</a></li>
+                        </ul>
+                    </details>
+                </nav>
+
+                <div class="topbar-actions" aria-label="Acciones de cuenta">
+                    <a class="btn btn-ghost" href="dashboard_admin.html#perfil">Editar perfil</a>
+                    <a class="btn btn-primary" href="login.html">Cerrar sesión</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="wrap dashboard" aria-label="Panel de administración">
+            <section id="inicio" class="dash-head" aria-label="Encabezado del panel">
+                <div class="card card-pad card-dash" style="flex:1; min-width:min(100%, 340px);">
+                    <span class="chip">Perfil: Administrador</span>
+                    <h2>Panel de administración</h2>
+                    <p>Visión global del club: usuarios, ocupación y reportes en un solo vistazo.</p>
+                </div>
+                <div class="card card-pad card-dash kpi" aria-label="Salud del sistema">
+                    <span class="muted">Salud operativa</span>
+                    <strong>96%</strong>
+                    <span class="muted">Uptime y procesos OK (demo)</span>
+                    <div class="progress-line" style="--p: 96; margin-top: 12px;" role="progressbar" aria-valuenow="96" aria-valuemin="0" aria-valuemax="100">
+                        <span class="progress-line__fill"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dash-stats" aria-label="Indicadores">
+                <article class="stat-card">
+                    <p class="stat-card__label">Crecimiento usuarios</p>
+                    <p class="stat-card__value">+12%</p>
+                    <p class="stat-card__hint">vs. trimestre anterior</p>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-card__label">Reservas</p>
+                    <p class="stat-card__value">+8%</p>
+                    <p class="stat-card__hint">Semana actual</p>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-card__label">Ocupación club</p>
+                    <p class="stat-card__value">76%</p>
+                    <p class="stat-card__hint">Promedio por franja</p>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-card__label">Incidencias</p>
+                    <p class="stat-card__value">4</p>
+                    <p class="stat-card__hint">Tickets abiertos</p>
+                </article>
+            </section>
+
+            <section class="dash-grid" aria-label="Contenido principal">
+                <article id="perfil" class="card card-pad card-dash" aria-label="Perfil del administrador">
+                    <div class="dash-section-title">
+                        <h3>Perfil</h3>
+                        <a class="link-inline" href="dashboard_admin.html#usuarios">Ir a usuarios</a>
+                    </div>
+                    <ul class="list" aria-label="Datos del administrador">
+                        <li><span><strong>Nombre</strong><br><span class="muted">Administrador</span></span><span class="pill">Root</span></li>
+                        <li><span><strong>Correo</strong><br><span class="muted">admin@sportclub.com</span></span><span class="pill">Verificado</span></li>
+                        <li><span><strong>Rol</strong><br><span class="muted">Admin</span></span><span class="pill">Sistema</span></li>
+                    </ul>
+                </article>
+
+                <article id="usuarios" class="card card-pad card-dash" aria-label="Gestión de usuarios">
+                    <div class="dash-section-title">
+                        <h3>Gestión de usuarios</h3>
+                        <a class="link-inline" href="dashboard_admin.html#estadisticas">Ver estadísticas</a>
+                    </div>
+                    <ul class="list" aria-label="Lista de usuarios">
+                        <li>
+                            <span>
+                                <strong>Ana Torres</strong><br>
+                                <span class="muted">ana@email.com</span>
+                                <span class="list-meta">Completitud de ficha</span>
+                                <div class="progress-line" style="--p: 92; margin-top: 8px;" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="progress-line__fill"></span>
+                                </div>
+                            </span>
+                            <span class="pill">Usuario</span>
+                        </li>
+                        <li>
+                            <span>
+                                <strong>Diego Rivas</strong><br>
+                                <span class="muted">diego@email.com</span>
+                                <span class="list-meta">Completitud de ficha</span>
+                                <div class="progress-line" style="--p: 100; margin-top: 8px;" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="progress-line__fill"></span>
+                                </div>
+                            </span>
+                            <span class="pill">Coach</span>
+                        </li>
+                        <li>
+                            <span>
+                                <strong>Admin SportClub</strong><br>
+                                <span class="muted">admin@sportclub.com</span>
+                                <span class="list-meta">Completitud de ficha</span>
+                                <div class="progress-line" style="--p: 100; margin-top: 8px;" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="progress-line__fill"></span>
+                                </div>
+                            </span>
+                            <span class="pill">Admin</span>
+                        </li>
+                    </ul>
+                </article>
+
+                <article id="estadisticas" class="card card-pad card-dash" aria-label="Estadísticas del sistema">
+                    <div class="dash-section-title">
+                        <h3>Estadísticas del sistema</h3>
+                        <a class="link-inline" href="dashboard_admin.html#reportes">Reportes</a>
+                    </div>
+                    <div class="dash-progress-block">
+                        <div class="progress-donut" style="--pct: 76" role="img" aria-label="Ocupación promedio 76 por ciento">
+                            <span class="progress-donut__label">76%</span>
+                        </div>
+                        <div class="dash-goals">
+                            <div>
+                                <div class="progress-row__top">
+                                    <span>Ocupación promedio</span>
+                                    <span>76%</span>
+                                </div>
+                                <div class="progress-line" style="--p: 76" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="progress-line__fill"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="progress-row__top">
+                                    <span>Usuarios activos (7 días)</span>
+                                    <span>93</span>
+                                </div>
+                                <div class="progress-line" style="--p: 63" role="progressbar" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="progress-line__fill"></span>
+                                </div>
+                                <span class="list-meta">63% del total de cuentas registradas</span>
+                            </div>
+                            <div>
+                                <div class="progress-row__top">
+                                    <span>Clases del día</span>
+                                    <span>8</span>
+                                </div>
+                                <div class="progress-line" style="--p: 88" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="progress-line__fill"></span>
+                                </div>
+                                <span class="list-meta">88% de cupos asignados</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="reportes" class="card card-pad card-dash" aria-label="Panel de control y reportes">
+                    <div class="dash-section-title">
+                        <h3>Reportes y acciones</h3>
+                        <a class="link-inline" href="dashboard_admin.html#configuracion">Configuración</a>
+                    </div>
+                    <ul class="list" aria-label="Acciones rápidas">
+                        <li><span><strong>Usuarios activos</strong><br><span class="muted">Revisión mensual · PDF estático</span></span><a class="btn btn-ghost" href="dashboard_admin.html#estadisticas">Abrir</a></li>
+                        <li><span><strong>Clases del día</strong><br><span class="muted">Export operación diaria</span></span><a class="btn btn-ghost" href="dashboard_admin.html#estadisticas">Abrir</a></li>
+                        <li><span><strong>Informe consolidado</strong><br><span class="muted">Descarga demo</span></span><a class="btn btn-ghost" href="dashboard_admin.html#reportes">Descargar</a></li>
+                    </ul>
+                </article>
+            </section>
+
+            <section id="configuracion" class="card card-pad card-dash dash-mt" aria-label="Configuración">
+                <div class="dash-section-title">
+                    <h3>Configuración</h3>
+                    <a class="link-inline" href="dashboard_admin.html#inicio">Inicio</a>
+                </div>
+                <p class="muted">Ajustes generales del sistema (roles, clases, horarios). Vista estática para la entrega.</p>
+                <div class="progress-row" style="margin-top:14px;">
+                    <div class="progress-row__top">
+                        <span>Progreso de parametrización (demo)</span>
+                        <span>41%</span>
+                    </div>
+                    <div class="progress-line" style="--p: 41" role="progressbar" aria-valuenow="41" aria-valuemin="0" aria-valuemax="100">
+                        <span class="progress-line__fill"></span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

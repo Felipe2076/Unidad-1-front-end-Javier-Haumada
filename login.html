@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportHub - Login</title>
+    <title>SportClub - Login</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/forms.css">
 </head>
 <body>
-    <main class="auth-page">
+    <main class="auth-page" aria-label="Login SportClub">
         <section class="auth-card" aria-label="Formulario de inicio de sesión">
             <header class="auth-brand">
                 <img class="auth-logo" src="img/logo-sportclub.png" alt="Logo SportClub">
@@ -40,6 +40,15 @@
                 </div>
 
                 <button type="submit" class="btn-login">Iniciar sesión</button>
+
+                <nav class="auth-links" aria-label="Accesos rápidos">
+                    <ul>
+                        <li><a href="index.html">Volver al inicio</a></li>
+                        <li><a href="dashboard_usuario.html">Entrar como Usuario (demo)</a></li>
+                        <li><a href="dashboard_coach.html">Entrar como Coach (demo)</a></li>
+                        <li><a href="dashboard_admin.html">Entrar como Admin (demo)</a></li>
+                    </ul>
+                </nav>
 
                 <nav class="auth-links auth-links--row" aria-label="Enlaces de autenticación">
                     <a href="recover.html" class="link-recover">Recuperar contraseña</a>
