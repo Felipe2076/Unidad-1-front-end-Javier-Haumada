@@ -14,31 +14,17 @@
                     <img src="img/logo-sportclub.png" alt="Logo SportClub">
                     <span class="brand-title">
                         <strong>SportClub</strong>
-                        <span>Dashboard Admin</span>
                     </span>
                 </a>
 
                 <nav class="nav" aria-label="Navegación de administrador">
-                    <a href="dashboard_admin.html#inicio">Inicio</a>
-                    <details class="nav-dropdown">
-                        <summary>Usuarios</summary>
-                        <ul class="nav-dropdown-menu">
-                            <li><a href="dashboard_admin.html#usuarios">Gestión de usuarios</a></li>
-                            <li><a href="dashboard_admin.html#perfil">Perfil admin</a></li>
-                        </ul>
-                    </details>
-                    <details class="nav-dropdown">
-                        <summary>Operación</summary>
-                        <ul class="nav-dropdown-menu">
-                            <li><a href="dashboard_admin.html#estadisticas">Estadísticas</a></li>
-                            <li><a href="dashboard_admin.html#reportes">Reportes</a></li>
-                            <li><a href="dashboard_admin.html#configuracion">Configuración</a></li>
-                        </ul>
-                    </details>
+                    <a href="dashboard_admin.html#usuarios">Usuarios</a>
+                    <a href="dashboard_admin.html#reportes">Reportes</a>
+                    <a href="dashboard_admin.html#configuracion">Configuración</a>
                 </nav>
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
-                    <a class="btn btn-ghost" href="dashboard_admin.html#perfil">Editar perfil</a>
+                    <a class="btn btn-ghost" href="dashboard_admin.html#inicio">Editar perfil</a>
                     <a class="btn btn-primary" href="login.html">Cerrar sesión</a>
                 </div>
             </div>
@@ -47,17 +33,8 @@
         <main class="wrap dashboard" aria-label="Panel de administración">
             <section id="inicio" class="dash-head" aria-label="Encabezado del panel">
                 <div class="card card-pad card-dash" style="flex:1; min-width:min(100%, 340px);">
-                    <span class="chip">Perfil: Administrador</span>
                     <h2>Panel de administración</h2>
                     <p>Visión global del club: usuarios, ocupación y reportes en un solo vistazo.</p>
-                </div>
-                <div class="card card-pad card-dash kpi" aria-label="Salud del sistema">
-                    <span class="muted">Salud operativa</span>
-                    <strong>96%</strong>
-                    <span class="muted">Uptime y procesos OK (demo)</span>
-                    <div class="progress-line" style="--p: 96; margin-top: 12px;" role="progressbar" aria-valuenow="96" aria-valuemin="0" aria-valuemax="100">
-                        <span class="progress-line__fill"></span>
-                    </div>
                 </div>
             </section>
 
@@ -85,18 +62,6 @@
             </section>
 
             <section class="dash-grid" aria-label="Contenido principal">
-                <article id="perfil" class="card card-pad card-dash" aria-label="Perfil del administrador">
-                    <div class="dash-section-title">
-                        <h3>Perfil</h3>
-                        <a class="link-inline" href="dashboard_admin.html#usuarios">Ir a usuarios</a>
-                    </div>
-                    <ul class="list" aria-label="Datos del administrador">
-                        <li><span><strong>Nombre</strong><br><span class="muted">Administrador</span></span><span class="pill">Root</span></li>
-                        <li><span><strong>Correo</strong><br><span class="muted">admin@sportclub.com</span></span><span class="pill">Verificado</span></li>
-                        <li><span><strong>Rol</strong><br><span class="muted">Admin</span></span><span class="pill">Sistema</span></li>
-                    </ul>
-                </article>
-
                 <article id="usuarios" class="card card-pad card-dash" aria-label="Gestión de usuarios">
                     <div class="dash-section-title">
                         <h3>Gestión de usuarios</h3>

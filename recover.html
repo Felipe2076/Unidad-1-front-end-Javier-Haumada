@@ -3,60 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportClub - Recuperar Contraseña</title>
+    <title>Recuperar contraseña — SportClub</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/forms.css">
 </head>
 <body>
-    <main class="auth-page" aria-label="Recuperación de cuenta SportClub">
-        <section class="auth-card" aria-label="Recuperación de contraseña">
-            <header class="auth-brand">
-                <img class="auth-logo" src="img/logo-sportclub.png" alt="Logo SportClub">
-            </header>
+    <div class="auth-page">
+        <div class="auth-card">
+            <div class="auth-brand">
+                <a href="index.html" aria-label="SportClub — inicio">
+                    <img class="auth-logo" src="img/logo-sportclub.png" width="280" height="80" alt="SportClub">
+                </a>
+            </div>
 
             <header class="form-header">
-                <h2>Recuperar Contraseña</h2>
-                <p>Ingresa tu correo para recibir un enlace de recuperación</p>
+                <h2>Recuperar contraseña</h2>
+                <p>Te enviaremos un enlace para restablecer tu acceso. Revisa también la carpeta de spam.</p>
             </header>
 
-            <form class="recover-form" method="POST" action="#submit" id="recover-form">
+            <form action="#" method="get" aria-label="Solicitud de recuperación de contraseña">
                 <div class="form-group">
                     <label for="email">Correo electrónico</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="tu@email.com"
-                        required
-                        autocomplete="email"
-                    >
+                    <input type="email" id="email" name="email" autocomplete="email" required placeholder="tu@correo.com">
                 </div>
-
                 <button type="submit" class="btn-login">Recuperar contraseña</button>
             </form>
 
-            <div id="message" class="message is-hidden" role="status" aria-live="polite">
-                Se ha enviado un enlace de recuperación a su correo.
+            <div class="message" role="status" aria-live="polite">
+                Se ha enviado un enlace de recuperación a su correo (simulado en esta versión estática).
             </div>
 
-            <nav class="auth-links" aria-label="Volver">
-                <ul>
-                    <li>
-                        <a href="index.html" class="link-recover">Volver al inicio</a>
-                    </li>
-                    <li>
-                        <a href="login.html" class="link-recover">Volver al login</a>
-                    </li>
-                </ul>
-            </nav>
-        </section>
-    </main>
-
-    <script>
-        document.getElementById('recover-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('message').classList.remove('is-hidden');
-        });
-    </script>
+            <p class="form-footer">
+                <a href="login.html">Volver al login</a>
+            </p>
+        </div>
+    </div>
 </body>
 </html>

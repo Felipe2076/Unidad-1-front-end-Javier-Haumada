@@ -3,121 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportClub - Registro</title>
+    <title>Registro — SportClub</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/forms.css">
 </head>
 <body>
-    <main class="auth-page" aria-label="Registro SportClub">
-        <section class="auth-card" aria-label="Formulario de registro">
-            <header class="auth-brand">
-                <img class="auth-logo" src="img/logo-sportclub.png" alt="Logo SportClub">
-            </header>
+    <div class="auth-page">
+        <div class="auth-card auth-card--wide">
+            <div class="auth-brand">
+                <a href="index.html" aria-label="SportClub — inicio">
+                    <img class="auth-logo" src="img/logo-sportclub.png" width="280" height="80" alt="SportClub">
+                </a>
+            </div>
 
             <header class="form-header">
-                <h2>Registro de usuario</h2>
-                <p>Únete a nuestra comunidad deportiva</p>
+                <h2>Crear cuenta</h2>
+                <p>Completa los datos obligatorios. Los demás campos nos ayudan a personalizar tu experiencia.</p>
             </header>
 
-            <form class="register-form" method="POST" action="#submit">
+            <form action="#" method="get" aria-label="Formulario de registro">
                 <div class="form-group">
-                    <label for="email">Correo electrónico *</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="tu@email.com"
-                        required
-                        autocomplete="email"
-                    >
+                    <label for="email">Correo electrónico <span class="muted">(obligatorio)</span></label>
+                    <input type="email" id="email" name="email" autocomplete="email" required placeholder="tu@correo.com">
                 </div>
-
                 <div class="form-group">
-                    <label for="password">Contraseña *</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="••••••••"
-                        required
-                        autocomplete="new-password"
-                    >
+                    <label for="password">Contraseña <span class="muted">(obligatorio)</span></label>
+                    <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Mínimo 8 caracteres">
                 </div>
-
                 <div class="form-group">
                     <label for="name">Nombre</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        placeholder="Tu nombre completo"
-                    >
+                    <input type="text" id="name" name="name" autocomplete="name" placeholder="Tu nombre completo">
                 </div>
-
                 <div class="form-group">
                     <label for="age">Edad</label>
-                    <input
-                        type="number"
-                        id="age"
-                        name="age"
-                        min="1"
-                        placeholder="Tu edad"
-                    >
+                    <input type="number" id="age" name="age" min="12" max="120" placeholder="Ej. 28">
                 </div>
-
                 <div class="form-group">
-                    <label for="practices-sport">
-                        <input type="checkbox" id="practices-sport" name="practices-sport"> ¿Practicas deporte?
+                    <label>
+                        <input type="checkbox" id="practiceDeporte" name="practiceDeporte" value="si">
+                        ¿Practicas deporte?
                     </label>
                 </div>
-
                 <div class="form-group">
-                    <label for="sport-type">Tipo de deporte</label>
-                    <select id="sport-type" name="sport-type">
-                        <option value="">Selecciona</option>
-                        <option value="football">Fútbol</option>
-                        <option value="basketball">Baloncesto</option>
-                        <option value="tennis">Tenis</option>
-                        <option value="running">Running</option>
-                        <option value="swimming">Natación</option>
-                        <option value="other">Otro</option>
-                    </select>
+                    <label for="typeDeporte">Tipo de deporte</label>
+                    <input type="text" id="typeDeporte" name="typeDeporte" placeholder="Ej. running, natación…">
                 </div>
-
                 <div class="form-group">
-                    <label for="objective">Objetivo personal</label>
-                    <input
-                        type="text"
-                        id="objective"
-                        name="objective"
-                        placeholder="Ej: Mejorar condición física, competir"
-                    >
+                    <label for="objectivePersonal">Objetivo personal</label>
+                    <input type="text" id="objectivePersonal" name="objectivePersonal" placeholder="Ej. mejorar resistencia">
                 </div>
-
                 <div class="form-group">
                     <label for="level">Nivel</label>
                     <select id="level" name="level">
-                        <option value="">Selecciona</option>
-                        <option value="beginner">Principiante</option>
-                        <option value="intermediate">Intermedio</option>
-                        <option value="advanced">Avanzado</option>
+                        <option value="" selected>Selecciona una opción</option>
+                        <option value="principiante">Principiante</option>
+                        <option value="intermedio">Intermedio</option>
+                        <option value="avanzado">Avanzado</option>
                     </select>
                 </div>
-
+                <div class="form-group">
+                    <label for="infoAdicional">Información adicional <span class="muted">(opcional)</span></label>
+                    <textarea id="infoAdicional" name="infoAdicional" placeholder="Lesiones, horarios preferidos, comentarios…"></textarea>
+                </div>
                 <button type="submit" class="btn-login">Registrarse</button>
             </form>
 
-            <nav class="auth-links" aria-label="Volver">
-                <ul>
-                    <li>
-                        <a href="index.html" class="link-register">Volver al inicio</a>
-                    </li>
-                    <li>
-                        <a href="login.html" class="link-register">Volver al login</a>
-                    </li>
-                </ul>
-            </nav>
-        </section>
-    </main>
+            <p class="form-footer">
+                ¿Ya tienes cuenta? <a href="login.html">Volver al login</a>
+            </p>
+        </div>
+    </div>
 </body>
 </html>

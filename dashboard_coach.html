@@ -14,31 +14,17 @@
                     <img src="img/logo-sportclub.png" alt="Logo SportClub">
                     <span class="brand-title">
                         <strong>SportClub</strong>
-                        <span>Dashboard Coach</span>
                     </span>
                 </a>
 
                 <nav class="nav" aria-label="Navegación de coach">
                     <a href="dashboard_coach.html#inicio">Inicio</a>
-                    <details class="nav-dropdown">
-                        <summary>Alumnos</summary>
-                        <ul class="nav-dropdown-menu">
-                            <li><a href="dashboard_coach.html#alumnos">Listado</a></li>
-                            <li><a href="dashboard_coach.html#progreso-alumnos">Progreso por alumno</a></li>
-                        </ul>
-                    </details>
-                    <details class="nav-dropdown">
-                        <summary>Clases</summary>
-                        <ul class="nav-dropdown-menu">
-                            <li><a href="dashboard_coach.html#clases">Asignadas</a></li>
-                            <li><a href="dashboard_coach.html#horario">Horario semanal</a></li>
-                        </ul>
-                    </details>
-                    <a href="dashboard_coach.html#reportes">Reportes</a>
+                    <a href="dashboard_coach.html#alumnos">Alumnos</a>
+                    <a href="dashboard_coach.html#clases">Clases</a>
                 </nav>
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
-                    <a class="btn btn-ghost" href="dashboard_coach.html#perfil">Editar perfil</a>
+                    <a class="btn btn-ghost" href="dashboard_coach.html#inicio">Editar perfil</a>
                     <a class="btn btn-primary" href="login.html">Cerrar sesión</a>
                 </div>
             </div>
@@ -47,7 +33,6 @@
         <main class="wrap dashboard" aria-label="Panel de coach">
             <section id="inicio" class="dash-head" aria-label="Encabezado del panel">
                 <div class="card card-pad card-dash" style="flex:1; min-width:min(100%, 340px);">
-                    <span class="chip">Perfil: Coach</span>
                     <h2>Panel de entrenador</h2>
                     <p>Bienvenido, Coach Valentina Antonia Rojas. Métricas de alumnos, asistencia y carga semanal.</p>
                 </div>
@@ -85,18 +70,6 @@
             </section>
 
             <section class="dash-grid dash-grid--coach" aria-label="Contenido principal">
-                <article id="perfil" class="card card-pad card-dash" aria-label="Perfil del coach">
-                    <div class="dash-section-title">
-                        <h3>Mi perfil</h3>
-                        <a class="link-inline" href="dashboard_coach.html#inicio">Resumen</a>
-                    </div>
-                    <ul class="list" aria-label="Datos del coach">
-                        <li><span><strong>Nombre</strong><br><span class="muted">Coach Valentina</span></span><span class="pill">Staff</span></li>
-                        <li><span><strong>Correo</strong><br><span class="muted">coach@sportclub.com</span></span><span class="pill">Verificado</span></li>
-                        <li><span><strong>Especialidad</strong><br><span class="muted">Funcional y HIIT</span></span><span class="pill">Pro</span></li>
-                    </ul>
-                </article>
-
                 <article id="alumnos" class="card card-pad card-dash" aria-label="Lista de alumnos">
                     <div class="dash-section-title">
                         <h3>Mis alumnos</h3>

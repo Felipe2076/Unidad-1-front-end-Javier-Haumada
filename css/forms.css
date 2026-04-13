@@ -15,6 +15,14 @@
     background-color: var(--bg-light);
 }
 
+.auth-card--wide {
+    max-width: 560px;
+}
+
+.auth-card--with-demo {
+    max-width: 480px;
+}
+
 .auth-card {
     width: 100%;
     max-width: 420px;
@@ -68,17 +76,25 @@ input[type="email"],
 input[type="password"],
 input[type="text"],
 input[type="number"],
-select {
+select,
+textarea {
     width: 100%;
     padding: 12px 16px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
+    font-family: inherit;
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(46, 26, 71, 0.14);
@@ -87,8 +103,8 @@ select:focus {
 .btn-login {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    color: var(--bg-white);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-dark) 100%);
+    color: #000000;
     border: none;
     border-radius: 8px;
     font-size: 1.1rem;
@@ -117,14 +133,14 @@ select:focus {
 }
 
 .auth-links a {
-    color: var(--primary-color);
+    color: #000000;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s;
 }
 
 .auth-links a:hover {
-    color: var(--primary-dark);
+    color: #000000;
     text-decoration: underline;
 }
 
@@ -142,8 +158,9 @@ select:focus {
 .message {
     margin-top: 20px;
     padding: 15px;
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-dark) 100%);
-    color: var(--bg-white);
+    background: linear-gradient(135deg, rgba(242, 183, 5, 0.35) 0%, rgba(242, 183, 5, 0.55) 100%);
+    color: #000000;
+    border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 8px;
     text-align: center;
     font-weight: 500;
@@ -271,12 +288,89 @@ select:focus {
 }
 
 .form-footer a {
-    color: var(--primary-color);
+    color: #000000;
     text-decoration: none;
 }
 
 .form-footer a:hover {
-    color: var(--primary-dark);
+    color: #000000;
     text-decoration: underline;
+}
+
+/* Acceso demo a dashboards (sitio estático) */
+.auth-demo {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.auth-demo__title {
+    margin: 0 0 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #000000;
+}
+
+.auth-demo__text {
+    margin: 0 0 14px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.auth-demo__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (min-width: 400px) {
+    .auth-demo__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.auth-demo__tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 48px;
+    padding: 10px 8px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: #000000;
+    border: 2px solid rgba(0, 0, 0, 0.18);
+    transition: transform 0.15s, box-shadow 0.2s, filter 0.2s;
+}
+
+.auth-demo__tile:hover {
+    filter: brightness(0.98);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.auth-demo__tile:focus-visible {
+    outline: 3px solid rgba(242, 183, 5, 0.55);
+    outline-offset: 2px;
+}
+
+.auth-demo__tile--user {
+    background: rgba(37, 99, 235, 0.14);
+    border-color: rgba(37, 99, 235, 0.45);
+}
+
+.auth-demo__tile--coach {
+    background: rgba(22, 163, 74, 0.14);
+    border-color: rgba(22, 163, 74, 0.45);
+}
+
+.auth-demo__tile--admin {
+    background: rgba(124, 58, 237, 0.12);
+    border-color: rgba(124, 58, 237, 0.4);
 }
 
