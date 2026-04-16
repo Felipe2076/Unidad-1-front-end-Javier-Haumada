@@ -6,7 +6,7 @@
     <title>SportClub - Dashboard Usuario</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="role-user">
+<body class="role-user dashboard-sketch">
     <div class="page">
         <header class="topbar">
             <div class="wrap topbar-inner">
@@ -19,8 +19,9 @@
 
                 <nav class="nav" aria-label="Navegación de usuario">
                     <a href="dashboard_usuario.html#inicio">Inicio</a>
+                    <a href="dashboard_usuario.html#clases">Clases</a>
                     <a href="dashboard_usuario.html#reservas">Reservas</a>
-                    <a href="dashboard_usuario.html#perfil">Perfil</a>
+                    <a href="dashboard_usuario.html#progreso">Mi progreso</a>
                 </nav>
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
@@ -31,301 +32,98 @@
         </header>
 
         <main class="wrap dashboard" aria-label="Panel de usuario">
-            <section id="inicio" class="dash-head" aria-label="Encabezado del panel">
-                <div class="card card-pad card-dash" style="flex:1; min-width:min(100%, 320px);">
-                    <h2>Bienvenido a SportClub</h2>
-                    <p>Resumen rápido de tu actividad, reservas y avance hacia tus objetivos.</p>
+            <section id="inicio" class="card card-pad card-dash sketch-banner sketch-banner--user">
+                <span class="sketch-kicker">Dashboard premium</span>
+                <h2>Bienvenido a SportClub</h2>
+                <p>Tu semana se ve clara, activa y lista para reservar.</p>
+            </section>
+
+            <section class="sketch-grid-user" aria-label="Panel principal usuario">
+                <article id="perfil" class="card card-pad card-dash sketch-card sketch-card--profile">
+                    <h3>Mi perfil</h3>
+                    <div class="sketch-profile">
+                        <div class="avatar-circle"></div>
+                        <p><strong>Nombre:</strong> Francisco</p>
+                        <p><strong>Email:</strong> francisco@email.com</p>
+                        <p><strong>Objetivos personales:</strong></p>
+                        <ul>
+                            <li>Mejorar resistencia</li>
+                            <li>Subir fuerza</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article id="progreso" class="card card-pad card-dash sketch-card sketch-card--progress">
+                    <h3>Progreso</h3>
+                    <div class="sketch-progress-row">
+                        <div class="progress-donut progress-donut--hero" style="--pct: 68" role="img" aria-label="Avance general 68 por ciento">
+                            <span class="progress-donut__label"><strong>68%</strong><small>Avance</small></span>
+                        </div>
+                        <div class="sketch-metrics">
+                            <ul class="sketch-mini-list">
+                                <li>Asistencia: 82%</li>
+                                <li>Cardio: 74%</li>
+                                <li>Fuerza: 61%</li>
+                            </ul>
+                            <div class="progress-line progress-line--glow" style="--p: 68" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
+                                <span class="progress-line__fill"></span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="reservas" class="card card-pad card-dash sketch-card sketch-card--actions">
+                    <h3>Clases disponibles</h3>
+                    <ul class="sketch-action-list">
+                        <li><span>Spinning</span><a class="btn btn-ghost" href="dashboard_usuario.html#clases">Reservar</a></li>
+                        <li><span>CrossFit</span><a class="btn btn-ghost" href="dashboard_usuario.html#clases">Reservar</a></li>
+                        <li><span>Viernes</span><a class="btn btn-ghost" href="dashboard_usuario.html#clases">Reservar</a></li>
+                    </ul>
+                </article>
+            </section>
+
+            <section id="clases" class="card card-pad card-dash sketch-card sketch-card--table">
+                <h3>Clases disponibles</h3>
+                <div class="sketch-table">
+                    <div><strong>Spinning</strong></div>
+                    <div>Lunes / 18:00 / 10:00</div>
+                    <div><strong>Boxeo</strong></div>
+                    <div>Sab 2</div>
+                    <div><a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a></div>
+                    <div><strong>CrossFit</strong></div>
+                    <div>Miercoles / 10:00</div>
+                    <div><strong>HIIT</strong></div>
+                    <div>10:00</div>
+                    <div><a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a></div>
+                    <div><strong>Yoga</strong></div>
+                    <div>Jueves / 19:30</div>
+                    <div><strong>Pilates</strong></div>
+                    <div>Viernes / 09:00</div>
+                    <div><a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a></div>
                 </div>
-                <div class="card card-pad card-dash kpi" aria-label="Objetivo semanal">
-                    <span class="muted">Objetivo semanal</span>
-                    <strong>68%</strong>
-                    <span class="muted">2 de 3 entrenamientos completados</span>
-                    <div class="progress-line" style="--p: 68; margin-top: 12px;" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
+            </section>
+
+            <section class="sketch-extra-grid">
+                <article class="card card-pad card-dash sketch-card">
+                    <h3>Resumen semanal</h3>
+                    <div class="mini-stats">
+                        <div class="mini-stat"><span>Entrenamientos</span><strong>4/5</strong></div>
+                        <div class="mini-stat"><span>Calorías</span><strong>2.340</strong></div>
+                        <div class="mini-stat"><span>Racha activa</span><strong>6 días</strong></div>
+                    </div>
+                    <div class="progress-line progress-line--glow" style="--p: 80" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">
                         <span class="progress-line__fill"></span>
                     </div>
-                </div>
-            </section>
-
-            <section class="dash-stats dash-stats--cols-3" aria-label="Indicadores">
-                <article class="stat-card">
-                    <p class="stat-card__label">Asistencia (mes)</p>
-                    <p class="stat-card__value">82%</p>
-                    <p class="stat-card__hint">+6% vs. mes anterior</p>
                 </article>
-                <article class="stat-card">
-                    <p class="stat-card__label">Reservas activas</p>
-                    <p class="stat-card__value">3<span style="font-size:1rem;opacity:.85;font-weight:800;"> / 5</span></p>
-                    <p class="stat-card__hint">Cupos usados esta semana</p>
-                </article>
-                <article class="stat-card">
-                    <p class="stat-card__label">Progreso plan</p>
-                    <p class="stat-card__value">68%</p>
-                    <p class="stat-card__hint">Plan introductory — 4 sem.</p>
-                </article>
-            </section>
 
-            <section id="reservas" class="dash-reservas-hub" aria-label="Reservas, actividades y cupos">
-                <div class="card card-pad dash-hub-intro">
-                    <h2>Reservas y actividades</h2>
-                    <p>
-                        Aquí ves el <strong>catálogo general</strong> del club: horarios, sala, entrenador, ocupación del cupo y plazas libres.
-                        Más abajo están <strong>tus reservas confirmadas</strong> y el historial. Los datos son estáticos para la demo.
-                    </p>
-                    <nav class="dash-hub-toc" aria-label="Secciones de reservas">
-                        <a href="dashboard_usuario.html#catalogo-actividades">Catálogo de clases</a>
-                        <a href="dashboard_usuario.html#mis-reservas">Mis reservas</a>
-                        <a href="dashboard_usuario.html#historial-reservas">Historial</a>
-                    </nav>
-                </div>
-
-                <div id="catalogo-actividades" class="activity-catalog" aria-labelledby="cat-title">
-                    <div class="dash-section-title" style="margin-bottom: 14px;">
-                        <h3 id="cat-title">Catálogo de clases</h3>
-                        <a class="link-inline" href="dashboard_usuario.html#mis-reservas">Ver mis reservas</a>
-                    </div>
-                    <div class="activity-grid" role="list">
-                        <article class="activity-card" role="listitem" aria-label="Yoga">
-                            <div class="activity-card__head">
-                                <strong>Yoga</strong>
-                                <span class="pill">Todo nivel</span>
-                            </div>
-                            <p class="activity-card__when">Martes · 18:30 — 50 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Zen · P1</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>8 de 22</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>64%</span></div>
-                            <div class="progress-line" style="--p: 64;" role="progressbar" aria-valuenow="64" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Ana Méndez</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Spinning">
-                            <div class="activity-card__head">
-                                <strong>Spinning</strong>
-                                <span class="pill">Intenso</span>
-                            </div>
-                            <p class="activity-card__when">Jueves · 20:00 — 45 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Ciclo · P2</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>5 de 18</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>71%</span></div>
-                            <div class="progress-line" style="--p: 71;" role="progressbar" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Luis Ortega</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Funcional">
-                            <div class="activity-card__head">
-                                <strong>Funcional</strong>
-                                <span class="pill">Intermedio</span>
-                            </div>
-                            <p class="activity-card__when">Sábado · 10:00 — 50 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Fuerza · P1</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>11 de 20</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>45%</span></div>
-                            <div class="progress-line" style="--p: 45;" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Valentina Rojas</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Crossfit">
-                            <div class="activity-card__head">
-                                <strong>Crossfit</strong>
-                                <span class="pill">Avanzado</span>
-                            </div>
-                            <p class="activity-card__when">Lunes · 18:00 — 60 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Box central</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>4 de 14</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>72%</span></div>
-                            <div class="progress-line" style="--p: 72;" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Diego Rivas</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Natación">
-                            <div class="activity-card__head">
-                                <strong>Natación</strong>
-                                <span class="pill">Técnica</span>
-                            </div>
-                            <p class="activity-card__when">Miércoles · 10:00 — 45 min</p>
-                            <div class="activity-card__row"><span>Piscina</span><span>Olímpica · carril 2</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>6 de 12</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>50%</span></div>
-                            <div class="progress-line" style="--p: 50;" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Paula Soto</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Pilates">
-                            <div class="activity-card__head">
-                                <strong>Pilates</strong>
-                                <span class="pill">Principiante</span>
-                            </div>
-                            <p class="activity-card__when">Lunes · 9:00 — 40 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Estudio A</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>10 de 16</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>38%</span></div>
-                            <div class="progress-line" style="--p: 38;" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Carmen Vega</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Boxeo">
-                            <div class="activity-card__head">
-                                <strong>Boxeo</strong>
-                                <span class="pill">Mixto</span>
-                            </div>
-                            <p class="activity-card__when">Viernes · 20:00 — 55 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Ring</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>2 de 12</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>85%</span></div>
-                            <div class="progress-line" style="--p: 85;" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Marco Díaz</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="HIIT">
-                            <div class="activity-card__head">
-                                <strong>HIIT</strong>
-                                <span class="pill">Cardio</span>
-                            </div>
-                            <p class="activity-card__when">Martes · 19:15 — 35 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Funcional · P2</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>7 de 18</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>61%</span></div>
-                            <div class="progress-line" style="--p: 61;" role="progressbar" aria-valuenow="61" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Valentina Rojas</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Stretching">
-                            <div class="activity-card__head">
-                                <strong>Stretching</strong>
-                                <span class="pill">Recuperación</span>
-                            </div>
-                            <p class="activity-card__when">Domingo · 11:00 — 30 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Zen · P1</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>14 de 20</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>28%</span></div>
-                            <div class="progress-line" style="--p: 28;" role="progressbar" aria-valuenow="28" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Ana Méndez</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                        <article class="activity-card" role="listitem" aria-label="Spinning express">
-                            <div class="activity-card__head">
-                                <strong>Spinning express</strong>
-                                <span class="pill">30 min</span>
-                            </div>
-                            <p class="activity-card__when">Viernes · 7:00 — 30 min</p>
-                            <div class="activity-card__row"><span>Sala</span><span>Ciclo · P2</span></div>
-                            <div class="activity-card__row"><span>Plazas libres</span><span>9 de 16</span></div>
-                            <div class="activity-card__row"><span>Ocupación</span><span>48%</span></div>
-                            <div class="progress-line" style="--p: 48;" role="progressbar" aria-valuenow="48" aria-valuemin="0" aria-valuemax="100"><span class="progress-line__fill"></span></div>
-                            <div class="activity-card__row"><span>Coach</span><span>Luis Ortega</span></div>
-                            <a class="btn btn-ghost" href="dashboard_usuario.html#mis-reservas">Reservar cupo</a>
-                        </article>
-                    </div>
-                </div>
-
-                <article id="mis-reservas" class="card card-pad card-dash dash-reservas-block" aria-label="Mis reservas">
-                    <div class="dash-section-title">
-                        <h3>Mis reservas</h3>
-                        <a class="link-inline" href="dashboard_usuario.html#catalogo-actividades">Ir al catálogo</a>
-                    </div>
-                    <ul class="list" aria-label="Lista de reservas">
-                        <li>
-                            <span>
-                                <strong>Clase de Crossfit</strong><br>
-                                <span class="muted">Lunes 18:00</span>
-                                <span class="list-meta">Ocupación del grupo</span>
-                                <div class="progress-line" style="--p: 72; margin-top: 8px;" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-line__fill"></span>
-                                </div>
-                            </span>
-                            <span class="pill">Confirmada</span>
-                        </li>
-                        <li>
-                            <span>
-                                <strong>Clase de natación</strong><br>
-                                <span class="muted">Miércoles 20:00</span>
-                                <span class="list-meta">Ocupación del grupo</span>
-                                <div class="progress-line" style="--p: 58; margin-top: 8px;" role="progressbar" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-line__fill"></span>
-                                </div>
-                            </span>
-                            <span class="pill">Confirmada</span>
-                        </li>
-                        <li>
-                            <span>
-                                <strong>Ejercicio funcional</strong><br>
-                                <span class="muted">Viernes 19:00</span>
-                                <span class="list-meta">Ocupación del grupo</span>
-                                <div class="progress-line" style="--p: 89; margin-top: 8px;" role="progressbar" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-line__fill"></span>
-                                </div>
-                            </span>
-                            <span class="pill">Pendiente</span>
-                        </li>
+                <article class="card card-pad card-dash sketch-card sketch-card--report">
+                    <h3>Sugerencias para vos</h3>
+                    <ul class="timeline-list">
+                        <li><strong>Hoy 18:00</strong> Clase sugerida: Spinning Express.</li>
+                        <li><strong>Mañana</strong> Reforzá fuerza con circuito funcional.</li>
+                        <li><strong>Tip</strong> Hidratación recomendada: 2.2L diarios.</li>
                     </ul>
                 </article>
-
-                <section id="historial-reservas" class="card card-pad card-dash dash-reservas-block" aria-label="Historial de reservas">
-                    <div class="dash-section-title">
-                        <h3>Historial reciente</h3>
-                        <a class="link-inline" href="dashboard_usuario.html#mis-reservas">Volver a activas</a>
-                    </div>
-                    <ul class="list" aria-label="Últimas sesiones">
-                        <li><span><strong>Funcional</strong><br><span class="muted">Hace 6 días · Completada 100%</span></span><span class="pill">OK</span></li>
-                        <li><span><strong>Spinning</strong><br><span class="muted">Hace 10 días · Asistencia 1 h</span></span><span class="pill">OK</span></li>
-                        <li><span><strong>Yoga</strong><br><span class="muted">Hace 14 días · Cancelada (cupos)</span></span><span class="pill">—</span></li>
-                    </ul>
-                </section>
-            </section>
-
-            <section class="dash-grid" aria-label="Contenido principal">
-                <article id="progreso" class="card card-pad card-dash" aria-label="Progreso y metas">
-                    <div class="dash-section-title">
-                        <h3>Progreso y metas</h3>
-                        <a class="link-inline" href="dashboard_usuario.html#perfil">Ver perfil</a>
-                    </div>
-                    <div class="dash-progress-block">
-                        <div class="progress-donut" style="--pct: 68" role="img" aria-label="Avance general 68 por ciento">
-                            <span class="progress-donut__label">68%</span>
-                        </div>
-                        <div class="dash-goals">
-                            <div>
-                                <div class="progress-row__top">
-                                    <span>Avance general</span>
-                                    <span>68%</span>
-                                </div>
-                                <div class="progress-line" style="--p: 68" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-line__fill"></span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-row__top">
-                                    <span>Condición (cardio)</span>
-                                    <span>74%</span>
-                                </div>
-                                <div class="progress-line" style="--p: 74" role="progressbar" aria-valuenow="74" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-line__fill"></span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="progress-row__top">
-                                    <span>Fuerza</span>
-                                    <span>61%</span>
-                                </div>
-                                <div class="progress-line" style="--p: 61" role="progressbar" aria-valuenow="61" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-line__fill"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <article id="perfil" class="card card-pad card-dash" aria-label="Información del usuario">
-                    <div class="dash-section-title">
-                        <h3>Mi perfil</h3>
-                        <a class="link-inline" href="dashboard_usuario.html#progreso">Ver progreso</a>
-                    </div>
-                    <ul class="list" aria-label="Datos del usuario">
-                        <li><span><strong>Nombre</strong><br><span class="muted">Francisco Rodriguez</span></span><span class="pill">Activo</span></li>
-                        <li><span><strong>Correo</strong><br><span class="muted">FranciscoR@email.com</span></span><span class="pill">Verificado</span></li>
-                        <li><span><strong>Interés</strong><br><span class="muted">Básquetbol y natación</span></span><span class="pill">Plus</span></li>
-                    </ul>
-                </article>
-
             </section>
         </main>
     </div>

@@ -518,6 +518,54 @@ main.wrap {
     margin-top: 8px;
 }
 
+/* Detalles unicos y atajos */
+.dash-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.highlight-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--role-accent);
+}
+
+.highlight-card strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    margin-bottom: 6px;
+}
+
+.highlight-card p {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.highlight-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.highlight-link:hover {
+    border-color: var(--role-accent);
+    background: rgba(0, 0, 0, 0.08);
+}
+
 /* Hub de reservas (usuario): catálogo + mis reservas + historial */
 .dash-reservas-hub {
     margin-bottom: 24px;
@@ -802,5 +850,668 @@ main.wrap {
     .topbar-actions {
         width: 100%;
         justify-content: flex-start;
+    }
+}
+
+/* —— Modo boceto: dashboards simples como wireframe —— */
+.dashboard-sketch .topbar {
+    background: #ffffff;
+    color: #111111;
+    border-bottom: 2px solid #111111;
+    box-shadow: none;
+}
+
+.dashboard-sketch .brand img {
+    border: 2px solid #111111;
+}
+
+.dashboard-sketch .nav a {
+    border: none;
+    border-radius: 0;
+    padding: 4px 8px;
+    color: #111111;
+}
+
+.dashboard-sketch .topbar .btn {
+    border-radius: 4px;
+    padding: 8px 12px;
+    border: 1px solid #111111;
+    box-shadow: none;
+}
+
+.dashboard-sketch .topbar .btn-primary,
+.dashboard-sketch .topbar .btn-ghost {
+    background: #ffffff;
+    color: #111111;
+}
+
+.dashboard-sketch .card {
+    border: 2px solid #111111;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.dashboard-sketch .card-pad {
+    padding: 14px;
+}
+
+.dashboard-sketch .dashboard {
+    display: grid;
+    gap: 12px;
+}
+
+.sketch-banner h2 {
+    margin: 0;
+    font-size: 1.55rem;
+}
+
+.sketch-banner p {
+    margin-top: 8px;
+}
+
+.sketch-grid-user {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr 1.2fr 1fr;
+}
+
+.sketch-grid-coach {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr 2fr;
+}
+
+.sketch-grid-admin {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr 1.3fr 1fr;
+}
+
+.sketch-profile p {
+    margin: 8px 0;
+}
+
+.avatar-circle {
+    width: 68px;
+    height: 68px;
+    border: 2px solid #111111;
+    border-radius: 50%;
+    margin-bottom: 8px;
+}
+
+.sketch-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sketch-mini-list {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.sketch-action-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.sketch-action-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #111111;
+    padding-bottom: 6px;
+}
+
+.sketch-with-dot li span::before {
+    content: "◉ ";
+}
+
+.dashboard-sketch main.dashboard .btn-ghost {
+    background: #ffffff;
+    border: 1px solid #111111;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+}
+
+.sketch-table {
+    display: grid;
+    border-top: 1px solid #111111;
+    border-left: 1px solid #111111;
+}
+
+.sketch-table > div {
+    border-right: 1px solid #111111;
+    border-bottom: 1px solid #111111;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+.sketch-table-coach {
+    grid-template-columns: repeat(6, minmax(70px, 1fr));
+}
+
+.sketch-table-admin {
+    grid-template-columns: 1fr 1fr 120px;
+}
+
+.sketch-search {
+    border: 1px solid #111111;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.sketch-config-btn {
+    margin-top: 12px;
+}
+
+@media (max-width: 980px) {
+    .sketch-grid-user,
+    .sketch-grid-admin,
+    .sketch-grid-coach {
+        grid-template-columns: 1fr;
+    }
+
+    .sketch-table-coach {
+        grid-template-columns: repeat(3, minmax(90px, 1fr));
+    }
+}
+
+/* —— Upgrade visual final para dashboards tipo boceto —— */
+.dashboard-sketch {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.98), rgba(240, 242, 255, 0.92) 42%, rgba(227, 232, 255, 0.86) 100%),
+        linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(124, 58, 237, 0.08));
+}
+
+.dashboard-sketch .topbar {
+    background: rgba(255, 255, 255, 0.72);
+    color: #101528;
+    border-bottom: 1px solid rgba(16, 21, 40, 0.08);
+    box-shadow: 0 20px 45px rgba(32, 45, 90, 0.08);
+    backdrop-filter: blur(14px);
+}
+
+.dashboard-sketch .brand {
+    position: relative;
+}
+
+.dashboard-sketch .brand img {
+    border: 1px solid rgba(16, 21, 40, 0.1);
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff, #eef3ff);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.14);
+}
+
+.dashboard-sketch .nav a {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 8px 12px;
+    color: #26304d;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-sketch .nav a:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.78);
+    border-color: rgba(37, 99, 235, 0.18);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.1);
+}
+
+.dashboard-sketch .topbar .btn {
+    border-radius: 999px;
+    padding: 9px 14px;
+    border: 1px solid rgba(16, 21, 40, 0.12);
+    box-shadow: 0 12px 20px rgba(15, 23, 42, 0.08);
+}
+
+.dashboard-sketch .topbar .btn-primary,
+.dashboard-sketch .topbar .btn-ghost {
+    background: rgba(255, 255, 255, 0.9);
+    color: #111827;
+}
+
+.dashboard-sketch .card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    border-radius: 26px;
+    box-shadow: 0 22px 50px rgba(38, 51, 98, 0.14);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(242, 246, 255, 0.92));
+}
+
+.dashboard-sketch .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0));
+    pointer-events: none;
+}
+
+.dashboard-sketch .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 60px rgba(38, 51, 98, 0.18);
+}
+
+.dashboard-sketch .card-pad {
+    padding: 18px;
+}
+
+.dashboard-sketch .dashboard {
+    gap: 16px;
+}
+
+.sketch-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    margin-bottom: 12px;
+}
+
+.sketch-banner {
+    min-height: 126px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sketch-banner--user {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(56, 189, 248, 0.12), rgba(255, 255, 255, 0.96));
+}
+
+.sketch-banner--coach {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.18), rgba(74, 222, 128, 0.12), rgba(255, 255, 255, 0.96));
+}
+
+.sketch-banner--admin {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(220, 38, 38, 0.1), rgba(255, 255, 255, 0.96));
+}
+
+.sketch-banner h2 {
+    font-size: clamp(1.65rem, 3vw, 2.2rem);
+    margin-bottom: 6px;
+}
+
+.sketch-banner p {
+    color: #42506c;
+}
+
+.sketch-card h3 {
+    margin-bottom: 14px;
+}
+
+.sketch-card--profile::after,
+.sketch-card--actions::after,
+.sketch-card--table::after,
+.sketch-card--report::after {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    right: -40px;
+    top: -40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+    pointer-events: none;
+}
+
+.sketch-profile {
+    position: relative;
+    z-index: 1;
+}
+
+.sketch-profile ul {
+    margin: 10px 0 0;
+    padding-left: 20px;
+    color: #42506c;
+}
+
+.avatar-circle {
+    width: 82px;
+    height: 82px;
+    border: 0;
+    background:
+        radial-gradient(circle at 45% 35%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25) 40%, transparent 41%),
+        linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(56, 189, 248, 0.42));
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7), 0 12px 22px rgba(37, 99, 235, 0.16);
+    animation: floatAvatar 4s ease-in-out infinite;
+}
+
+.sketch-progress-row {
+    align-items: center;
+    gap: 20px;
+}
+
+.progress-donut--hero {
+    width: 156px;
+    height: 156px;
+    position: relative;
+    background:
+        conic-gradient(from 180deg, var(--role-accent) calc(var(--pct) * 1%), rgba(219, 228, 255, 0.55) 0),
+        radial-gradient(circle at center, rgba(255, 255, 255, 0.92) 58%, transparent 59%);
+    box-shadow:
+        inset 0 0 0 14px rgba(255, 255, 255, 0.92),
+        0 22px 36px rgba(37, 99, 235, 0.18),
+        0 0 0 10px rgba(255, 255, 255, 0.32);
+    animation: pulseRing 3.5s ease-in-out infinite;
+}
+
+.progress-donut--hero::before,
+.progress-donut--hero::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    border: 1px solid rgba(37, 99, 235, 0.14);
+    animation: rotateHalo 10s linear infinite;
+}
+
+.progress-donut--hero::after {
+    inset: -18px;
+    border-style: dashed;
+    opacity: 0.5;
+    animation-direction: reverse;
+    animation-duration: 16s;
+}
+
+.progress-donut__label {
+    display: grid;
+    place-items: center;
+    line-height: 1.05;
+    text-align: center;
+}
+
+.progress-donut__label strong {
+    font-size: 2rem;
+    font-family: var(--font-display);
+}
+
+.progress-donut__label small {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.sketch-metrics {
+    flex: 1;
+    display: grid;
+    gap: 14px;
+}
+
+.sketch-mini-list {
+    list-style: none;
+    padding-left: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.sketch-mini-list li {
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.66);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.14);
+    color: #334155;
+    font-weight: 600;
+}
+
+.progress-line--glow {
+    height: 12px;
+    background: rgba(209, 219, 255, 0.7);
+    box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.1);
+}
+
+.progress-line--glow .progress-line__fill {
+    position: relative;
+    background: linear-gradient(90deg, #2563eb, #38bdf8, #7c3aed);
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.45);
+    animation: shimmerBar 2.8s linear infinite;
+}
+
+.sketch-action-list {
+    gap: 10px;
+}
+
+.sketch-action-list li {
+    border-bottom: 0;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.62);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.14);
+}
+
+.sketch-action-list li:hover {
+    transform: translateX(4px);
+}
+
+.dashboard-sketch main.dashboard .btn-ghost {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(234, 240, 255, 0.95));
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    padding: 7px 12px;
+    box-shadow: 0 10px 18px rgba(37, 99, 235, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.dashboard-sketch main.dashboard .btn-ghost:hover {
+    transform: translateY(-2px) scale(1.02);
+    border-color: var(--role-accent);
+    box-shadow: 0 16px 26px rgba(37, 99, 235, 0.18);
+}
+
+.sketch-table {
+    border: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.58);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+}
+
+.sketch-table > div {
+    border-right: 1px solid rgba(148, 163, 184, 0.18);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 12px 10px;
+    font-size: 0.9rem;
+    color: #334155;
+}
+
+.sketch-table > div strong {
+    color: #0f172a;
+}
+
+.sketch-search {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 16px;
+    padding: 11px 14px;
+    color: #64748b;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.sketch-search::after {
+    content: "⌕";
+    float: right;
+    color: #64748b;
+}
+
+.sketch-config-btn {
+    width: 100%;
+    margin-top: 14px;
+}
+
+.role-coach.dashboard-sketch .progress-line--glow .progress-line__fill {
+    background: linear-gradient(90deg, #16a34a, #4ade80, #22c55e);
+}
+
+.role-admin.dashboard-sketch .progress-line--glow .progress-line__fill {
+    background: linear-gradient(90deg, #dc2626, #7c3aed, #f43f5e);
+}
+
+.role-coach.dashboard-sketch main.dashboard .btn-ghost {
+    border-color: rgba(22, 163, 74, 0.2);
+    box-shadow: 0 10px 18px rgba(22, 163, 74, 0.12);
+}
+
+.role-admin.dashboard-sketch main.dashboard .btn-ghost {
+    border-color: rgba(124, 58, 237, 0.2);
+    box-shadow: 0 10px 18px rgba(124, 58, 237, 0.14);
+}
+
+.role-coach.dashboard-sketch .progress-donut--hero {
+    box-shadow:
+        inset 0 0 0 14px rgba(255, 255, 255, 0.92),
+        0 22px 36px rgba(22, 163, 74, 0.18),
+        0 0 0 10px rgba(255, 255, 255, 0.32);
+}
+
+.role-admin.dashboard-sketch .progress-donut--hero {
+    box-shadow:
+        inset 0 0 0 14px rgba(255, 255, 255, 0.92),
+        0 22px 36px rgba(124, 58, 237, 0.2),
+        0 0 0 10px rgba(255, 255, 255, 0.32);
+}
+
+@keyframes pulseRing {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.03);
+    }
+}
+
+@keyframes rotateHalo {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes shimmerBar {
+    0% {
+        filter: saturate(1);
+    }
+    50% {
+        filter: saturate(1.25) brightness(1.08);
+    }
+    100% {
+        filter: saturate(1);
+    }
+}
+
+@keyframes floatAvatar {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-sketch .card,
+    .dashboard-sketch .nav a,
+    .dashboard-sketch .btn,
+    .avatar-circle,
+    .progress-donut--hero,
+    .progress-donut--hero::before,
+    .progress-donut--hero::after,
+    .progress-line--glow .progress-line__fill {
+        animation: none;
+        transition: none;
+    }
+}
+
+.sketch-extra-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.mini-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.mini-stat {
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.16);
+    display: grid;
+    gap: 4px;
+}
+
+.mini-stat span {
+    font-size: 0.74rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mini-stat strong {
+    font-size: 1.15rem;
+    font-family: var(--font-display);
+    color: #0f172a;
+}
+
+.timeline-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.timeline-list li {
+    position: relative;
+    padding: 10px 12px 10px 26px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.66);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.14);
+    color: #334155;
+}
+
+.timeline-list li::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--role-accent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--role-accent) 55%, transparent);
+}
+
+@media (max-width: 980px) {
+    .sketch-extra-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mini-stats {
+        grid-template-columns: 1fr;
     }
 }

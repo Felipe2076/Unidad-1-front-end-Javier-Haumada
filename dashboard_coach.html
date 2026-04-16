@@ -6,7 +6,7 @@
     <title>SportClub - Dashboard Coach</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="role-coach">
+<body class="role-coach dashboard-sketch">
     <div class="page">
         <header class="topbar">
             <div class="wrap topbar-inner">
@@ -20,7 +20,8 @@
                 <nav class="nav" aria-label="Navegación de coach">
                     <a href="dashboard_coach.html#inicio">Inicio</a>
                     <a href="dashboard_coach.html#alumnos">Alumnos</a>
-                    <a href="dashboard_coach.html#clases">Clases</a>
+                    <a href="dashboard_coach.html#horario">Mi horario</a>
+                    <a href="dashboard_coach.html#reportes">Reportes</a>
                 </nav>
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
@@ -31,127 +32,58 @@
         </header>
 
         <main class="wrap dashboard" aria-label="Panel de coach">
-            <section id="inicio" class="dash-head" aria-label="Encabezado del panel">
-                <div class="card card-pad card-dash" style="flex:1; min-width:min(100%, 340px);">
-                    <h2>Panel de entrenador</h2>
-                    <p>Bienvenido, Coach Valentina Antonia Rojas. Métricas de alumnos, asistencia y carga semanal.</p>
-                </div>
-                <div class="card card-pad card-dash kpi" aria-label="Carga semanal">
-                    <span class="muted">Carga semanal (horas)</span>
-                    <strong>18 h</strong>
-                    <span class="muted">92% de planificación utilizada</span>
-                    <div class="progress-line" style="--p: 92; margin-top: 12px;" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100">
+            <section id="inicio" class="card card-pad card-dash sketch-banner sketch-banner--coach">
+                <span class="sketch-kicker">Panel activo</span>
+                <h2>Panel de Entrenador</h2>
+                <p>Bienvenido, Coach <strong>[nombre]</strong></p>
+            </section>
+
+            <section class="sketch-grid-coach">
+                <article id="alumnos" class="card card-pad card-dash sketch-card sketch-card--profile">
+                    <h3>Mis alumnos</h3>
+                    <ul class="sketch-action-list sketch-with-dot">
+                        <li><span>Ana Torres</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
+                        <li><span>Carlos Perez</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
+                        <li><span>Laura Diaz</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
+                    </ul>
+                </article>
+
+                <article id="horario" class="card card-pad card-dash sketch-card sketch-card--table">
+                    <h3>Mi horario</h3>
+                    <div class="sketch-table sketch-table-coach">
+                        <div><strong>Lunes</strong></div><div><strong>Martes</strong></div><div><strong>Miercoles</strong></div><div><strong>Jueves</strong></div><div><strong>Viernes</strong></div><div><strong>Viernes</strong></div>
+                        <div>Spinning</div><div>18:00</div><div>Spinning</div><div>10:00</div><div>Boxeo</div><div><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver detalle</a></div>
+                        <div>Miercoles</div><div>11:00</div><div>CrossFit</div><div>11:00</div><div>Boxeo</div><div><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver detalle</a></div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="reportes" class="card card-pad card-dash sketch-card sketch-card--report">
+                <h3>Reportes</h3>
+                <p class="muted">Atajo rapido para seguimiento de alumnos y rendimiento semanal.</p>
+            </section>
+
+            <section class="sketch-extra-grid">
+                <article class="card card-pad card-dash sketch-card">
+                    <h3>Objetivos de la semana</h3>
+                    <ul class="timeline-list">
+                        <li><strong>Asistencia grupal</strong> Meta 90% esta semana.</li>
+                        <li><strong>Seguimiento</strong> Revisar 6 progresos individuales.</li>
+                        <li><strong>Planificación</strong> Ajustar cargas para grupo B.</li>
+                    </ul>
+                    <div class="progress-line progress-line--glow" style="--p: 72" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100">
                         <span class="progress-line__fill"></span>
                     </div>
-                </div>
-            </section>
+                </article>
 
-            <section class="dash-stats" aria-label="Indicadores">
-                <article class="stat-card">
-                    <p class="stat-card__label">Asistencia grupal</p>
-                    <p class="stat-card__value">91%</p>
-                    <p class="stat-card__hint">Promedio últimas 4 semanas</p>
-                </article>
-                <article class="stat-card">
-                    <p class="stat-card__label">Alumnos activos</p>
-                    <p class="stat-card__value">12</p>
-                    <p class="stat-card__hint">Con plan vigente</p>
-                </article>
-                <article class="stat-card">
-                    <p class="stat-card__label">Clases / semana</p>
-                    <p class="stat-card__value">6</p>
-                    <p class="stat-card__hint">3 salas distintas</p>
-                </article>
-                <article class="stat-card">
-                    <p class="stat-card__label">Retención</p>
-                    <p class="stat-card__value">84%</p>
-                    <p class="stat-card__hint">Renovación trimestral</p>
-                </article>
-            </section>
-
-            <section class="dash-grid dash-grid--coach" aria-label="Contenido principal">
-                <article id="alumnos" class="card card-pad card-dash" aria-label="Lista de alumnos">
-                    <div class="dash-section-title">
-                        <h3>Mis alumnos</h3>
-                        <a class="link-inline" href="dashboard_coach.html#progreso-alumnos">Ver progreso</a>
-                    </div>
-                    <ul class="list" aria-label="Alumnos">
-                        <li><span><strong>María López</strong><br><span class="muted">maria@email.com</span></span><a class="btn btn-ghost" href="dashboard_coach.html#progreso-alumnos">Detalle</a></li>
-                        <li><span><strong>Carlos Pérez</strong><br><span class="muted">carlos@email.com</span></span><a class="btn btn-ghost" href="dashboard_coach.html#progreso-alumnos">Detalle</a></li>
-                        <li><span><strong>Antonia Silva</strong><br><span class="muted">antonia@email.com</span></span><a class="btn btn-ghost" href="dashboard_coach.html#progreso-alumnos">Detalle</a></li>
+                <article class="card card-pad card-dash sketch-card">
+                    <h3>Mensajes pendientes</h3>
+                    <ul class="timeline-list">
+                        <li><strong>María López</strong> Consulta sobre rutina de piernas.</li>
+                        <li><strong>Carlos Pérez</strong> Confirmó asistencia jueves 18:00.</li>
+                        <li><strong>Coordinación</strong> Cambio de sala para Boxeo viernes.</li>
                     </ul>
                 </article>
-
-                <article id="progreso-alumnos" class="card card-pad card-dash dash-span-full" aria-label="Progreso de alumnos">
-                    <div class="dash-section-title">
-                        <h3>Progreso por alumno</h3>
-                        <a class="link-inline" href="dashboard_coach.html#alumnos">Ir al listado</a>
-                    </div>
-                    <div class="dash-goals">
-                        <div>
-                            <div class="progress-row__top">
-                                <span>María López · adherencia al plan</span>
-                                <span>88%</span>
-                            </div>
-                            <div class="progress-line" style="--p: 88" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100">
-                                <span class="progress-line__fill"></span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="progress-row__top">
-                                <span>Carlos Pérez · adherencia al plan</span>
-                                <span>76%</span>
-                            </div>
-                            <div class="progress-line" style="--p: 76" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100">
-                                <span class="progress-line__fill"></span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="progress-row__top">
-                                <span>Antonia Silva · adherencia al plan</span>
-                                <span>93%</span>
-                            </div>
-                            <div class="progress-line" style="--p: 93" role="progressbar" aria-valuenow="93" aria-valuemin="0" aria-valuemax="100">
-                                <span class="progress-line__fill"></span>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <article id="clases" class="card card-pad card-dash" aria-label="Clases asignadas">
-                    <div class="dash-section-title">
-                        <h3>Clases asignadas</h3>
-                        <a class="link-inline" href="dashboard_coach.html#horario">Ver horario</a>
-                    </div>
-                    <ul class="list" aria-label="Clases">
-                        <li><span><strong>Entrenamiento funcional</strong><br><span class="muted">Martes 19:00</span></span><span class="pill">Grupo A</span></li>
-                        <li><span><strong>Crossfit</strong><br><span class="muted">Jueves 18:00</span></span><span class="pill">Grupo B</span></li>
-                        <li><span><strong>HIIT</strong><br><span class="muted">Sábado 10:00</span></span><span class="pill">Grupo C</span></li>
-                    </ul>
-                </article>
-
-                <article id="horario" class="card card-pad card-dash dash-span-full" aria-label="Horarios">
-                    <div class="dash-section-title">
-                        <h3>Mi horario</h3>
-                        <a class="link-inline" href="dashboard_coach.html#clases">Clases</a>
-                    </div>
-                    <ul class="list" aria-label="Horario semanal">
-                        <li><span><strong>Lunes</strong><br><span class="muted">18:00 · Spinning · Ocupación 81%</span></span><span class="pill">Sala 2</span></li>
-                        <li><span><strong>Miércoles</strong><br><span class="muted">19:00 · Funcional · Ocupación 67%</span></span><span class="pill">Sala 1</span></li>
-                        <li><span><strong>Viernes</strong><br><span class="muted">18:00 · Boxeo · Ocupación 74%</span></span><span class="pill">Ring</span></li>
-                    </ul>
-                </article>
-            </section>
-
-            <section id="reportes" class="card card-pad card-dash dash-mt" aria-label="Reportes">
-                <div class="dash-section-title">
-                    <h3>Reportes rápidos</h3>
-                    <a class="link-inline" href="dashboard_coach.html#inicio">Inicio</a>
-                </div>
-                <ul class="list" aria-label="Accesos">
-                    <li><span><strong>Asistencia por clase</strong><br><span class="muted">Exportación estática (demo)</span></span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Abrir</a></li>
-                    <li><span><strong>Progreso de grupo</strong><br><span class="muted">Resumen semanal</span></span><a class="btn btn-ghost" href="dashboard_coach.html#progreso-alumnos">Abrir</a></li>
-                </ul>
             </section>
         </main>
     </div>
