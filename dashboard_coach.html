@@ -6,7 +6,7 @@
     <title>SportClub - Dashboard Coach</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="role-coach dashboard-sketch">
+<body class="role-coach dashboard-sketch" data-required-role="coach">
     <div class="page">
         <header class="topbar">
             <div class="wrap topbar-inner">
@@ -26,7 +26,7 @@
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
                     <a class="btn btn-ghost" href="dashboard_coach.html#inicio">Editar perfil</a>
-                    <a class="btn btn-primary" href="login.html">Cerrar sesión</a>
+                    <a class="btn btn-primary" href="login.html" data-logout>Cerrar sesión</a>
                 </div>
             </div>
         </header>
@@ -35,7 +35,7 @@
             <section id="inicio" class="card card-pad card-dash sketch-banner sketch-banner--coach">
                 <span class="sketch-kicker">Panel activo</span>
                 <h2>Panel de Entrenador</h2>
-                <p>Bienvenido, Coach <strong>[nombre]</strong></p>
+                <p>Bienvenido, Coach <strong data-user-name>Coach</strong></p>
             </section>
 
             <section class="sketch-grid-coach">
@@ -87,5 +87,6 @@
             </section>
         </main>
     </div>
+    <script src="js/auth.js"></script>
 </body>
 </html>

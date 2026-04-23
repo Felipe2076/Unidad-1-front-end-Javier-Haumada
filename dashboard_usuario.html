@@ -6,7 +6,7 @@
     <title>SportClub - Dashboard Usuario</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="role-user dashboard-sketch">
+<body class="role-user dashboard-sketch" data-required-role="user">
     <div class="page">
         <header class="topbar">
             <div class="wrap topbar-inner">
@@ -26,7 +26,7 @@
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
                     <a class="btn btn-ghost" href="dashboard_usuario.html#perfil">Editar perfil</a>
-                    <a class="btn btn-primary" href="login.html">Cerrar sesión</a>
+                    <a class="btn btn-primary" href="login.html" data-logout>Cerrar sesión</a>
                 </div>
             </div>
         </header>
@@ -34,7 +34,7 @@
         <main class="wrap dashboard" aria-label="Panel de usuario">
             <section id="inicio" class="card card-pad card-dash sketch-banner sketch-banner--user">
                 <span class="sketch-kicker">Dashboard premium</span>
-                <h2>Bienvenido a SportClub</h2>
+                <h2>Bienvenido a SportClub, <span data-user-name>Usuario</span></h2>
                 <p>Tu semana se ve clara, activa y lista para reservar.</p>
             </section>
 
@@ -43,8 +43,8 @@
                     <h3>Mi perfil</h3>
                     <div class="sketch-profile">
                         <div class="avatar-circle"></div>
-                        <p><strong>Nombre:</strong> Francisco</p>
-                        <p><strong>Email:</strong> francisco@email.com</p>
+                        <p><strong>Nombre:</strong> <span data-user-name>Usuario</span></p>
+                        <p><strong>Email:</strong> <span data-user-email>correo@sportclub.cl</span></p>
                         <p><strong>Objetivos personales:</strong></p>
                         <ul>
                             <li>Mejorar resistencia</li>
@@ -83,23 +83,88 @@
             </section>
 
             <section id="clases" class="card card-pad card-dash sketch-card sketch-card--table">
-                <h3>Clases disponibles</h3>
-                <div class="sketch-table">
-                    <div><strong>Spinning</strong></div>
-                    <div>Lunes / 18:00 / 10:00</div>
-                    <div><strong>Boxeo</strong></div>
-                    <div>Sab 2</div>
-                    <div><a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a></div>
-                    <div><strong>CrossFit</strong></div>
-                    <div>Miercoles / 10:00</div>
-                    <div><strong>HIIT</strong></div>
-                    <div>10:00</div>
-                    <div><a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a></div>
-                    <div><strong>Yoga</strong></div>
-                    <div>Jueves / 19:30</div>
-                    <div><strong>Pilates</strong></div>
-                    <div>Viernes / 09:00</div>
-                    <div><a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a></div>
+                <div class="classes-head">
+                    <h3>Clases disponibles</h3>
+                    <p>Elegi tu horario y reservá en un solo click.</p>
+                </div>
+                <div class="classes-grid" aria-label="Listado de clases disponibles">
+                    <article class="class-item">
+                        <div class="class-item__top">
+                            <strong>Spinning</strong>
+                            <span class="class-level">Intermedio</span>
+                        </div>
+                        <p class="class-item__meta">Lunes · 18:00</p>
+                        <p class="class-item__meta">Coach: Javier</p>
+                        <div class="class-item__foot">
+                            <span class="class-slots">10 cupos</span>
+                            <a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a>
+                        </div>
+                    </article>
+
+                    <article class="class-item">
+                        <div class="class-item__top">
+                            <strong>Boxeo</strong>
+                            <span class="class-level">Principiante</span>
+                        </div>
+                        <p class="class-item__meta">Sábado · 10:00</p>
+                        <p class="class-item__meta">Coach: María</p>
+                        <div class="class-item__foot">
+                            <span class="class-slots">2 cupos</span>
+                            <a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a>
+                        </div>
+                    </article>
+
+                    <article class="class-item">
+                        <div class="class-item__top">
+                            <strong>CrossFit</strong>
+                            <span class="class-level">Avanzado</span>
+                        </div>
+                        <p class="class-item__meta">Miércoles · 10:00</p>
+                        <p class="class-item__meta">Coach: Lucas</p>
+                        <div class="class-item__foot">
+                            <span class="class-slots">6 cupos</span>
+                            <a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a>
+                        </div>
+                    </article>
+
+                    <article class="class-item">
+                        <div class="class-item__top">
+                            <strong>HIIT</strong>
+                            <span class="class-level">Intermedio</span>
+                        </div>
+                        <p class="class-item__meta">Miércoles · 19:00</p>
+                        <p class="class-item__meta">Coach: Paula</p>
+                        <div class="class-item__foot">
+                            <span class="class-slots">8 cupos</span>
+                            <a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a>
+                        </div>
+                    </article>
+
+                    <article class="class-item">
+                        <div class="class-item__top">
+                            <strong>Yoga</strong>
+                            <span class="class-level">Todos los niveles</span>
+                        </div>
+                        <p class="class-item__meta">Jueves · 19:30</p>
+                        <p class="class-item__meta">Coach: Sofía</p>
+                        <div class="class-item__foot">
+                            <span class="class-slots">12 cupos</span>
+                            <a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a>
+                        </div>
+                    </article>
+
+                    <article class="class-item">
+                        <div class="class-item__top">
+                            <strong>Pilates</strong>
+                            <span class="class-level">Suave</span>
+                        </div>
+                        <p class="class-item__meta">Viernes · 09:00</p>
+                        <p class="class-item__meta">Coach: Carla</p>
+                        <div class="class-item__foot">
+                            <span class="class-slots">5 cupos</span>
+                            <a class="btn btn-ghost" href="dashboard_usuario.html#reservas">Reservar</a>
+                        </div>
+                    </article>
                 </div>
             </section>
 
@@ -127,5 +192,6 @@
             </section>
         </main>
     </div>
+    <script src="js/auth.js"></script>
 </body>
 </html>

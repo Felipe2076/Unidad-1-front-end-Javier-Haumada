@@ -21,7 +21,7 @@
                 <p>Ingresa con tu correo y contraseña para acceder a tu cuenta.</p>
             </header>
 
-            <form action="#" method="get" aria-label="Formulario de inicio de sesión">
+            <form id="login-form" action="#" method="post" aria-label="Formulario de inicio de sesión" novalidate>
                 <div class="form-group">
                     <label for="email">Correo electrónico</label>
                     <input type="email" id="email" name="email" autocomplete="email" required placeholder="tu@correo.com">
@@ -32,28 +32,18 @@
                 </div>
                 <button type="submit" class="btn-login">Iniciar sesión</button>
             </form>
+            <p id="login-message" class="message is-hidden" role="status" aria-live="polite"></p>
 
             <nav class="auth-links auth-links--row" aria-label="Enlaces de cuenta">
                 <a href="recover.html">¿Olvidaste tu contraseña?</a>
                 <a href="register.html">Registrarse</a>
             </nav>
 
-            <section class="auth-demo" aria-labelledby="demo-login-title">
-                <h3 id="demo-login-title" class="auth-demo__title">Inicio de sesión (demo)</h3>
-                <p class="auth-demo__text">
-                    No hay servidor: el formulario no redirige. Elige un perfil para abrir el dashboard de ejemplo con datos estáticos.
-                </p>
-                <div class="auth-demo__grid">
-                    <a class="auth-demo__tile auth-demo__tile--user" href="dashboard_usuario.html">Usuario</a>
-                    <a class="auth-demo__tile auth-demo__tile--coach" href="dashboard_coach.html">Coach</a>
-                    <a class="auth-demo__tile auth-demo__tile--admin" href="dashboard_admin.html">Admin</a>
-                </div>
-            </section>
-
             <p class="form-footer">
                 ¿Aún no conoces el club? <a href="index.html">Volver al inicio</a>
             </p>
         </div>
     </div>
+    <script src="js/auth.js"></script>
 </body>
 </html>

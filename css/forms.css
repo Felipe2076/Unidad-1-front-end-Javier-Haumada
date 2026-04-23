@@ -158,12 +158,24 @@ textarea:focus {
 .message {
     margin-top: 20px;
     padding: 15px;
-    background: linear-gradient(135deg, rgba(242, 183, 5, 0.35) 0%, rgba(242, 183, 5, 0.55) 100%);
-    color: #000000;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #e9efff;
+    color: #12326b;
+    border: 1px solid #aac0ff;
     border-radius: 8px;
     text-align: center;
     font-weight: 500;
+}
+
+.message-error {
+    background: #ffe7ea;
+    color: #8b1021;
+    border-color: #f1a7b2;
+}
+
+.message-success {
+    background: #e8f9ee;
+    color: #14532d;
+    border-color: #98dfb1;
 }
 
 .divider {
