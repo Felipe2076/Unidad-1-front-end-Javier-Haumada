@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Usuario Demo",
+    "user": "user1@sportclub.cl",
+    "password": "demo1234",
+    "role": "user",
+    "age": 28,
+    "practiceDeporte": true,
+    "typeDeporte": "running",
+    "objectivePersonal": "Mejorar resistencia",
+    "level": "intermedio",
+    "infoAdicional": "Prefiere clases por la tarde."
+  },
+  {
+    "name": "Coach Demo",
+    "user": "coach1@sportclub.cl",
+    "password": "coach1234",
+    "role": "coach",
+    "age": 34,
+    "practiceDeporte": true,
+    "typeDeporte": "crossfit",
+    "objectivePersonal": "Guiar a atletas",
+    "level": "avanzado",
+    "infoAdicional": "Coach de fuerza y resistencia."
+  },
+  {
+    "name": "Admin Demo",
+    "user": "admin1@sportclub.cl",
+    "password": "admin1234",
+    "role": "admin",
+    "age": 31,
+    "practiceDeporte": false,
+    "typeDeporte": "",
+    "objectivePersonal": "Administrar el club",
+    "level": "",
+    "infoAdicional": "Cuenta de administración."
+  }
+]
