@@ -35,6 +35,15 @@ proyecto-club/
 2. O abre directamente `login.html` para acceder al sistema
 3. Navega entre las páginas usando los enlaces
 
+## Backend local (opcional)
+
+El proyecto ahora incluye un backend simple para login y registro y se ejecuta en `http://localhost:3000`.
+
+1. Abre una terminal en la carpeta `backend`
+2. Ejecuta `npm install`
+3. Ejecuta `npm start`
+4. Luego usa `login.html` y `register.html` desde el frontend
+
 ## Requerimientos Cumplidos
 
 - Estructura semántica HTML5
