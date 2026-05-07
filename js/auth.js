@@ -778,6 +778,10 @@ function handleAdminPage() {
 
         if (deleteButton) {
             const userId = deleteButton.dataset.deleteId;
+            const confirmDelete = window.confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.");
+            if (!confirmDelete) {
+                return;
+            }
             const result = await tryDeleteUser(userId);
             if (!result.success) {
                 setMessage(adminMessage, result.error || "No se pudo eliminar el usuario.", "message-error");
@@ -941,16 +945,7 @@ function handleProfilePage() {
     refreshProfileData();
 }
 
-function handleDashboardPage() {
-    const requiredRole = document.body.dataset.requiredRole;
-    if (!requiredRole) return;
-
-    const loggedUser = getLoggedUser();
-    if (!loggedUser || loggedUser.role !== requiredRole) {
-        window.location.href = "login.html";
-        return;
-    }
-
+function populateDashboard(loggedUser) {
     document.querySelectorAll("[data-user-name]").forEach(function (element) {
         element.textContent = loggedUser.name;
     });
@@ -968,11 +963,58 @@ function handleDashboardPage() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+async function handleDashboardPage() {
+    const requiredRole = document.body.dataset.requiredRole;
+    if (!requiredRole) return;
+
+    const loggedUser = getLoggedUser();
+    const authToken = getAuthToken();
+
+    if (!loggedUser) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    if (authToken) {
+        const profileResult = await tryFetchProfile();
+        if (profileResult.success) {
+            if (profileResult.user.role !== requiredRole) {
+                clearSession();
+                window.location.href = "login.html";
+                return;
+            }
+            saveSession({
+                user: {
+                    name: profileResult.user.name,
+                    user: normalizeEmail(profileResult.user.user),
+                    role: profileResult.user.role
+                },
+                token: authToken
+            });
+            populateDashboard(profileResult.user);
+            return;
+        }
+
+        if (!profileResult.fallback) {
+            clearSession();
+            window.location.href = "login.html";
+            return;
+        }
+    }
+
+    if (loggedUser.role !== requiredRole) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    populateDashboard(loggedUser);
+}
+
+document.addEventListener("DOMContentLoaded", async function () {
     initializeUsersStore();
     handleLoginPage();
     handleRegisterPage();
     handleAdminPage();
     handleProfilePage();
-    handleDashboardPage();
+    await handleDashboardPage();
 });
