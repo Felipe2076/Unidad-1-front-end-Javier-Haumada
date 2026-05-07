@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:3000/api";
+﻿const API_BASE_URL = "http://localhost:3000/api";
+const SESSION_STORAGE_KEY = "sportclub_session";
+const USERS_STORAGE_KEY = "sportclub_users";
 const defaultUsers = [];
 const demoUserEmails = [
     "user1@sportclub.cl",
@@ -8,8 +10,6 @@ const demoUserEmails = [
     "admin1@sportclub.cl",
     "admin2@sportclub.cl"
 ];
-
-const USERS_STORAGE_KEY = "sportclub_users";
 
 const roleRedirects = {
     user: "dashboard_usuario.html",
@@ -21,18 +21,36 @@ function normalizeEmail(value) {
     return String(value || "").trim().toLowerCase();
 }
 
-function getLoggedUser() {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
+function getSession() {
+    const stored = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!stored) {
         return null;
     }
 
     try {
-        return JSON.parse(storedUser);
+        return JSON.parse(stored);
     } catch (error) {
-        localStorage.removeItem("user");
+        localStorage.removeItem(SESSION_STORAGE_KEY);
         return null;
     }
+}
+
+function saveSession(session) {
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+}
+
+function clearSession() {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
+function getLoggedUser() {
+    const session = getSession();
+    return session && session.user ? session.user : null;
+}
+
+function getAuthToken() {
+    const session = getSession();
+    return session && session.token ? session.token : null;
 }
 
 function getUsers() {
@@ -77,16 +95,68 @@ function clearMessage(messageElement) {
     messageElement.className = "message is-hidden";
 }
 
-async function apiRequest(endpoint, payload) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    });
+function setInputError(inputElement, text) {
+    if (!inputElement) return;
+    const container = inputElement.closest(".form-group");
+    if (!container) return;
 
+    let errorElement = container.querySelector(".input-error");
+    if (!errorElement) {
+        errorElement = document.createElement("p");
+        errorElement.className = "input-error";
+        container.appendChild(errorElement);
+    }
+
+    errorElement.textContent = text;
+    inputElement.classList.add("input-invalid");
+}
+
+function clearInputErrors(container) {
+    if (!container) return;
+    container.querySelectorAll(".input-invalid").forEach(function (input) {
+        input.classList.remove("input-invalid");
+    });
+    container.querySelectorAll(".input-error").forEach(function (element) {
+        element.textContent = "";
+    });
+}
+
+function formatDate(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.valueOf())) {
+        return value;
+    }
+
+    return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+}
+
+async function apiRequest(endpoint, method = "GET", payload = null, requireAuth = false) {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const headers = {
+        "Content-Type": "application/json"
+    };
+
+    if (requireAuth) {
+        const token = getAuthToken();
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+    }
+
+    const options = {
+        method,
+        headers
+    };
+
+    if (payload) {
+        options.body = JSON.stringify(payload);
+    }
+
+    const response = await fetch(url, options);
     const contentType = response.headers.get("content-type") || "";
     const data = contentType.includes("application/json") ? await response.json() : null;
 
@@ -98,12 +168,16 @@ async function apiRequest(endpoint, payload) {
     return data;
 }
 
+function isFetchError(error) {
+    return error instanceof TypeError || error.message.includes("Failed to fetch");
+}
+
 async function tryFetchLogin(email, password) {
     try {
-        const result = await apiRequest("/auth/login", { email, password });
-        return { success: true, user: result.user };
+        const result = await apiRequest("/auth/login", "POST", { email, password });
+        return { success: true, user: result.user, token: result.token };
     } catch (error) {
-        if (error instanceof TypeError || error.message.includes("Failed to fetch")) {
+        if (isFetchError(error)) {
             return { success: false, fallback: true, error: error.message };
         }
         return { success: false, error: error.message };
@@ -112,12 +186,87 @@ async function tryFetchLogin(email, password) {
 
 async function tryFetchRegister(payload) {
     try {
-        const result = await apiRequest("/auth/register", payload);
-        return { success: true, user: result.user };
+        const result = await apiRequest("/auth/register", "POST", payload);
+        return { success: true, user: result.user, token: result.token };
     } catch (error) {
-        if (error instanceof TypeError || error.message.includes("Failed to fetch")) {
+        if (isFetchError(error)) {
             return { success: false, fallback: true, error: error.message };
         }
+        return { success: false, error: error.message };
+    }
+}
+
+async function tryFetchProfile() {
+    try {
+        const result = await apiRequest("/auth/me", "GET", null, true);
+        return { success: true, user: result.user };
+    } catch (error) {
+        if (isFetchError(error)) {
+            return { success: false, fallback: true, error: error.message };
+        }
+        return { success: false, error: error.message };
+    }
+}
+
+async function tryUpdateProfile(payload) {
+    try {
+        const result = await apiRequest("/auth/me", "PUT", payload, true);
+        return { success: true, user: result.user };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function tryChangePassword(payload) {
+    try {
+        const result = await apiRequest("/auth/me/password", "PUT", payload, true);
+        return { success: true, message: result.message };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function tryFetchUsers() {
+    try {
+        const result = await apiRequest("/users", "GET", null, true);
+        return { success: true, users: result.users };
+    } catch (error) {
+        return { success: false, error: error.message, fallback: isFetchError(error) };
+    }
+}
+
+async function tryFetchUser(id) {
+    try {
+        const result = await apiRequest(`/users/${id}`, "GET", null, true);
+        return { success: true, user: result.user };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function tryCreateUser(payload) {
+    try {
+        const result = await apiRequest("/users", "POST", payload, true);
+        return { success: true, user: result.user };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function tryUpdateUser(id, payload) {
+    try {
+        const result = await apiRequest(`/users/${id}`, "PUT", payload, true);
+        return { success: true, user: result.user };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function tryDeleteUser(id) {
+    try {
+        await apiRequest(`/users/${id}`, "DELETE", null, true);
+        return { success: true };
+    } catch (error) {
         return { success: false, error: error.message };
     }
 }
@@ -151,13 +300,18 @@ function performLocalRegister(payload, messageElement) {
         return normalizeEmail(currentUser.user) === payload.email;
     });
 
-    if (!payload.email || !payload.password) {
-        setMessage(messageElement, "Completa correo y contraseña para registrarte.", "message-error");
+    if (!payload.email || !payload.password || !payload.confirmPassword) {
+        setMessage(messageElement, "Completa correo, contraseña y confirmación.", "message-error");
         return null;
     }
 
-    if (payload.password.length < 4) {
-        setMessage(messageElement, "La contraseña debe tener al menos 4 caracteres.", "message-error");
+    if (payload.password.length < 8) {
+        setMessage(messageElement, "La contraseña debe tener al menos 8 caracteres.", "message-error");
+        return null;
+    }
+
+    if (payload.password !== payload.confirmPassword) {
+        setMessage(messageElement, "Las contraseñas no coinciden.", "message-error");
         return null;
     }
 
@@ -170,7 +324,14 @@ function performLocalRegister(payload, messageElement) {
         name: payload.name || "Nuevo usuario",
         user: payload.email,
         password: payload.password,
-        role: "user"
+        role: "user",
+        age: payload.age,
+        birthDate: payload.birthDate || "",
+        practiceDeporte: payload.practiceDeporte === true,
+        typeDeporte: payload.typeDeporte || "",
+        objectivePersonal: payload.objectivePersonal || "",
+        level: payload.level || "",
+        infoAdicional: payload.infoAdicional || ""
     };
 
     users.push(newUser);
@@ -183,12 +344,87 @@ function performLocalRegister(payload, messageElement) {
     };
 }
 
-function saveSessionUser(sessionUser) {
-    localStorage.setItem("user", JSON.stringify(sessionUser));
+function performLocalProfileUpdate(payload, messageElement) {
+    const loggedUser = getLoggedUser();
+    if (!loggedUser) {
+        setMessage(messageElement, "No hay sesión activa.", "message-error");
+        return null;
+    }
+
+    const users = getUsers();
+    const matchedUser = users.find(function (currentUser) {
+        return normalizeEmail(currentUser.user) === loggedUser.user;
+    });
+
+    if (!matchedUser) {
+        setMessage(messageElement, "Usuario local no encontrado.", "message-error");
+        return null;
+    }
+
+    matchedUser.name = payload.name || matchedUser.name;
+    matchedUser.age = payload.age || matchedUser.age;
+    matchedUser.birthDate = payload.birthDate || matchedUser.birthDate;
+    matchedUser.practiceDeporte = typeof payload.practiceDeporte !== "undefined" ? payload.practiceDeporte : matchedUser.practiceDeporte;
+    matchedUser.typeDeporte = payload.typeDeporte || matchedUser.typeDeporte;
+    matchedUser.objectivePersonal = payload.objectivePersonal || matchedUser.objectivePersonal;
+    matchedUser.level = payload.level || matchedUser.level;
+    matchedUser.infoAdicional = payload.infoAdicional || matchedUser.infoAdicional;
+
+    saveUsers(users);
+
+    const updatedSession = {
+        user: {
+            name: matchedUser.name,
+            user: normalizeEmail(matchedUser.user),
+            role: matchedUser.role
+        },
+        token: getAuthToken()
+    };
+    saveSession(updatedSession);
+
+    return updatedSession.user;
 }
 
-function redirectToDashboard(role) {
-    window.location.href = roleRedirects[role] || "login.html";
+function performLocalPasswordChange(currentPassword, newPassword, confirmPassword, messageElement) {
+    const loggedUser = getLoggedUser();
+    if (!loggedUser) {
+        setMessage(messageElement, "No hay sesión activa.", "message-error");
+        return false;
+    }
+
+    const users = getUsers();
+    const matchedUser = users.find(function (currentUser) {
+        return normalizeEmail(currentUser.user) === loggedUser.user;
+    });
+
+    if (!matchedUser) {
+        setMessage(messageElement, "Usuario local no encontrado.", "message-error");
+        return false;
+    }
+
+    if (matchedUser.password !== currentPassword) {
+        setMessage(messageElement, "La contraseña actual es incorrecta.", "message-error");
+        return false;
+    }
+
+    if (newPassword.length < 8) {
+        setMessage(messageElement, "La nueva contraseña debe tener al menos 8 caracteres.", "message-error");
+        return false;
+    }
+
+    if (newPassword !== confirmPassword) {
+        setMessage(messageElement, "Las nuevas contraseñas no coinciden.", "message-error");
+        return false;
+    }
+
+    matchedUser.password = newPassword;
+    saveUsers(users);
+    return true;
+}
+
+function getRoleBadge(role) {
+    const className = role === "admin" ? "badge-admin" : role === "coach" ? "badge-coach" : "badge-user";
+    return `<span class="badge ${className}">${role}</span>`;
 }
 
 function handleLoginPage() {
@@ -220,14 +456,17 @@ function handleLoginPage() {
 
         if (apiResult.success && apiResult.user) {
             const sessionUser = {
-                name: apiResult.user.name,
-                user: normalizeEmail(apiResult.user.user),
-                role: apiResult.user.role
+                user: {
+                    name: apiResult.user.name,
+                    user: normalizeEmail(apiResult.user.user),
+                    role: apiResult.user.role
+                },
+                token: apiResult.token || null
             };
-            saveSessionUser(sessionUser);
-            setMessage(messageElement, `Bienvenido ${sessionUser.name}. Redirigiendo...`, "message-success");
+            saveSession(sessionUser);
+            setMessage(messageElement, `Bienvenido ${sessionUser.user.name}. Redirigiendo...`, "message-success");
             window.setTimeout(function () {
-                redirectToDashboard(sessionUser.role);
+                redirectToDashboard(sessionUser.user.role);
             }, 500);
             return;
         }
@@ -237,7 +476,7 @@ function handleLoginPage() {
             if (!sessionUser) {
                 return;
             }
-            saveSessionUser(sessionUser);
+            saveSession({ user: sessionUser });
             setMessage(messageElement, `Bienvenido ${sessionUser.name}. Redirigiendo...`, "message-success");
             window.setTimeout(function () {
                 redirectToDashboard(sessionUser.role);
@@ -262,8 +501,10 @@ function handleRegisterPage() {
 
     const emailInput = document.querySelector("#email");
     const passwordInput = document.querySelector("#password");
+    const confirmPasswordInput = document.querySelector("#confirmPassword");
     const nameInput = document.querySelector("#name");
     const ageInput = document.querySelector("#age");
+    const birthDateInput = document.querySelector("#birthDate");
     const practiceDeporteInput = document.querySelector("#practiceDeporte");
     const typeDeporteInput = document.querySelector("#typeDeporte");
     const objectivePersonalInput = document.querySelector("#objectivePersonal");
@@ -273,12 +514,15 @@ function handleRegisterPage() {
 
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
+        clearInputErrors(form);
 
         const payload = {
             email: normalizeEmail(emailInput.value),
             password: String(passwordInput.value || "").trim(),
+            confirmPassword: String(confirmPasswordInput.value || "").trim(),
             name: String(nameInput.value || "").trim(),
             age: ageInput.value ? Number(ageInput.value) : null,
+            birthDate: String(birthDateInput.value || "").trim(),
             practiceDeporte: practiceDeporteInput ? practiceDeporteInput.checked : false,
             typeDeporte: String(typeDeporteInput.value || "").trim(),
             objectivePersonal: String(objectivePersonalInput.value || "").trim(),
@@ -286,13 +530,23 @@ function handleRegisterPage() {
             infoAdicional: String(infoAdicionalInput.value || "").trim()
         };
 
-        if (!payload.email || !payload.password) {
-            setMessage(messageElement, "Completa correo y contraseña para registrarte.", "message-error");
+        if (!payload.email) {
+            setInputError(emailInput, "El email es obligatorio.");
             return;
         }
 
-        if (payload.password.length < 4) {
-            setMessage(messageElement, "La contraseña debe tener al menos 4 caracteres.", "message-error");
+        if (!payload.password) {
+            setInputError(passwordInput, "La contraseña es obligatoria.");
+            return;
+        }
+
+        if (payload.password.length < 8) {
+            setInputError(passwordInput, "La contraseña debe tener al menos 8 caracteres.");
+            return;
+        }
+
+        if (payload.password !== payload.confirmPassword) {
+            setInputError(confirmPasswordInput, "Las contraseñas no coinciden.");
             return;
         }
 
@@ -300,14 +554,17 @@ function handleRegisterPage() {
 
         if (apiResult.success && apiResult.user) {
             const sessionUser = {
-                name: apiResult.user.name,
-                user: normalizeEmail(apiResult.user.user),
-                role: apiResult.user.role
+                user: {
+                    name: apiResult.user.name,
+                    user: normalizeEmail(apiResult.user.user),
+                    role: apiResult.user.role
+                },
+                token: apiResult.token || null
             };
-            saveSessionUser(sessionUser);
+            saveSession(sessionUser);
             setMessage(messageElement, "Cuenta creada correctamente. Redirigiendo...", "message-success");
             window.setTimeout(function () {
-                redirectToDashboard(sessionUser.role);
+                redirectToDashboard(sessionUser.user.role);
             }, 700);
             return;
         }
@@ -317,7 +574,7 @@ function handleRegisterPage() {
             if (!sessionUser) {
                 return;
             }
-            saveSessionUser(sessionUser);
+            saveSession({ user: sessionUser });
             setMessage(messageElement, "Cuenta creada correctamente. Redirigiendo...", "message-success");
             window.setTimeout(function () {
                 redirectToDashboard(sessionUser.role);
@@ -328,12 +585,360 @@ function handleRegisterPage() {
         setMessage(messageElement, apiResult.error || "Ocurrió un error al registrarte.", "message-error");
     });
 
-    [emailInput, passwordInput, nameInput, ageInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput].forEach(function (input) {
+    [emailInput, passwordInput, confirmPasswordInput, nameInput, ageInput, birthDateInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput].forEach(function (input) {
         if (!input) return;
         input.addEventListener("input", function () {
             clearMessage(messageElement);
+            clearInputErrors(form);
         });
     });
+}
+
+function handleAdminPage() {
+    const tableBody = document.querySelector("#admin-users-table-body");
+    if (!tableBody) return;
+
+    const adminMessage = document.querySelector("#admin-message");
+    const adminFormSection = document.querySelector("#admin-user-form-section");
+    const adminForm = document.querySelector("#user-form");
+    const newUserButton = document.querySelector("#new-user-button");
+    const cancelUserFormButton = document.querySelector("#cancel-user-form");
+    const formTitle = document.querySelector("#admin-user-form-title");
+    const submitButton = document.querySelector("#admin-user-form-submit");
+
+    let editingUserId = null;
+
+    function getUserFormData() {
+        return {
+            id: editingUserId,
+            name: document.querySelector("#admin-name").value.trim(),
+            email: normalizeEmail(document.querySelector("#admin-email").value),
+            role: document.querySelector("#admin-role").value,
+            password: document.querySelector("#admin-password").value,
+            confirmPassword: document.querySelector("#admin-confirmPassword").value,
+            birthDate: document.querySelector("#admin-birthDate").value,
+            age: document.querySelector("#admin-age").value ? Number(document.querySelector("#admin-age").value) : null,
+            practiceDeporte: document.querySelector("#admin-practiceDeporte").checked,
+            typeDeporte: document.querySelector("#admin-typeDeporte").value.trim(),
+            objectivePersonal: document.querySelector("#admin-objectivePersonal").value.trim(),
+            level: document.querySelector("#admin-level").value,
+            infoAdicional: document.querySelector("#admin-infoAdicional").value.trim()
+        };
+    }
+
+    function updateFormTitle() {
+        formTitle.textContent = editingUserId ? "Editar Usuario" : "Nuevo Usuario";
+        submitButton.textContent = editingUserId ? "Actualizar usuario" : "Crear usuario";
+    }
+
+    function resetAdminForm() {
+        editingUserId = null;
+        adminForm.reset();
+        document.querySelector("#editing-user-id").value = "";
+        updateFormTitle();
+        clearMessage(adminMessage);
+        clearInputErrors(adminForm);
+        if (adminFormSection) {
+            adminFormSection.classList.add("is-hidden");
+        }
+    }
+
+    function fillAdminForm(user) {
+        editingUserId = user.id;
+        document.querySelector("#editing-user-id").value = user.id;
+        document.querySelector("#admin-name").value = user.name || "";
+        document.querySelector("#admin-email").value = user.user || "";
+        document.querySelector("#admin-role").value = user.role || "user";
+        document.querySelector("#admin-password").value = "";
+        document.querySelector("#admin-confirmPassword").value = "";
+        document.querySelector("#admin-birthDate").value = user.birthDate || "";
+        document.querySelector("#admin-age").value = user.age || "";
+        document.querySelector("#admin-practiceDeporte").checked = !!user.practiceDeporte;
+        document.querySelector("#admin-typeDeporte").value = user.typeDeporte || "";
+        document.querySelector("#admin-objectivePersonal").value = user.objectivePersonal || "";
+        document.querySelector("#admin-level").value = user.level || "";
+        document.querySelector("#admin-infoAdicional").value = user.infoAdicional || "";
+        updateFormTitle();
+        adminFormSection.classList.remove("is-hidden");
+    }
+
+    function renderUsersTable(users) {
+        if (!users || users.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan=6>No hay usuarios registrados.</td></tr>";
+            return;
+        }
+
+        tableBody.innerHTML = users
+            .map(function (user) {
+                return `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.user}</td>
+                        <td>${getRoleBadge(user.role)}</td>
+                        <td>${formatDate(user.createdAt)}</td>
+                        <td>
+                            <button type="button" data-edit-id="${user.id}" class="btn btn-ghost admin-action-button">Editar</button>
+                            <button type="button" data-delete-id="${user.id}" class="btn btn-danger admin-action-button">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            })
+            .join("");
+    }
+
+    async function loadAdminUsers() {
+        clearMessage(adminMessage);
+
+        const result = await tryFetchUsers();
+        if (result.success) {
+            renderUsersTable(result.users);
+            return;
+        }
+
+        if (result.fallback) {
+            renderUsersTable(getUsers());
+            setMessage(adminMessage, "Conexión al backend fallida. Se muestra la copia local.", "message-error");
+            return;
+        }
+
+        setMessage(adminMessage, result.error || "No se pudo cargar la lista de usuarios.", "message-error");
+    }
+
+    newUserButton.addEventListener("click", function () {
+        adminForm.reset();
+        editingUserId = null;
+        updateFormTitle();
+        clearInputErrors(adminForm);
+        adminFormSection.classList.remove("is-hidden");
+    });
+
+    cancelUserFormButton.addEventListener("click", function () {
+        resetAdminForm();
+    });
+
+    adminForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        clearInputErrors(adminForm);
+        clearMessage(adminMessage);
+
+        const payload = getUserFormData();
+
+        if (!payload.name) {
+            setInputError(document.querySelector("#admin-name"), "El nombre es obligatorio.");
+            return;
+        }
+
+        if (!payload.email) {
+            setInputError(document.querySelector("#admin-email"), "El email es obligatorio.");
+            return;
+        }
+
+        if (!editingUserId && !payload.password) {
+            setInputError(document.querySelector("#admin-password"), "La contraseña es obligatoria para un nuevo usuario.");
+            return;
+        }
+
+        if (payload.password && payload.password.length < 8) {
+            setInputError(document.querySelector("#admin-password"), "La contraseña debe tener al menos 8 caracteres.");
+            return;
+        }
+
+        if (payload.password && payload.password !== payload.confirmPassword) {
+            setInputError(document.querySelector("#admin-confirmPassword"), "Las contraseñas no coinciden.");
+            return;
+        }
+
+        const result = editingUserId ? await tryUpdateUser(editingUserId, payload) : await tryCreateUser(payload);
+
+        if (!result.success) {
+            setMessage(adminMessage, result.error || "Error al guardar el usuario.", "message-error");
+            return;
+        }
+
+        await loadAdminUsers();
+        setMessage(adminMessage, editingUserId ? "Usuario actualizado correctamente." : "Usuario creado correctamente.", "message-success");
+        resetAdminForm();
+    });
+
+    tableBody.addEventListener("click", async function (event) {
+        const editButton = event.target.closest("[data-edit-id]");
+        const deleteButton = event.target.closest("[data-delete-id]");
+
+        if (editButton) {
+            const userId = editButton.dataset.editId;
+            const result = await tryFetchUser(userId);
+            if (!result.success) {
+                setMessage(adminMessage, result.error || "No se pudo cargar el usuario.", "message-error");
+                return;
+            }
+            fillAdminForm(result.user);
+            return;
+        }
+
+        if (deleteButton) {
+            const userId = deleteButton.dataset.deleteId;
+            const result = await tryDeleteUser(userId);
+            if (!result.success) {
+                setMessage(adminMessage, result.error || "No se pudo eliminar el usuario.", "message-error");
+                return;
+            }
+            await loadAdminUsers();
+            setMessage(adminMessage, "Usuario eliminado correctamente.", "message-success");
+        }
+    });
+
+    loadAdminUsers();
+}
+
+function handleProfilePage() {
+    const profileForm = document.querySelector("#profile-form");
+    const passwordForm = document.querySelector("#password-form");
+    if (!profileForm || !passwordForm) return;
+
+    const profileName = document.querySelector("[data-user-name]");
+    const profileEmail = document.querySelector("[data-user-email]");
+    const profileRole = document.querySelector("[data-user-role]");
+    const profileBirthDate = document.querySelector("[data-user-birthdate]");
+    const profileObjective = document.querySelector("[data-user-objective]");
+    const profileMessage = document.querySelector("#profile-message");
+    const passwordMessage = document.querySelector("#password-message");
+
+    const nameInput = document.querySelector("#profile-name");
+    const birthDateInput = document.querySelector("#profile-birthDate");
+    const ageInput = document.querySelector("#profile-age");
+    const practiceDeporteInput = document.querySelector("#profile-practiceDeporte");
+    const typeDeporteInput = document.querySelector("#profile-typeDeporte");
+    const objectiveInput = document.querySelector("#profile-objectivePersonal");
+    const levelInput = document.querySelector("#profile-level");
+    const infoInput = document.querySelector("#profile-infoAdicional");
+    const currentPasswordInput = document.querySelector("#current-password");
+    const newPasswordInput = document.querySelector("#new-password");
+    const confirmNewPasswordInput = document.querySelector("#confirm-new-password");
+
+    async function refreshProfileData() {
+        clearMessage(profileMessage);
+        const result = await tryFetchProfile();
+        if (result.success) {
+            updateProfileUI(result.user);
+            fillProfileForm(result.user);
+            return;
+        }
+
+        if (result.fallback) {
+            const localUser = getLoggedUser();
+            if (localUser) {
+                updateProfileUI(localUser);
+                fillProfileForm(localUser);
+            }
+            return;
+        }
+
+        setMessage(profileMessage, result.error || "No se pudo cargar el perfil.", "message-error");
+    }
+
+    function updateProfileUI(user) {
+        if (profileName) profileName.textContent = user.name;
+        if (profileEmail) profileEmail.textContent = user.user;
+        if (profileRole) profileRole.textContent = user.role;
+        if (profileBirthDate) profileBirthDate.textContent = formatDate(user.birthDate);
+        if (profileObjective) profileObjective.textContent = user.objectivePersonal || "Sin objetivos definidos.";
+    }
+
+    function fillProfileForm(user) {
+        nameInput.value = user.name || "";
+        birthDateInput.value = user.birthDate || "";
+        ageInput.value = user.age || "";
+        practiceDeporteInput.checked = !!user.practiceDeporte;
+        typeDeporteInput.value = user.typeDeporte || "";
+        objectiveInput.value = user.objectivePersonal || "";
+        levelInput.value = user.level || "";
+        infoInput.value = user.infoAdicional || "";
+    }
+
+    profileForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        clearInputErrors(profileForm);
+        clearMessage(profileMessage);
+
+        const payload = {
+            name: nameInput.value.trim(),
+            birthDate: birthDateInput.value,
+            age: ageInput.value ? Number(ageInput.value) : null,
+            practiceDeporte: practiceDeporteInput.checked,
+            typeDeporte: typeDeporteInput.value.trim(),
+            objectivePersonal: objectiveInput.value.trim(),
+            level: levelInput.value,
+            infoAdicional: infoInput.value.trim()
+        };
+
+        if (!payload.name) {
+            setInputError(nameInput, "El nombre es obligatorio.");
+            return;
+        }
+
+        if (getAuthToken()) {
+            const result = await tryUpdateProfile(payload);
+            if (result.success) {
+                saveSession({ user: { name: result.user.name, user: normalizeEmail(result.user.user), role: result.user.role }, token: getAuthToken() });
+                updateProfileUI(result.user);
+                setMessage(profileMessage, "Perfil actualizado correctamente.", "message-success");
+                return;
+            }
+            setMessage(profileMessage, result.error || "No se pudo actualizar el perfil.", "message-error");
+            return;
+        }
+
+        const localUser = performLocalProfileUpdate(payload, profileMessage);
+        if (localUser) {
+            updateProfileUI(localUser);
+            setMessage(profileMessage, "Perfil actualizado localmente.", "message-success");
+        }
+    });
+
+    passwordForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        clearInputErrors(passwordForm);
+        clearMessage(passwordMessage);
+
+        const currentPassword = currentPasswordInput.value.trim();
+        const newPassword = newPasswordInput.value.trim();
+        const confirmPassword = confirmNewPasswordInput.value.trim();
+
+        if (!currentPassword) {
+            setInputError(currentPasswordInput, "Debes ingresar la contraseña actual.");
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            setInputError(newPasswordInput, "La nueva contraseña debe tener al menos 8 caracteres.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setInputError(confirmNewPasswordInput, "Las contraseñas no coinciden.");
+            return;
+        }
+
+        if (getAuthToken()) {
+            const result = await tryChangePassword({ currentPassword, newPassword, confirmPassword });
+            if (result.success) {
+                passwordForm.reset();
+                setMessage(passwordMessage, result.message || "Contraseña actualizada correctamente.", "message-success");
+                return;
+            }
+            setMessage(passwordMessage, result.error || "No se pudo cambiar la contraseña.", "message-error");
+            return;
+        }
+
+        const localSuccess = performLocalPasswordChange(currentPassword, newPassword, confirmPassword, passwordMessage);
+        if (localSuccess) {
+            passwordForm.reset();
+            setMessage(passwordMessage, "Contraseña actualizada localmente.", "message-success");
+        }
+    });
+
+    refreshProfileData();
 }
 
 function handleDashboardPage() {
@@ -357,7 +962,7 @@ function handleDashboardPage() {
     document.querySelectorAll("[data-logout]").forEach(function (button) {
         button.addEventListener("click", function (event) {
             event.preventDefault();
-            localStorage.removeItem("user");
+            clearSession();
             window.location.href = "login.html";
         });
     });
@@ -367,5 +972,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeUsersStore();
     handleLoginPage();
     handleRegisterPage();
+    handleAdminPage();
+    handleProfilePage();
     handleDashboardPage();
 });
