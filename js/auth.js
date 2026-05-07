@@ -156,8 +156,8 @@ function performLocalRegister(payload, messageElement) {
         return null;
     }
 
-    if (payload.password.length < 4) {
-        setMessage(messageElement, "La contraseña debe tener al menos 4 caracteres.", "message-error");
+    if (payload.password.length < 8) {
+        setMessage(messageElement, "La contraseña debe tener al menos 8 caracteres.", "message-error");
         return null;
     }
 
@@ -291,8 +291,8 @@ function handleRegisterPage() {
             return;
         }
 
-        if (payload.password.length < 4) {
-            setMessage(messageElement, "La contraseña debe tener al menos 4 caracteres.", "message-error");
+        if (payload.password.length < 8) {
+            setMessage(messageElement, "La contraseña debe tener al menos 8 caracteres.", "message-error");
             return;
         }
 

@@ -79,8 +79,8 @@ app.post("/api/auth/register", (req, res) => {
     return res.status(400).json({ error: "Debes completar correo y contraseña." });
   }
 
-  if (password.length < 4) {
-    return res.status(400).json({ error: "La contraseña debe tener al menos 4 caracteres." });
+  if (password.length < 8) {
+    return res.status(400).json({ error: "La contraseña debe tener al menos 8 caracteres." });
   }
 
   const users = loadUsers();
