@@ -22,6 +22,7 @@
                     <a href="dashboard_usuario.html#clases">Clases</a>
                     <a href="dashboard_usuario.html#reservas">Reservas</a>
                     <a href="dashboard_usuario.html#progreso">Mi progreso</a>
+                    <a href="dashboard_usuario.html#perfil" aria-current="page">Perfil</a>
                 </nav>
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
@@ -41,16 +42,97 @@
             <section class="sketch-grid-user" aria-label="Panel principal usuario">
                 <article id="perfil" class="card card-pad card-dash sketch-card sketch-card--profile">
                     <h3>Mi perfil</h3>
+                    <p class="muted">Gestiona tu información personal y actualiza tu perfil cuando lo necesites.</p>
                     <div class="sketch-profile">
                         <div class="avatar-circle"></div>
                         <p><strong>Nombre:</strong> <span data-user-name>Usuario</span></p>
                         <p><strong>Email:</strong> <span data-user-email>correo@sportclub.cl</span></p>
+                        <p><strong>Rol:</strong> <span data-user-role>user</span></p>
+                        <p><strong>Fecha de nacimiento:</strong> <span data-user-birthdate>---</span></p>
                         <p><strong>Objetivos personales:</strong></p>
                         <ul>
-                            <li>Mejorar resistencia</li>
-                            <li>Subir fuerza</li>
+                            <li data-user-objective>Mejorar resistencia</li>
                         </ul>
                     </div>
+                </article>
+
+                <article id="profile-edit-section" class="card card-pad sketch-card">
+                    <h3>Editar Perfil</h3>
+                    <p class="muted">Actualiza tus datos personales. Tu email y rol no se pueden cambiar desde aquí.</p>
+                    <form id="profile-form" novalidate>
+                        <div class="form-group">
+                            <label for="profile-name">Nombre completo</label>
+                            <input type="text" id="profile-name" name="name" placeholder="Tu nombre completo">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-birthDate">Fecha de nacimiento</label>
+                            <input type="date" id="profile-birthDate" name="birthDate">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-age">Edad</label>
+                            <input type="number" id="profile-age" name="age" min="12" max="120" placeholder="Ej. 28">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="profile-practiceDeporte" name="practiceDeporte" value="si">
+                                ¿Practicas deporte?
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-typeDeporte">Tipo de deporte</label>
+                            <input type="text" id="profile-typeDeporte" name="typeDeporte" placeholder="Ej. running, natación…">
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-objectivePersonal">Objetivo personal</label>
+                            <input type="text" id="profile-objectivePersonal" name="objectivePersonal" placeholder="Ej. mejorar resistencia">
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-level">Nivel</label>
+                            <select id="profile-level" name="level">
+                                <option value="" selected>Selecciona una opción</option>
+                                <option value="principiante">Principiante</option>
+                                <option value="intermedio">Intermedio</option>
+                                <option value="avanzado">Avanzado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-infoAdicional">Información adicional</label>
+                            <textarea id="profile-infoAdicional" name="infoAdicional" placeholder="Lesiones, horarios preferidos, comentarios…"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        </div>
+                        <p id="profile-message" class="message is-hidden" role="status" aria-live="polite"></p>
+                    </form>
+                </article>
+
+                <article id="password-change-section" class="card card-pad sketch-card">
+                    <h3>Cambiar contraseña</h3>
+                    <p class="muted">Asegúrate de usar una contraseña segura de al menos 8 caracteres.</p>
+                    <form id="password-form" novalidate>
+                        <div class="form-group">
+                            <label for="current-password">Contraseña actual</label>
+                            <input type="password" id="current-password" name="currentPassword" placeholder="Contraseña actual">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Nueva contraseña</label>
+                            <input type="password" id="new-password" name="newPassword" placeholder="Nueva contraseña">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-new-password">Confirmar nueva contraseña</label>
+                            <input type="password" id="confirm-new-password" name="confirmPassword" placeholder="Repite la nueva contraseña">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Guardar contraseña</button>
+                        </div>
+                        <p id="password-message" class="message is-hidden" role="status" aria-live="polite"></p>
+                    </form>
                 </article>
 
                 <article id="progreso" class="card card-pad card-dash sketch-card sketch-card--progress">

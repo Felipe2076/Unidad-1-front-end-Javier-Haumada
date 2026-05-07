@@ -958,6 +958,98 @@ main.wrap {
     gap: 8px;
 }
 
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+}
+
+.badge-user {
+    background: #16a34a;
+}
+
+.badge-coach {
+    background: #2563eb;
+}
+
+.badge-admin {
+    background: #be185d;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 18px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.admin-table th,
+.admin-table td {
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.admin-table th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(46, 26, 71, 0.04);
+}
+
+.admin-action-button {
+    min-width: 88px;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.input-error {
+    margin-top: 8px;
+    font-size: 0.88rem;
+    color: #b91c1c;
+    min-height: 1.25rem;
+}
+
+.input-invalid {
+    border-color: #dc2626 !important;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+    .admin-table {
+        min-width: 100%;
+    }
+}
+
 .sketch-action-list li {
     display: flex;
     justify-content: space-between;
