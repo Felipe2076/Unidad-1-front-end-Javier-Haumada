@@ -1044,6 +1044,116 @@ main.wrap {
     margin-top: 18px;
 }
 
+.dashboard-sketch .form-group {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 7px;
+    margin-bottom: 16px;
+}
+
+.dashboard-sketch .form-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #1f2937;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.dashboard-sketch input[type="email"],
+.dashboard-sketch input[type="password"],
+.dashboard-sketch input[type="text"],
+.dashboard-sketch input[type="number"],
+.dashboard-sketch input[type="date"],
+.dashboard-sketch select,
+.dashboard-sketch textarea {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(100, 116, 139, 0.24);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.82);
+    color: #111827;
+    font: inherit;
+    font-size: 0.94rem;
+    line-height: 1.3;
+    padding: 11px 13px;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 22px rgba(37, 99, 235, 0.05);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.dashboard-sketch textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
+.dashboard-sketch input::placeholder,
+.dashboard-sketch textarea::placeholder {
+    color: #94a3b8;
+}
+
+.dashboard-sketch input:focus,
+.dashboard-sketch select:focus,
+.dashboard-sketch textarea:focus {
+    border-color: var(--role-accent);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--role-accent) 16%, transparent), 0 14px 28px rgba(37, 99, 235, 0.1);
+}
+
+.dashboard-sketch input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--role-accent);
+    margin: 0;
+}
+
+.dashboard-sketch .form-group label:has(input[type="checkbox"]) {
+    width: fit-content;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.16);
+}
+
+.dashboard-sketch .form-actions {
+    position: relative;
+    z-index: 1;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.dashboard-sketch .form-actions .btn {
+    min-height: 46px;
+    padding-inline: 22px;
+}
+
+#profile-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+}
+
+#profile-form .form-group {
+    margin-bottom: 0;
+}
+
+#profile-form .form-group:has(#profile-name),
+#profile-form .form-group:has(#profile-infoAdicional),
+#profile-form .form-actions,
+#profile-form #profile-message {
+    grid-column: 1 / -1;
+}
+
+#password-form {
+    display: grid;
+    gap: 14px;
+}
+
+#password-form .form-group {
+    margin-bottom: 0;
+}
+
 @media (max-width: 900px) {
     .admin-table {
         min-width: 100%;
@@ -1697,6 +1807,10 @@ main.wrap {
 }
 
 @media (max-width: 640px) {
+    #profile-form {
+        grid-template-columns: 1fr;
+    }
+
     .classes-grid {
         grid-template-columns: 1fr;
     }
