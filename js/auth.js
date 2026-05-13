@@ -17,6 +17,10 @@ const roleRedirects = {
     admin: "dashboard_admin.html"
 };
 
+function redirectToDashboard(role) {
+    window.location.href = roleRedirects[role] || roleRedirects.user;
+}
+
 function normalizeEmail(value) {
     return String(value || "").trim().toLowerCase();
 }
@@ -817,6 +821,8 @@ function handleProfilePage() {
     const passwordForm = document.querySelector("#password-form");
     if (!profileForm || !passwordForm) return;
 
+    const profileEditSection = document.querySelector("#profile-edit-section");
+    const passwordChangeSection = document.querySelector("#password-change-section");
     const profileName = document.querySelector("[data-user-name]");
     const profileEmail = document.querySelector("[data-user-email]");
     const profileRole = document.querySelector("[data-user-role]");
@@ -836,6 +842,26 @@ function handleProfilePage() {
     const currentPasswordInput = document.querySelector("#current-password");
     const newPasswordInput = document.querySelector("#new-password");
     const confirmNewPasswordInput = document.querySelector("#confirm-new-password");
+
+    function openProfilePanel(panelName) {
+        const targetSection = panelName === "password" ? passwordChangeSection : profileEditSection;
+        const otherSection = panelName === "password" ? profileEditSection : passwordChangeSection;
+
+        if (!targetSection || !otherSection) {
+            return;
+        }
+
+        otherSection.classList.add("is-hidden");
+        targetSection.classList.remove("is-hidden");
+        targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.querySelectorAll("[data-profile-action]").forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            openProfilePanel(button.dataset.profileAction);
+        });
+    });
 
     async function refreshProfileData() {
         clearMessage(profileMessage);

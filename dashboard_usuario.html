@@ -26,7 +26,7 @@
                 </nav>
 
                 <div class="topbar-actions" aria-label="Acciones de cuenta">
-                    <a class="btn btn-ghost" href="dashboard_usuario.html#perfil">Editar perfil</a>
+                    <a class="btn btn-ghost" href="dashboard_usuario.html#profile-edit-section" data-profile-action="edit">Editar perfil</a>
                     <a class="btn btn-primary" href="login.html" data-logout>Cerrar sesión</a>
                 </div>
             </div>
@@ -54,9 +54,13 @@
                             <li data-user-objective>Mejorar resistencia</li>
                         </ul>
                     </div>
+                    <div class="profile-actions">
+                        <a class="btn btn-ghost" href="dashboard_usuario.html#profile-edit-section" data-profile-action="edit">Editar perfil</a>
+                        <a class="btn btn-ghost" href="dashboard_usuario.html#password-change-section" data-profile-action="password">Cambiar contraseña</a>
+                    </div>
                 </article>
 
-                <article id="profile-edit-section" class="card card-pad sketch-card">
+                <article id="profile-edit-section" class="card card-pad sketch-card is-hidden">
                     <h3>Editar Perfil</h3>
                     <p class="muted">Actualiza tus datos personales. Tu email y rol no se pueden cambiar desde aquí.</p>
                     <form id="profile-form" novalidate>
@@ -109,7 +113,7 @@
                     </form>
                 </article>
 
-                <article id="password-change-section" class="card card-pad sketch-card">
+                <article id="password-change-section" class="card card-pad sketch-card is-hidden">
                     <h3>Cambiar contraseña</h3>
                     <p class="muted">Asegúrate de usar una contraseña segura de al menos 8 caracteres.</p>
                     <form id="password-form" novalidate>
