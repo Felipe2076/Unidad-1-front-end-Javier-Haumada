@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE_URL = window.location.port === '3000' ? '/api' : 'http://localhost:3000/api';
+    const SESSION_STORAGE_KEY = 'sportclub_session';
     const form = document.getElementById('login-form');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
@@ -38,6 +40,22 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'dashboard_usuario.html';
     }
 
+    function saveSession(user, token) {
+        const session = {
+            user: {
+                name: user.name,
+                user: String(user.user || '').trim().toLowerCase(),
+                role: user.role
+            },
+            token
+        };
+
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('userName', user.name);
+    }
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         resetValidation();
@@ -65,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -75,13 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             if (!response.ok) {
-                showMessage(data.message || 'No se pudo iniciar sesión. Revisa tus credenciales.');
+                showMessage(data.error || data.message || 'No se pudo iniciar sesión. Revisa tus credenciales.');
                 return;
             }
 
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('userRole', data.user.role);
-            localStorage.setItem('userName', data.user.name);
+            saveSession(data.user, data.token);
             redirectByRole(data.user.role);
         } catch (error) {
             showMessage('Error de conexión. Intenta de nuevo más tarde.');

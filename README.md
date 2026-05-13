@@ -44,6 +44,31 @@ El proyecto ahora incluye un backend simple para login y registro y se ejecuta e
 3. Ejecuta `npm start`
 4. Luego usa `login.html` y `register.html` desde el frontend
 
+También puedes abrir la app desde el mismo backend en:
+
+- `http://localhost:3000/index.html`
+- `http://localhost:3000/login.html`
+
+## Usuarios demo
+
+- Admin: `admin1@sportclub.cl` / `admin1234`
+- Coach: `coach1@sportclub.cl` / `coach1234`
+- Usuario: `user1@sportclub.cl` / `demo1234`
+
+## Evidencias de prueba para entrega
+
+Fecha de verificación: 13/05/2026.
+
+- Login correcto con usuario demo y redirección según rol.
+- CRUD de usuarios disponible desde el dashboard de administrador.
+- Perfil de usuario editable y cambio de contraseña conectado a la API.
+- Backend endurecido con contraseñas hasheadas, sesiones con expiración, validación de roles y protección básica contra intentos repetidos de login.
+
+Evidencia documentada en el repositorio:
+
+- `docs/evidencias/evidencia-entrega.md`
+- `docs/evidencias/prueba-login-brave.png`
+
 ## Requerimientos Cumplidos
 
 - Estructura semántica HTML5

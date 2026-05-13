@@ -3,7 +3,6 @@
     "id": 1,
     "name": "Usuario Demo",
     "user": "user1@sportclub.cl",
-    "password": "demo1234",
     "role": "user",
     "age": 28,
     "birthDate": "1995-02-12",
@@ -12,13 +11,13 @@
     "objectivePersonal": "Mejorar resistencia",
     "level": "intermedio",
     "infoAdicional": "Prefiere clases por la tarde.",
-    "createdAt": "2025-05-10T10:00:00.000Z"
+    "createdAt": "2025-05-10T10:00:00.000Z",
+    "passwordHash": "pbkdf2_sha256$120000$5244a85ec7ccba2b9c31e5d539529954$9bbd4212585f1daa98378ede0f6062d1a32fee192723f19e514cea31fcbc3722b3b32a309cc21af752cb345d8523f722011b1d8c0903f2b3b21aac965e0daf06"
   },
   {
     "id": 2,
     "name": "Coach Demo",
     "user": "coach1@sportclub.cl",
-    "password": "coach1234",
     "role": "coach",
     "age": 34,
     "birthDate": "1990-08-21",
@@ -27,13 +26,13 @@
     "objectivePersonal": "Guiar a atletas",
     "level": "avanzado",
     "infoAdicional": "Coach de fuerza y resistencia.",
-    "createdAt": "2025-05-10T12:30:00.000Z"
+    "createdAt": "2025-05-10T12:30:00.000Z",
+    "passwordHash": "pbkdf2_sha256$120000$03eb7869df7fe808f244856661d9d78c$26356b4d4d0fd7a687919ab538ae8984e540d80fc11a40531f49399dce7f5a6439713837808fd5b7a6d13180836f3cd10a39269edb5bf6aebade958472306373"
   },
   {
     "id": 3,
     "name": "Admin Demo",
     "user": "admin1@sportclub.cl",
-    "password": "admin1234",
     "role": "admin",
     "age": 31,
     "birthDate": "1992-03-14",
@@ -42,6 +41,7 @@
     "objectivePersonal": "Administrar el club",
     "level": "",
     "infoAdicional": "Cuenta de administración.",
-    "createdAt": "2025-05-10T14:45:00.000Z"
+    "createdAt": "2025-05-10T14:45:00.000Z",
+    "passwordHash": "pbkdf2_sha256$120000$dd4cefe4fcda14aa9eace1af2f9ede13$79704c516aa12a6bb3163db8b6000aa9007022e4e60e65a142f1d850555426b60aef44cbfb58e42295f7f1b33ad826685686d5a8b076c097c4a35202daee9580"
   }
 ]

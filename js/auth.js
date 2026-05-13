@@ -134,6 +134,18 @@ function formatDate(value) {
     return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 }
 
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (character) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[character];
+    });
+}
+
 async function apiRequest(endpoint, method = "GET", payload = null, requireAuth = false) {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = {
@@ -424,7 +436,7 @@ function performLocalPasswordChange(currentPassword, newPassword, confirmPasswor
 
 function getRoleBadge(role) {
     const className = role === "admin" ? "badge-admin" : role === "coach" ? "badge-coach" : "badge-user";
-    return `<span class="badge ${className}">${role}</span>`;
+    return `<span class="badge ${className}">${escapeHTML(role)}</span>`;
 }
 
 function handleLoginPage() {
@@ -670,16 +682,21 @@ function handleAdminPage() {
 
         tableBody.innerHTML = users
             .map(function (user) {
+                const userId = escapeHTML(user.id);
+                const userName = escapeHTML(user.name);
+                const userEmail = escapeHTML(user.user);
+                const userCreatedAt = escapeHTML(formatDate(user.createdAt));
+
                 return `
                     <tr>
-                        <td>${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.user}</td>
+                        <td>${userId}</td>
+                        <td>${userName}</td>
+                        <td>${userEmail}</td>
                         <td>${getRoleBadge(user.role)}</td>
-                        <td>${formatDate(user.createdAt)}</td>
+                        <td>${userCreatedAt}</td>
                         <td>
-                            <button type="button" data-edit-id="${user.id}" class="btn btn-ghost admin-action-button">Editar</button>
-                            <button type="button" data-delete-id="${user.id}" class="btn btn-danger admin-action-button">Eliminar</button>
+                            <button type="button" data-edit-id="${userId}" class="btn btn-ghost admin-action-button">Editar</button>
+                            <button type="button" data-delete-id="${userId}" class="btn btn-danger admin-action-button">Eliminar</button>
                         </td>
                     </tr>
                 `;

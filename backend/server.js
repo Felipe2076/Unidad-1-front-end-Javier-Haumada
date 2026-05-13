@@ -7,10 +7,41 @@ const crypto = require("crypto");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, "users.json");
+const FRONTEND_PATH = path.join(__dirname, "..");
+const PASSWORD_ALGORITHM = "pbkdf2_sha256";
+const PASSWORD_ITERATIONS = 120000;
+const PASSWORD_KEY_LENGTH = 64;
+const SESSION_TTL_MS = Number(process.env.SESSION_TTL_MS || 60 * 60 * 1000);
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_ATTEMPTS = 5;
+const ALLOWED_ROLES = new Set(["user", "coach", "admin"]);
 const sessions = new Map();
+const loginAttempts = new Map();
 
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5500,http://127.0.0.1:5500,null")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Origen no permitido por CORS."));
+  }
+}));
+app.use(express.json({ limit: "10kb" }));
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  next();
+});
+app.use("/css", express.static(path.join(FRONTEND_PATH, "css")));
+app.use("/js", express.static(path.join(FRONTEND_PATH, "js")));
+app.use("/img", express.static(path.join(FRONTEND_PATH, "img")));
 
 function normalizeEmail(value) {
   return String(value || "").trim().toLowerCase();
@@ -25,6 +56,60 @@ function parseBoolean(value) {
   return value === true || value === "si" || value === "true";
 }
 
+function normalizeRole(value, fallback = "user") {
+  return String(value || fallback).trim().toLowerCase();
+}
+
+function isAllowedRole(role) {
+  return ALLOWED_ROLES.has(role);
+}
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
+  const hash = crypto
+    .pbkdf2Sync(String(password || ""), salt, PASSWORD_ITERATIONS, PASSWORD_KEY_LENGTH, "sha256")
+    .toString("hex");
+  return `${PASSWORD_ALGORITHM}$${PASSWORD_ITERATIONS}$${salt}$${hash}`;
+}
+
+function timingSafeHexCompare(left, right) {
+  const leftBuffer = Buffer.from(left, "hex");
+  const rightBuffer = Buffer.from(right, "hex");
+
+  if (leftBuffer.length !== rightBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function verifyPasswordHash(password, passwordHash) {
+  const [algorithm, iterationsValue, salt, storedHash] = String(passwordHash || "").split("$");
+  const iterations = Number(iterationsValue);
+
+  if (algorithm !== PASSWORD_ALGORITHM || !Number.isInteger(iterations) || !salt || !storedHash) {
+    return false;
+  }
+
+  const candidateHash = crypto
+    .pbkdf2Sync(String(password || ""), salt, iterations, PASSWORD_KEY_LENGTH, "sha256")
+    .toString("hex");
+
+  return timingSafeHexCompare(candidateHash, storedHash);
+}
+
+function setUserPassword(user, password) {
+  user.passwordHash = hashPassword(password);
+  delete user.password;
+}
+
+function verifyUserPassword(user, password) {
+  if (user.passwordHash) {
+    return verifyPasswordHash(password, user.passwordHash);
+  }
+
+  return typeof user.password === "string" && user.password === password;
+}
+
 function loadUsers() {
   try {
     const raw = fs.readFileSync(DB_PATH, "utf8");
@@ -37,6 +122,22 @@ function loadUsers() {
 
 function saveUsers(users) {
   fs.writeFileSync(DB_PATH, JSON.stringify(users, null, 2), "utf8");
+}
+
+function migrateLegacyPasswords() {
+  const users = loadUsers();
+  let changed = false;
+
+  users.forEach((user) => {
+    if (user.password && !user.passwordHash) {
+      setUserPassword(user, user.password);
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    saveUsers(users);
+  }
 }
 
 function getNextUserId(users) {
@@ -65,10 +166,12 @@ function sanitizeUser(user) {
 
 function createToken(user) {
   const token = crypto.randomUUID();
+  const now = Date.now();
   sessions.set(token, {
     userId: user.id,
     role: user.role,
-    issuedAt: Date.now()
+    issuedAt: now,
+    expiresAt: now + SESSION_TTL_MS
   });
   return token;
 }
@@ -77,7 +180,18 @@ function getSessionFromToken(token) {
   if (!token) {
     return null;
   }
-  return sessions.get(token);
+  const session = sessions.get(token);
+
+  if (!session) {
+    return null;
+  }
+
+  if (session.expiresAt <= Date.now()) {
+    sessions.delete(token);
+    return null;
+  }
+
+  return session;
 }
 
 function authMiddleware(req, res, next) {
@@ -112,6 +226,48 @@ function validatePassword(password) {
   return String(password || "").trim().length >= 8;
 }
 
+function getLoginAttemptKey(req, email) {
+  return `${req.ip}:${email}`;
+}
+
+function getLoginAttempt(key) {
+  const attempt = loginAttempts.get(key);
+
+  if (!attempt || attempt.resetAt <= Date.now()) {
+    loginAttempts.delete(key);
+    return null;
+  }
+
+  return attempt;
+}
+
+function isLoginBlocked(key) {
+  const attempt = getLoginAttempt(key);
+  return Boolean(attempt && attempt.count >= LOGIN_MAX_ATTEMPTS);
+}
+
+function recordFailedLogin(key) {
+  const attempt = getLoginAttempt(key) || { count: 0, resetAt: Date.now() + LOGIN_WINDOW_MS };
+  attempt.count += 1;
+  loginAttempts.set(key, attempt);
+}
+
+function clearLoginAttempts(key) {
+  loginAttempts.delete(key);
+}
+
+function sendFrontendPage(res, fileName) {
+  res.sendFile(path.join(FRONTEND_PATH, fileName));
+}
+
+app.get(["/", "/index.html"], (req, res) => {
+  sendFrontendPage(res, "index.html");
+});
+
+app.get(["/login.html", "/register.html", "/recover.html", "/dashboard_usuario.html", "/dashboard_coach.html", "/dashboard_admin.html"], (req, res) => {
+  sendFrontendPage(res, path.basename(req.path));
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
@@ -124,13 +280,26 @@ app.post("/api/auth/login", (req, res) => {
     return res.status(400).json({ error: "Debes enviar correo y contraseña." });
   }
 
+  const attemptKey = getLoginAttemptKey(req, email);
+
+  if (isLoginBlocked(attemptKey)) {
+    return res.status(429).json({ error: "Demasiados intentos fallidos. Intenta nuevamente en unos minutos." });
+  }
+
   const users = loadUsers();
   const foundUser = users.find((user) => normalizeEmail(user.user) === email);
 
-  if (!foundUser || foundUser.password !== password) {
+  if (!foundUser || !verifyUserPassword(foundUser, password)) {
+    recordFailedLogin(attemptKey);
     return res.status(401).json({ error: "Credenciales incorrectas." });
   }
 
+  if (foundUser.password && !foundUser.passwordHash) {
+    setUserPassword(foundUser, password);
+    saveUsers(users);
+  }
+
+  clearLoginAttempts(attemptKey);
   const token = createToken(foundUser);
   res.json({ user: sanitizeUser(foundUser), token });
 });
@@ -175,7 +344,6 @@ app.post("/api/auth/register", (req, res) => {
     id: getNextUserId(users),
     name: name || "Nuevo Usuario",
     user: email,
-    password,
     role: "user",
     age,
     birthDate,
@@ -187,6 +355,7 @@ app.post("/api/auth/register", (req, res) => {
     createdAt: new Date().toISOString()
   };
 
+  setUserPassword(newUser, password);
   users.push(newUser);
   saveUsers(users);
 
@@ -241,7 +410,7 @@ app.put("/api/auth/me/password", authMiddleware, (req, res) => {
     return res.status(400).json({ error: "Debes completar los tres campos de contraseña." });
   }
 
-  if (req.user.password !== currentPassword) {
+  if (!verifyUserPassword(req.user, currentPassword)) {
     return res.status(401).json({ error: "La contraseña actual es incorrecta." });
   }
 
@@ -260,7 +429,7 @@ app.put("/api/auth/me/password", authMiddleware, (req, res) => {
     return res.status(404).json({ error: "Usuario no encontrado." });
   }
 
-  currentUser.password = newPassword;
+  setUserPassword(currentUser, newPassword);
   saveUsers(users);
 
   res.json({ message: "Contraseña actualizada correctamente." });
@@ -287,7 +456,7 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
   const password = String(req.body.password || "").trim();
   const confirmPassword = String(req.body.confirmPassword || "").trim();
   const name = String(req.body.name || "").trim();
-  const role = String(req.body.role || "user").trim();
+  const role = normalizeRole(req.body.role);
   const age = req.body.age ? Number(req.body.age) : null;
   const birthDate = String(req.body.birthDate || "").trim();
   const practiceDeporte = parseBoolean(req.body.practiceDeporte);
@@ -302,6 +471,10 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
 
   if (!isValidEmail(email)) {
     return res.status(400).json({ error: "El correo electrónico no es válido." });
+  }
+
+  if (!isAllowedRole(role)) {
+    return res.status(400).json({ error: "El rol enviado no es válido." });
   }
 
   if (!validatePassword(password)) {
@@ -323,7 +496,6 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
     id: getNextUserId(users),
     name,
     user: email,
-    password,
     role,
     age,
     birthDate,
@@ -335,6 +507,7 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
     createdAt: new Date().toISOString()
   };
 
+  setUserPassword(newUser, password);
   users.push(newUser);
   saveUsers(users);
 
@@ -351,7 +524,7 @@ app.put("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
 
   const email = normalizeEmail(req.body.email || user.user);
   const name = String(req.body.name || user.name).trim();
-  const role = String(req.body.role || user.role).trim();
+  const role = normalizeRole(req.body.role || user.role);
   const age = req.body.age ? Number(req.body.age) : user.age || null;
   const birthDate = String(req.body.birthDate || user.birthDate).trim();
   const practiceDeporte = typeof req.body.practiceDeporte !== "undefined" ? parseBoolean(req.body.practiceDeporte) : user.practiceDeporte;
@@ -366,6 +539,10 @@ app.put("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
 
   if (!isValidEmail(email)) {
     return res.status(400).json({ error: "El correo electrónico no es válido." });
+  }
+
+  if (!isAllowedRole(role)) {
+    return res.status(400).json({ error: "El rol enviado no es válido." });
   }
 
   const emailTaken = users.some(
@@ -399,7 +576,7 @@ app.put("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
       return res.status(400).json({ error: "Las contraseñas no coinciden." });
     }
 
-    user.password = password;
+    setUserPassword(user, password);
   }
 
   saveUsers(users);
@@ -424,6 +601,8 @@ app.delete("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
 
   res.json({ success: true });
 });
+
+migrateLegacyPasswords();
 
 app.listen(PORT, () => {
   console.log(`SportClub backend API running on http://localhost:${PORT}`);
