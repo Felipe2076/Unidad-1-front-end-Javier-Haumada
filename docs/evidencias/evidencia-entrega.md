@@ -8,11 +8,11 @@ Rama de trabajo: `desarrollo`
 
 La aplicacion SportClub fue revisada con backend activo en `http://localhost:3000`, ejecutado desde `backend` con `npm start`.
 
-Usuarios demo disponibles:
+Usuarios demo utilizados para validacion:
 
-- Admin: `admin1@sportclub.cl` / `admin1234`
-- Coach: `coach1@sportclub.cl` / `coach1234`
-- Usuario: `user1@sportclub.cl` / `demo1234`
+- Admin demo
+- Coach demo
+- Usuario demo
 
 ## Evidencias en vivo
 

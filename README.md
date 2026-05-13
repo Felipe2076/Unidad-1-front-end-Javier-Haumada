@@ -49,12 +49,6 @@ También puedes abrir la app desde el mismo backend en:
 - `http://localhost:3000/index.html`
 - `http://localhost:3000/login.html`
 
-## Usuarios demo
-
-- Admin: `admin1@sportclub.cl` / `admin1234`
-- Coach: `coach1@sportclub.cl` / `coach1234`
-- Usuario: `user1@sportclub.cl` / `demo1234`
-
 ## Evidencias de prueba para entrega
 
 Fecha de verificación: 13/05/2026.
