@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SportClub - Dashboard Administrador</title>
+    <base href="/">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="role-admin dashboard-sketch" data-required-role="admin">
@@ -19,7 +20,7 @@
 
                 <nav class="nav" aria-label="Navegación de administrador">
                     <a href="dashboard_admin.html#inicio">Inicio</a>
-                    <a href="dashboard_admin.html#usuarios" aria-current="page">Usuarios</a>
+                    <a href="/admin/usuarios" aria-current="page">Usuarios</a>
                     <a href="dashboard_admin.html#estadisticas">Estadísticas</a>
                     <a href="dashboard_admin.html#configuracion">Configuración</a>
                 </nav>
@@ -50,14 +51,18 @@
                         </button>
                     </div>
                     <p id="admin-message" class="message is-hidden" role="status" aria-live="polite"></p>
-                    <div class="table-responsive">
+                    <div class="table-responsive" aria-label="Ver perfiles">
                         <table class="admin-table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Nombre completo</th>
+                                    <th>Apellido paterno</th>
+                                    <th>Apellido materno</th>
                                     <th>Email</th>
                                     <th>Rol</th>
+                                    <th>Nivel</th>
+                                    <th>Salud</th>
                                     <th>Fecha registro</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -74,6 +79,18 @@
                                 <label for="admin-name">Nombre completo</label>
                                 <input type="text" id="admin-name" name="name" placeholder="Nombre del usuario">
                                 <p class="input-error"></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-firstName">Nombre</label>
+                                <input type="text" id="admin-firstName" name="firstName" placeholder="Nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-lastNamePaternal">Apellido paterno</label>
+                                <input type="text" id="admin-lastNamePaternal" name="lastNamePaternal" placeholder="Apellido paterno">
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-lastNameMaternal">Apellido materno</label>
+                                <input type="text" id="admin-lastNameMaternal" name="lastNameMaternal" placeholder="Apellido materno">
                             </div>
                             <div class="form-group">
                                 <label for="admin-email">Email</label>
@@ -133,6 +150,10 @@
                             <div class="form-group">
                                 <label for="admin-infoAdicional">Información adicional</label>
                                 <textarea id="admin-infoAdicional" name="infoAdicional" placeholder="Lesiones, horarios preferidos, comentarios…"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-healthCondition">Condición de salud</label>
+                                <textarea id="admin-healthCondition" name="healthCondition" placeholder="Problemas de salud, lesiones o restricciones médicas"></textarea>
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary" id="admin-user-form-submit">Guardar usuario</button>

@@ -25,6 +25,15 @@ function normalizeEmail(value) {
     return String(value || "").trim().toLowerCase();
 }
 
+function buildFullName(firstName, lastNamePaternal, lastNameMaternal) {
+    return [firstName, lastNamePaternal, lastNameMaternal]
+        .map(function (value) {
+            return String(value || "").trim();
+        })
+        .filter(Boolean)
+        .join(" ");
+}
+
 function getSession() {
     const stored = localStorage.getItem(SESSION_STORAGE_KEY);
     if (!stored) {
@@ -337,17 +346,21 @@ function performLocalRegister(payload, messageElement) {
     }
 
     const newUser = {
-        name: payload.name || "Nuevo usuario",
+        name: payload.name || buildFullName(payload.firstName, payload.lastNamePaternal, payload.lastNameMaternal) || "Nuevo usuario",
+        firstName: payload.firstName || "",
+        lastNamePaternal: payload.lastNamePaternal || "",
+        lastNameMaternal: payload.lastNameMaternal || "",
         user: payload.email,
         password: payload.password,
         role: "user",
         age: payload.age,
         birthDate: payload.birthDate || "",
-        practiceDeporte: payload.practiceDeporte === true,
+        practiceDeporte: payload.practiceDeporte === true || payload.practiceDeporte === "si",
         typeDeporte: payload.typeDeporte || "",
         objectivePersonal: payload.objectivePersonal || "",
         level: payload.level || "",
-        infoAdicional: payload.infoAdicional || ""
+        healthCondition: payload.healthCondition || payload.infoAdicional || "",
+        infoAdicional: payload.infoAdicional || payload.healthCondition || ""
     };
 
     users.push(newUser);
@@ -518,7 +531,10 @@ function handleRegisterPage() {
     const emailInput = document.querySelector("#email");
     const passwordInput = document.querySelector("#password");
     const confirmPasswordInput = document.querySelector("#confirmPassword");
-    const nameInput = document.querySelector("#name");
+    const firstNameInput = document.querySelector("#firstName");
+    const lastNamePaternalInput = document.querySelector("#lastNamePaternal");
+    const lastNameMaternalInput = document.querySelector("#lastNameMaternal");
+    const legacyNameInput = document.querySelector("#name");
     const ageInput = document.querySelector("#age");
     const birthDateInput = document.querySelector("#birthDate");
     const practiceDeporteInput = document.querySelector("#practiceDeporte");
@@ -526,25 +542,68 @@ function handleRegisterPage() {
     const objectivePersonalInput = document.querySelector("#objectivePersonal");
     const levelInput = document.querySelector("#level");
     const infoAdicionalInput = document.querySelector("#infoAdicional");
+    const healthConditionInput = document.querySelector("#healthCondition");
     const messageElement = document.querySelector("#register-message");
+
+    if (practiceDeporteInput && levelInput) {
+        practiceDeporteInput.addEventListener("change", function () {
+            if (practiceDeporteInput.value === "no") {
+                levelInput.value = "principiante";
+            }
+        });
+    }
 
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
         clearInputErrors(form);
 
+        const firstName = firstNameInput ? firstNameInput.value.trim() : "";
+        const lastNamePaternal = lastNamePaternalInput ? lastNamePaternalInput.value.trim() : "";
+        const lastNameMaternal = lastNameMaternalInput ? lastNameMaternalInput.value.trim() : "";
+        const fullName = legacyNameInput ? legacyNameInput.value.trim() : buildFullName(firstName, lastNamePaternal, lastNameMaternal);
+
         const payload = {
             email: normalizeEmail(emailInput.value),
             password: String(passwordInput.value || "").trim(),
             confirmPassword: String(confirmPasswordInput.value || "").trim(),
-            name: String(nameInput.value || "").trim(),
+            name: fullName,
+            firstName,
+            lastNamePaternal,
+            lastNameMaternal,
             age: ageInput.value ? Number(ageInput.value) : null,
-            birthDate: String(birthDateInput.value || "").trim(),
-            practiceDeporte: practiceDeporteInput ? practiceDeporteInput.checked : false,
-            typeDeporte: String(typeDeporteInput.value || "").trim(),
-            objectivePersonal: String(objectivePersonalInput.value || "").trim(),
+            birthDate: birthDateInput ? String(birthDateInput.value || "").trim() : "",
+            practiceDeporte: practiceDeporteInput ? practiceDeporteInput.value : "",
+            typeDeporte: typeDeporteInput ? String(typeDeporteInput.value || "").trim() : "",
+            objectivePersonal: objectivePersonalInput ? String(objectivePersonalInput.value || "").trim() : "",
             level: String(levelInput.value || "").trim(),
-            infoAdicional: String(infoAdicionalInput.value || "").trim()
+            healthCondition: healthConditionInput ? String(healthConditionInput.value || "").trim() : "",
+            infoAdicional: infoAdicionalInput ? String(infoAdicionalInput.value || "").trim() : ""
         };
+
+        if (firstNameInput && !payload.firstName) {
+            setInputError(firstNameInput, "El nombre es obligatorio.");
+            return;
+        }
+
+        if (lastNamePaternalInput && !payload.lastNamePaternal) {
+            setInputError(lastNamePaternalInput, "El apellido paterno es obligatorio.");
+            return;
+        }
+
+        if (lastNameMaternalInput && !payload.lastNameMaternal) {
+            setInputError(lastNameMaternalInput, "El apellido materno es obligatorio.");
+            return;
+        }
+
+        if (!payload.age) {
+            setInputError(ageInput, "La edad es obligatoria.");
+            return;
+        }
+
+        if (payload.age < 12 || payload.age > 120) {
+            setInputError(ageInput, "La edad debe estar entre 12 y 120.");
+            return;
+        }
 
         if (!payload.email) {
             setInputError(emailInput, "El email es obligatorio.");
@@ -566,6 +625,21 @@ function handleRegisterPage() {
             return;
         }
 
+        if (practiceDeporteInput && !payload.practiceDeporte) {
+            setInputError(practiceDeporteInput, "Selecciona si haces deporte.");
+            return;
+        }
+
+        if (!payload.level) {
+            setInputError(levelInput, "Selecciona tu nivel actual.");
+            return;
+        }
+
+        if (healthConditionInput && !payload.healthCondition) {
+            setInputError(healthConditionInput, "Indica tu condicion de salud o escribe 'Ninguna'.");
+            return;
+        }
+
         const apiResult = await tryFetchRegister(payload);
 
         if (apiResult.success && apiResult.user) {
@@ -578,7 +652,7 @@ function handleRegisterPage() {
                 token: apiResult.token || null
             };
             saveSession(sessionUser);
-            setMessage(messageElement, "Cuenta creada correctamente. Redirigiendo...", "message-success");
+            setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al dashboard...", "message-success");
             window.setTimeout(function () {
                 redirectToDashboard(sessionUser.user.role);
             }, 700);
@@ -591,7 +665,7 @@ function handleRegisterPage() {
                 return;
             }
             saveSession({ user: sessionUser });
-            setMessage(messageElement, "Cuenta creada correctamente. Redirigiendo...", "message-success");
+            setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al dashboard...", "message-success");
             window.setTimeout(function () {
                 redirectToDashboard(sessionUser.role);
             }, 700);
@@ -601,7 +675,7 @@ function handleRegisterPage() {
         setMessage(messageElement, apiResult.error || "Ocurrió un error al registrarte.", "message-error");
     });
 
-    [emailInput, passwordInput, confirmPasswordInput, nameInput, ageInput, birthDateInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput].forEach(function (input) {
+    [emailInput, passwordInput, confirmPasswordInput, firstNameInput, lastNamePaternalInput, lastNameMaternalInput, legacyNameInput, ageInput, birthDateInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput, healthConditionInput].forEach(function (input) {
         if (!input) return;
         input.addEventListener("input", function () {
             clearMessage(messageElement);
@@ -628,6 +702,9 @@ function handleAdminPage() {
         return {
             id: editingUserId,
             name: document.querySelector("#admin-name").value.trim(),
+            firstName: document.querySelector("#admin-firstName").value.trim(),
+            lastNamePaternal: document.querySelector("#admin-lastNamePaternal").value.trim(),
+            lastNameMaternal: document.querySelector("#admin-lastNameMaternal").value.trim(),
             email: normalizeEmail(document.querySelector("#admin-email").value),
             role: document.querySelector("#admin-role").value,
             password: document.querySelector("#admin-password").value,
@@ -638,7 +715,8 @@ function handleAdminPage() {
             typeDeporte: document.querySelector("#admin-typeDeporte").value.trim(),
             objectivePersonal: document.querySelector("#admin-objectivePersonal").value.trim(),
             level: document.querySelector("#admin-level").value,
-            infoAdicional: document.querySelector("#admin-infoAdicional").value.trim()
+            infoAdicional: document.querySelector("#admin-infoAdicional").value.trim(),
+            healthCondition: document.querySelector("#admin-healthCondition").value.trim()
         };
     }
 
@@ -663,6 +741,9 @@ function handleAdminPage() {
         editingUserId = user.id;
         document.querySelector("#editing-user-id").value = user.id;
         document.querySelector("#admin-name").value = user.name || "";
+        document.querySelector("#admin-firstName").value = user.firstName || "";
+        document.querySelector("#admin-lastNamePaternal").value = user.lastNamePaternal || "";
+        document.querySelector("#admin-lastNameMaternal").value = user.lastNameMaternal || "";
         document.querySelector("#admin-email").value = user.user || "";
         document.querySelector("#admin-role").value = user.role || "user";
         document.querySelector("#admin-password").value = "";
@@ -674,13 +755,14 @@ function handleAdminPage() {
         document.querySelector("#admin-objectivePersonal").value = user.objectivePersonal || "";
         document.querySelector("#admin-level").value = user.level || "";
         document.querySelector("#admin-infoAdicional").value = user.infoAdicional || "";
+        document.querySelector("#admin-healthCondition").value = user.healthCondition || user.infoAdicional || "";
         updateFormTitle();
         adminFormSection.classList.remove("is-hidden");
     }
 
     function renderUsersTable(users) {
         if (!users || users.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan=6>No hay usuarios registrados.</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan=10>No hay usuarios registrados.</td></tr>";
             return;
         }
 
@@ -688,15 +770,23 @@ function handleAdminPage() {
             .map(function (user) {
                 const userId = escapeHTML(user.id);
                 const userName = escapeHTML(user.name);
+                const userLastNamePaternal = escapeHTML(user.lastNamePaternal || "-");
+                const userLastNameMaternal = escapeHTML(user.lastNameMaternal || "-");
                 const userEmail = escapeHTML(user.user);
                 const userCreatedAt = escapeHTML(formatDate(user.createdAt));
+                const userLevel = escapeHTML(user.level || "-");
+                const userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
 
                 return `
                     <tr>
                         <td>${userId}</td>
                         <td>${userName}</td>
+                        <td>${userLastNamePaternal}</td>
+                        <td>${userLastNameMaternal}</td>
                         <td>${userEmail}</td>
                         <td>${getRoleBadge(user.role)}</td>
+                        <td>${userLevel}</td>
+                        <td>${userHealth}</td>
                         <td>${userCreatedAt}</td>
                         <td>
                             <button type="button" data-edit-id="${userId}" class="btn btn-ghost admin-action-button">Editar</button>
@@ -885,9 +975,15 @@ function handleProfilePage() {
     }
 
     function updateProfileUI(user) {
-        if (profileName) profileName.textContent = user.name;
-        if (profileEmail) profileEmail.textContent = user.user;
-        if (profileRole) profileRole.textContent = user.role;
+        document.querySelectorAll("[data-user-name]").forEach(function (element) {
+            element.textContent = user.name;
+        });
+        document.querySelectorAll("[data-user-email]").forEach(function (element) {
+            element.textContent = user.user;
+        });
+        document.querySelectorAll("[data-user-role]").forEach(function (element) {
+            element.textContent = user.role;
+        });
         if (profileBirthDate) profileBirthDate.textContent = formatDate(user.birthDate);
         if (profileObjective) profileObjective.textContent = user.objectivePersonal || "Sin objetivos definidos.";
     }
@@ -921,6 +1017,10 @@ function handleProfilePage() {
 
         if (!payload.name) {
             setInputError(nameInput, "El nombre es obligatorio.");
+            return;
+        }
+
+        if (!window.confirm("Guardar cambios del perfil?")) {
             return;
         }
 
@@ -967,6 +1067,10 @@ function handleProfilePage() {
             return;
         }
 
+        if (!window.confirm("Guardar nueva contrasena?")) {
+            return;
+        }
+
         if (getAuthToken()) {
             const result = await tryChangePassword({ currentPassword, newPassword, confirmPassword });
             if (result.success) {
@@ -997,11 +1101,112 @@ function populateDashboard(loggedUser) {
         element.textContent = loggedUser.user;
     });
 
+    document.querySelectorAll("[data-user-role]").forEach(function (element) {
+        element.textContent = loggedUser.role;
+    });
+
     document.querySelectorAll("[data-logout]").forEach(function (button) {
         button.addEventListener("click", function (event) {
             event.preventDefault();
             clearSession();
             window.location.href = "login.html";
+        });
+    });
+}
+
+function normalizeAppPath(pathname) {
+    const path = pathname || window.location.pathname;
+
+    if (path === "/" || path.endsWith("/dashboard_usuario.html")) {
+        return "/dashboard_usuario.html";
+    }
+
+    if (path.endsWith("/clases")) return "/clases";
+    if (path.endsWith("/reservas")) return "/reservas";
+    if (path.endsWith("/progreso")) return "/progreso";
+    if (path.endsWith("/perfil/editar")) return "/perfil/editar";
+    if (path.endsWith("/admin/usuarios")) return "/admin/usuarios";
+    if (path.endsWith("/coach/reservas")) return "/coach/reservas";
+
+    return path;
+}
+
+function handleSpaRoutes() {
+    const views = Array.from(document.querySelectorAll("[data-view]"));
+    if (!views.length) return;
+
+    function getDefaultRoute() {
+        return views[0].dataset.view;
+    }
+
+    function setActiveRoute(route) {
+        const normalizedRoute = normalizeAppPath(route);
+        const targetRoute = views.some(function (view) {
+            return view.dataset.view === normalizedRoute;
+        }) ? normalizedRoute : getDefaultRoute();
+
+        views.forEach(function (view) {
+            view.classList.toggle("is-active", view.dataset.view === targetRoute);
+        });
+
+        document.querySelectorAll("[data-spa-nav] a, .topbar-actions [data-route]").forEach(function (link) {
+            if (link.dataset.route === targetRoute) {
+                link.setAttribute("aria-current", "page");
+            } else {
+                link.removeAttribute("aria-current");
+            }
+        });
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.querySelectorAll("[data-route]").forEach(function (link) {
+        link.addEventListener("click", function (event) {
+            const route = link.dataset.route;
+            if (!route) return;
+
+            event.preventDefault();
+            window.history.pushState({}, "", route);
+            setActiveRoute(route);
+        });
+    });
+
+    window.addEventListener("popstate", function () {
+        setActiveRoute(window.location.pathname);
+    });
+
+    setActiveRoute(window.location.pathname);
+}
+
+function handleClassFilters() {
+    const filter = document.querySelector("[data-class-filter]");
+    if (!filter) return;
+
+    filter.addEventListener("change", function () {
+        const selectedType = filter.value;
+        document.querySelectorAll("[data-class-type]").forEach(function (card) {
+            card.classList.toggle("is-hidden", selectedType !== "all" && card.dataset.classType !== selectedType);
+        });
+    });
+}
+
+function handleInlineConfirmations() {
+    document.querySelectorAll("[data-confirm]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            if (window.confirm("Confirmar esta accion?")) {
+                window.alert(button.dataset.confirm);
+            }
+        });
+    });
+
+    document.querySelectorAll("[data-confirm-form]").forEach(function (form) {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            const message = form.querySelector(".message");
+            if (!window.confirm("Guardar cambios?")) {
+                return;
+            }
+            setMessage(message, "Reserva agendada correctamente.", "message-success");
         });
     });
 }
@@ -1057,6 +1262,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     initializeUsersStore();
     handleLoginPage();
     handleRegisterPage();
+    handleSpaRoutes();
+    handleClassFilters();
+    handleInlineConfirmations();
     handleAdminPage();
     handleProfilePage();
     await handleDashboardPage();

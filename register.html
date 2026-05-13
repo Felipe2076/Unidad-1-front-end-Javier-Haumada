@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="css/forms.css">
 </head>
 <body>
-    <div class="auth-page">
-        <div class="auth-card auth-card--wide">
+    <div class="auth-page auth-page--register">
+        <div class="auth-card auth-card--advanced">
             <div class="auth-brand">
                 <a href="index.html" aria-label="SportClub — inicio">
                     <img class="auth-logo" src="img/logo-sportclub.png" width="280" height="80" alt="SportClub">
@@ -17,63 +17,118 @@
             </div>
 
             <header class="form-header">
-                <h2>Crear cuenta</h2>
-                <p>Completa los datos obligatorios. Los demás campos nos ayudan a personalizar tu experiencia.</p>
+                <span class="form-kicker">Alta de usuario</span>
+                <h2>Crear perfil SportClub</h2>
+                <p>Organiza tu informacion en identidad, perfil deportivo y salud para una gestion clara.</p>
             </header>
 
-            <form id="register-form" action="#" method="post" aria-label="Formulario de registro" novalidate>
-                <div class="form-group">
-                    <label for="email">Correo electrónico <span class="muted">(obligatorio)</span></label>
-                    <input type="email" id="email" name="email" autocomplete="email" required placeholder="tu@correo.com">
-                </div>
-                <div class="form-group">
-                    <label for="password">Contraseña <span class="muted">(obligatorio)</span></label>
-                    <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Mínimo 8 caracteres">
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirmar contraseña <span class="muted">(obligatorio)</span></label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required placeholder="Repite tu contraseña">
-                </div>
-                <div class="form-group">
-                    <label for="birthDate">Fecha de nacimiento</label>
-                    <input type="date" id="birthDate" name="birthDate" placeholder="dd/mm/aaaa">
-                </div>
-                <div class="form-group">
-                    <label for="name">Nombre</label>
-                    <input type="text" id="name" name="name" autocomplete="name" placeholder="Tu nombre completo">
-                </div>
-                <div class="form-group">
-                    <label for="age">Edad</label>
-                    <input type="number" id="age" name="age" min="12" max="120" placeholder="Ej. 28">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="practiceDeporte" name="practiceDeporte" value="si">
-                        ¿Practicas deporte?
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="typeDeporte">Tipo de deporte</label>
-                    <input type="text" id="typeDeporte" name="typeDeporte" placeholder="Ej. running, natación…">
-                </div>
-                <div class="form-group">
-                    <label for="objectivePersonal">Objetivo personal</label>
-                    <input type="text" id="objectivePersonal" name="objectivePersonal" placeholder="Ej. mejorar resistencia">
-                </div>
-                <div class="form-group">
-                    <label for="level">Nivel</label>
-                    <select id="level" name="level">
-                        <option value="" selected>Selecciona una opción</option>
-                        <option value="principiante">Principiante</option>
-                        <option value="intermedio">Intermedio</option>
-                        <option value="avanzado">Avanzado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="infoAdicional">Información adicional <span class="muted">(opcional)</span></label>
-                    <textarea id="infoAdicional" name="infoAdicional" placeholder="Lesiones, horarios preferidos, comentarios…"></textarea>
-                </div>
-                <button type="submit" class="btn-login">Registrarse</button>
+            <form id="register-form" class="advanced-register-form" action="#" method="post" aria-label="Formulario de registro" novalidate>
+                <section class="register-step-card" aria-labelledby="identity-title">
+                    <div class="register-step-card__head">
+                        <span>1</span>
+                        <div>
+                            <h3 id="identity-title">Identidad personal</h3>
+                            <p>Datos separados para administracion y busqueda de perfiles.</p>
+                        </div>
+                    </div>
+                    <div class="register-grid">
+                        <div class="form-group">
+                            <label for="firstName">Nombre completo</label>
+                            <input type="text" id="firstName" name="firstName" autocomplete="given-name" required placeholder="Ej. Javier">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastNamePaternal">Apellido paterno</label>
+                            <input type="text" id="lastNamePaternal" name="lastNamePaternal" autocomplete="family-name" required placeholder="Ej. Ahumada">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastNameMaternal">Apellido materno</label>
+                            <input type="text" id="lastNameMaternal" name="lastNameMaternal" required placeholder="Ej. Soto">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Edad</label>
+                            <input type="number" id="age" name="age" min="12" max="120" required placeholder="Ej. 28">
+                            <p class="input-error"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="register-step-card" aria-labelledby="account-title">
+                    <div class="register-step-card__head">
+                        <span>2</span>
+                        <div>
+                            <h3 id="account-title">Acceso</h3>
+                            <p>Credenciales para entrar al dashboard.</p>
+                        </div>
+                    </div>
+                    <div class="register-grid">
+                        <div class="form-group">
+                            <label for="email">Correo electronico</label>
+                            <input type="email" id="email" name="email" autocomplete="email" required placeholder="tu@correo.com">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Contrasena</label>
+                            <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="Minimo 8 caracteres">
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmar contrasena</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required placeholder="Repite tu contrasena">
+                            <p class="input-error"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="register-step-card" aria-labelledby="sport-title">
+                    <div class="register-step-card__head">
+                        <span>3</span>
+                        <div>
+                            <h3 id="sport-title">Perfil deportivo</h3>
+                            <p>Nivel inicial y habitos de entrenamiento.</p>
+                        </div>
+                    </div>
+                    <div class="register-grid">
+                        <div class="form-group">
+                            <label for="practiceDeporte">Haces deporte</label>
+                            <select id="practiceDeporte" name="practiceDeporte" required>
+                                <option value="" selected>Selecciona una opcion</option>
+                                <option value="si">Si</option>
+                                <option value="no">No</option>
+                            </select>
+                            <p class="input-error"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="level">Nivel actual</label>
+                            <select id="level" name="level" required>
+                                <option value="" selected>Selecciona una opcion</option>
+                                <option value="principiante">Principiante</option>
+                                <option value="intermedio">Intermedio</option>
+                                <option value="avanzado">Avanzado</option>
+                            </select>
+                            <p class="input-error"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="register-step-card" aria-labelledby="health-title">
+                    <div class="register-step-card__head">
+                        <span>4</span>
+                        <div>
+                            <h3 id="health-title">Salud y seguridad</h3>
+                            <p>Informacion visible para administracion y coaches.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="healthCondition">Tienes algun problema de salud o lesion?</label>
+                        <textarea id="healthCondition" name="healthCondition" required placeholder="Describe restricciones medicas, lesiones o escribe 'Ninguna'."></textarea>
+                        <p class="input-error"></p>
+                    </div>
+                </section>
+
+                <button type="submit" class="btn-login">Crear perfil y entrar</button>
             </form>
             <p id="register-message" class="message is-hidden" role="status" aria-live="polite"></p>
 

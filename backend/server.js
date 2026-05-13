@@ -151,6 +151,9 @@ function sanitizeUser(user) {
   return {
     id: user.id,
     name: user.name,
+    firstName: user.firstName || "",
+    lastNamePaternal: user.lastNamePaternal || "",
+    lastNameMaternal: user.lastNameMaternal || "",
     user: user.user,
     role: user.role,
     age: user.age || null,
@@ -159,6 +162,7 @@ function sanitizeUser(user) {
     typeDeporte: user.typeDeporte || "",
     objectivePersonal: user.objectivePersonal || "",
     level: user.level || "",
+    healthCondition: user.healthCondition || user.infoAdicional || "",
     infoAdicional: user.infoAdicional || "",
     createdAt: user.createdAt || ""
   };
@@ -268,6 +272,18 @@ app.get(["/login.html", "/register.html", "/recover.html", "/dashboard_usuario.h
   sendFrontendPage(res, path.basename(req.path));
 });
 
+app.get(["/clases", "/reservas", "/progreso", "/perfil/editar"], (req, res) => {
+  sendFrontendPage(res, "dashboard_usuario.html");
+});
+
+app.get(["/admin/usuarios"], (req, res) => {
+  sendFrontendPage(res, "dashboard_admin.html");
+});
+
+app.get(["/coach/reservas"], (req, res) => {
+  sendFrontendPage(res, "dashboard_coach.html");
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
@@ -308,17 +324,25 @@ app.post("/api/auth/register", (req, res) => {
   const email = normalizeEmail(req.body.email);
   const password = String(req.body.password || "").trim();
   const confirmPassword = String(req.body.confirmPassword || "").trim();
-  const name = String(req.body.name || "").trim();
+  const firstName = String(req.body.firstName || "").trim();
+  const lastNamePaternal = String(req.body.lastNamePaternal || "").trim();
+  const lastNameMaternal = String(req.body.lastNameMaternal || "").trim();
+  const name = String(req.body.name || [firstName, lastNamePaternal, lastNameMaternal].filter(Boolean).join(" ")).trim();
   const age = req.body.age ? Number(req.body.age) : null;
   const birthDate = String(req.body.birthDate || "").trim();
   const practiceDeporte = parseBoolean(req.body.practiceDeporte);
   const typeDeporte = String(req.body.typeDeporte || "").trim();
   const objectivePersonal = String(req.body.objectivePersonal || "").trim();
   const level = String(req.body.level || "").trim();
-  const infoAdicional = String(req.body.infoAdicional || "").trim();
+  const healthCondition = String(req.body.healthCondition || req.body.infoAdicional || "").trim();
+  const infoAdicional = String(req.body.infoAdicional || healthCondition).trim();
 
-  if (!email || !password || !confirmPassword) {
-    return res.status(400).json({ error: "Debes enviar correo, contraseña y confirmación." });
+  if (!firstName || !lastNamePaternal || !lastNameMaternal || !age || !email || !password || !confirmPassword || !req.body.practiceDeporte || !level || !healthCondition) {
+    return res.status(400).json({ error: "Debes completar identidad, acceso, perfil deportivo y salud." });
+  }
+
+  if (!Number.isFinite(age) || age < 12 || age > 120) {
+    return res.status(400).json({ error: "La edad debe estar entre 12 y 120." });
   }
 
   if (!isValidEmail(email)) {
@@ -343,6 +367,9 @@ app.post("/api/auth/register", (req, res) => {
   const newUser = {
     id: getNextUserId(users),
     name: name || "Nuevo Usuario",
+    firstName,
+    lastNamePaternal,
+    lastNameMaternal,
     user: email,
     role: "user",
     age,
@@ -351,6 +378,7 @@ app.post("/api/auth/register", (req, res) => {
     typeDeporte,
     objectivePersonal,
     level,
+    healthCondition,
     infoAdicional,
     createdAt: new Date().toISOString()
   };
@@ -376,25 +404,33 @@ app.put("/api/auth/me", authMiddleware, (req, res) => {
   }
 
   const name = String(req.body.name || currentUser.name).trim();
+  const firstName = String(req.body.firstName || currentUser.firstName || "").trim();
+  const lastNamePaternal = String(req.body.lastNamePaternal || currentUser.lastNamePaternal || "").trim();
+  const lastNameMaternal = String(req.body.lastNameMaternal || currentUser.lastNameMaternal || "").trim();
   const age = req.body.age ? Number(req.body.age) : currentUser.age || null;
   const birthDate = String(req.body.birthDate || currentUser.birthDate).trim();
   const practiceDeporte = typeof req.body.practiceDeporte !== "undefined" ? parseBoolean(req.body.practiceDeporte) : currentUser.practiceDeporte;
   const typeDeporte = String(req.body.typeDeporte || currentUser.typeDeporte).trim();
   const objectivePersonal = String(req.body.objectivePersonal || currentUser.objectivePersonal).trim();
   const level = String(req.body.level || currentUser.level).trim();
-  const infoAdicional = String(req.body.infoAdicional || currentUser.infoAdicional).trim();
+  const healthCondition = String(req.body.healthCondition || currentUser.healthCondition || currentUser.infoAdicional || "").trim();
+  const infoAdicional = String(req.body.infoAdicional || currentUser.infoAdicional || healthCondition).trim();
 
   if (!name) {
     return res.status(400).json({ error: "El nombre es obligatorio." });
   }
 
   currentUser.name = name;
+  currentUser.firstName = firstName;
+  currentUser.lastNamePaternal = lastNamePaternal;
+  currentUser.lastNameMaternal = lastNameMaternal;
   currentUser.age = age;
   currentUser.birthDate = birthDate;
   currentUser.practiceDeporte = practiceDeporte;
   currentUser.typeDeporte = typeDeporte;
   currentUser.objectivePersonal = objectivePersonal;
   currentUser.level = level;
+  currentUser.healthCondition = healthCondition;
   currentUser.infoAdicional = infoAdicional;
 
   saveUsers(users);
@@ -455,7 +491,10 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
   const email = normalizeEmail(req.body.email);
   const password = String(req.body.password || "").trim();
   const confirmPassword = String(req.body.confirmPassword || "").trim();
-  const name = String(req.body.name || "").trim();
+  const firstName = String(req.body.firstName || "").trim();
+  const lastNamePaternal = String(req.body.lastNamePaternal || "").trim();
+  const lastNameMaternal = String(req.body.lastNameMaternal || "").trim();
+  const name = String(req.body.name || [firstName, lastNamePaternal, lastNameMaternal].filter(Boolean).join(" ")).trim();
   const role = normalizeRole(req.body.role);
   const age = req.body.age ? Number(req.body.age) : null;
   const birthDate = String(req.body.birthDate || "").trim();
@@ -463,7 +502,8 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
   const typeDeporte = String(req.body.typeDeporte || "").trim();
   const objectivePersonal = String(req.body.objectivePersonal || "").trim();
   const level = String(req.body.level || "").trim();
-  const infoAdicional = String(req.body.infoAdicional || "").trim();
+  const healthCondition = String(req.body.healthCondition || req.body.infoAdicional || "").trim();
+  const infoAdicional = String(req.body.infoAdicional || healthCondition).trim();
 
   if (!name || !email || !password || !confirmPassword || !role) {
     return res.status(400).json({ error: "Todos los campos obligatorios deben completarse." });
@@ -495,6 +535,9 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
   const newUser = {
     id: getNextUserId(users),
     name,
+    firstName,
+    lastNamePaternal,
+    lastNameMaternal,
     user: email,
     role,
     age,
@@ -503,6 +546,7 @@ app.post("/api/users", authMiddleware, adminMiddleware, (req, res) => {
     typeDeporte,
     objectivePersonal,
     level,
+    healthCondition,
     infoAdicional,
     createdAt: new Date().toISOString()
   };
@@ -523,7 +567,10 @@ app.put("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
   }
 
   const email = normalizeEmail(req.body.email || user.user);
-  const name = String(req.body.name || user.name).trim();
+  const firstName = String(req.body.firstName || user.firstName || "").trim();
+  const lastNamePaternal = String(req.body.lastNamePaternal || user.lastNamePaternal || "").trim();
+  const lastNameMaternal = String(req.body.lastNameMaternal || user.lastNameMaternal || "").trim();
+  const name = String(req.body.name || [firstName, lastNamePaternal, lastNameMaternal].filter(Boolean).join(" ") || user.name).trim();
   const role = normalizeRole(req.body.role || user.role);
   const age = req.body.age ? Number(req.body.age) : user.age || null;
   const birthDate = String(req.body.birthDate || user.birthDate).trim();
@@ -531,7 +578,8 @@ app.put("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
   const typeDeporte = String(req.body.typeDeporte || user.typeDeporte).trim();
   const objectivePersonal = String(req.body.objectivePersonal || user.objectivePersonal).trim();
   const level = String(req.body.level || user.level).trim();
-  const infoAdicional = String(req.body.infoAdicional || user.infoAdicional).trim();
+  const healthCondition = String(req.body.healthCondition || user.healthCondition || user.infoAdicional || "").trim();
+  const infoAdicional = String(req.body.infoAdicional || user.infoAdicional || healthCondition).trim();
 
   if (!name || !email) {
     return res.status(400).json({ error: "El nombre y el correo son obligatorios." });
@@ -554,6 +602,9 @@ app.put("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
   }
 
   user.name = name;
+  user.firstName = firstName;
+  user.lastNamePaternal = lastNamePaternal;
+  user.lastNameMaternal = lastNameMaternal;
   user.user = email;
   user.role = role;
   user.age = age;
@@ -562,6 +613,7 @@ app.put("/api/users/:id", authMiddleware, adminMiddleware, (req, res) => {
   user.typeDeporte = typeDeporte;
   user.objectivePersonal = objectivePersonal;
   user.level = level;
+  user.healthCondition = healthCondition;
   user.infoAdicional = infoAdicional;
 
   if (req.body.password) {

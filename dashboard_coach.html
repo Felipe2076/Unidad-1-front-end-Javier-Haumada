@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SportClub - Dashboard Coach</title>
+    <base href="/">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="role-coach dashboard-sketch" data-required-role="coach">
@@ -20,7 +21,7 @@
                 <nav class="nav" aria-label="Navegación de coach">
                     <a href="dashboard_coach.html#inicio">Inicio</a>
                     <a href="dashboard_coach.html#alumnos">Alumnos</a>
-                    <a href="dashboard_coach.html#horario">Mi horario</a>
+                    <a href="/coach/reservas">Reservas y cupos</a>
                     <a href="dashboard_coach.html#reportes">Reportes</a>
                 </nav>
 
@@ -42,18 +43,18 @@
                 <article id="alumnos" class="card card-pad card-dash sketch-card sketch-card--profile">
                     <h3>Mis alumnos</h3>
                     <ul class="sketch-action-list sketch-with-dot">
-                        <li><span>Ana Torres</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
-                        <li><span>Carlos Perez</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
-                        <li><span>Laura Diaz</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
+                        <li><span>Ana Torres · Nivel intermedio · Salud: rodilla sensible</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
+                        <li><span>Carlos Perez · Nivel principiante · Salud: ninguna</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
+                        <li><span>Laura Diaz · Nivel avanzado · Salud: evitar impacto alto</span><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver progreso</a></li>
                     </ul>
                 </article>
 
                 <article id="horario" class="card card-pad card-dash sketch-card sketch-card--table">
-                    <h3>Mi horario</h3>
+                    <h3>Gestion operativa de cupos y horarios</h3>
                     <div class="sketch-table sketch-table-coach">
                         <div><strong>Lunes</strong></div><div><strong>Martes</strong></div><div><strong>Miercoles</strong></div><div><strong>Jueves</strong></div><div><strong>Viernes</strong></div><div><strong>Viernes</strong></div>
-                        <div>Spinning</div><div>18:00</div><div>Spinning</div><div>10:00</div><div>Boxeo</div><div><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver detalle</a></div>
-                        <div>Miercoles</div><div>11:00</div><div>CrossFit</div><div>11:00</div><div>Boxeo</div><div><a class="btn btn-ghost" href="dashboard_coach.html#reportes">Ver detalle</a></div>
+                        <div>Spinning</div><div>18:00</div><div>10 cupos</div><div>Sala 1</div><div>Activo</div><div><button class="btn btn-ghost" data-confirm="Horario actualizado correctamente.">Editar</button></div>
+                        <div>CrossFit</div><div>11:00</div><div>6 cupos</div><div>Sala 2</div><div>Activo</div><div><button class="btn btn-ghost" data-confirm="Cupo eliminado correctamente.">Eliminar</button></div>
                     </div>
                 </article>
             </section>
@@ -61,6 +62,15 @@
             <section id="reportes" class="card card-pad card-dash sketch-card sketch-card--report">
                 <h3>Reportes</h3>
                 <p class="muted">Atajo rapido para seguimiento de alumnos y rendimiento semanal.</p>
+            </section>
+
+            <section id="grupos" class="card card-pad card-dash sketch-card sketch-card--report">
+                <h3>Grupos y entrenamientos</h3>
+                <ul class="sketch-action-list">
+                    <li><span>Grupo A - Principiantes - revisar salud antes de carga</span><button class="btn btn-ghost" data-confirm="Entrenamiento asignado correctamente.">Asignar rutina</button></li>
+                    <li><span>Grupo B - Cardio intermedio - sin lesiones activas</span><button class="btn btn-ghost" data-confirm="Entrenamiento asignado correctamente.">Asignar rutina</button></li>
+                    <li><span>Grupo C - Movilidad - foco en restricciones medicas</span><button class="btn btn-ghost" data-confirm="Entrenamiento asignado correctamente.">Asignar rutina</button></li>
+                </ul>
             </section>
 
             <section class="sketch-extra-grid">
