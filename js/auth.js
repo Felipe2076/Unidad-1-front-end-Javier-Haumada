@@ -1,14 +1,66 @@
 ﻿const API_BASE_URL = "http://localhost:3000/api";
 const SESSION_STORAGE_KEY = "sportclub_session";
 const USERS_STORAGE_KEY = "sportclub_users";
-const defaultUsers = [];
+const defaultUsers = [
+    {
+        name: "Usuario Demo",
+        firstName: "Usuario",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "user1@sportclub.cl",
+        role: "user",
+        age: 28,
+        birthDate: "1995-02-12",
+        practiceDeporte: true,
+        typeDeporte: "running",
+        objectivePersonal: "Mejorar resistencia",
+        level: "intermedio",
+        healthCondition: "Sin lesiones declaradas.",
+        infoAdicional: "Prefiere clases por la tarde.",
+        createdAt: "2025-05-10T10:00:00.000Z",
+        password: "1234"
+    },
+    {
+        name: "Coach Demo",
+        firstName: "Coach",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "coach1@sportclub.cl",
+        role: "coach",
+        age: 34,
+        birthDate: "1990-08-21",
+        practiceDeporte: true,
+        typeDeporte: "crossfit",
+        objectivePersonal: "Guiar a atletas",
+        level: "avanzado",
+        healthCondition: "Sin restricciones medicas.",
+        infoAdicional: "Coach de fuerza y resistencia.",
+        createdAt: "2025-05-10T12:30:00.000Z",
+        password: "1234"
+    },
+    {
+        name: "Admin Demo",
+        firstName: "Admin",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "admin1@sportclub.cl",
+        role: "admin",
+        age: 31,
+        birthDate: "1992-03-14",
+        practiceDeporte: false,
+        typeDeporte: "",
+        objectivePersonal: "Administrar el club",
+        level: "principiante",
+        healthCondition: "Cuenta administrativa sin perfil deportivo activo.",
+        infoAdicional: "Cuenta de administración.",
+        createdAt: "2025-05-10T14:45:00.000Z",
+        password: "1234"
+    }
+];
 const demoUserEmails = [
     "user1@sportclub.cl",
-    "user2@sportclub.cl",
     "coach1@sportclub.cl",
-    "coach2@sportclub.cl",
-    "admin1@sportclub.cl",
-    "admin2@sportclub.cl"
+    "admin1@sportclub.cl"
 ];
 
 const roleRedirects = {
@@ -90,10 +142,18 @@ function initializeUsersStore() {
         return;
     }
 
-    const cleanedUsers = getUsers().filter(function (user) {
-        return !demoUserEmails.includes(normalizeEmail(user.user));
+    var stored = getUsers();
+    var hasDemoUsers = demoUserEmails.every(function (email) {
+        return stored.some(function (u) { return normalizeEmail(u.user) === email; });
     });
-    saveUsers(cleanedUsers);
+    if (!hasDemoUsers) {
+        var merged = stored.slice();
+        defaultUsers.forEach(function (demo) {
+            var exists = merged.some(function (u) { return normalizeEmail(u.user) === normalizeEmail(demo.user); });
+            if (!exists) { merged.push(demo); }
+        });
+        saveUsers(merged);
+    }
 }
 
 function setMessage(messageElement, text, type) {
@@ -1115,18 +1175,24 @@ function populateDashboard(loggedUser) {
 }
 
 function normalizeAppPath(pathname) {
-    const path = pathname || window.location.pathname;
+    var path = pathname || window.location.pathname;
 
     if (path === "/" || path.endsWith("/dashboard_usuario.html")) {
         return "/dashboard_usuario.html";
+    }
+
+    if (path.endsWith("/dashboard_admin.html") || path.endsWith("/admin/usuarios")) {
+        return "/dashboard_admin.html";
+    }
+
+    if (path.endsWith("/dashboard_coach.html") || path.endsWith("/coach/reservas")) {
+        return "/dashboard_coach.html";
     }
 
     if (path.endsWith("/clases")) return "/clases";
     if (path.endsWith("/reservas")) return "/reservas";
     if (path.endsWith("/progreso")) return "/progreso";
     if (path.endsWith("/perfil/editar")) return "/perfil/editar";
-    if (path.endsWith("/admin/usuarios")) return "/admin/usuarios";
-    if (path.endsWith("/coach/reservas")) return "/coach/reservas";
 
     return path;
 }
