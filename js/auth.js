@@ -3,6 +3,7 @@ const SESSION_STORAGE_KEY = "sportclub_session";
 const USERS_STORAGE_KEY = "sportclub_users";
 const defaultUsers = [
     {
+        id: 1,
         name: "Felipe Quiroz Vergara",
         firstName: "Felipe",
         lastNamePaternal: "Quiroz",
@@ -21,6 +22,7 @@ const defaultUsers = [
         password: "1234"
     },
     {
+        id: 2,
         name: "Entrenador Principal SportClub",
         firstName: "Entrenador",
         lastNamePaternal: "Principal",
@@ -39,6 +41,7 @@ const defaultUsers = [
         password: "1234"
     },
     {
+        id: 3,
         name: "Admin Sistema Vult",
         firstName: "Admin",
         lastNamePaternal: "Sistema",
@@ -343,6 +346,10 @@ async function tryCreateUser(payload) {
         const result = await apiRequest("/users", "POST", payload, true);
         return { success: true, user: result.user };
     } catch (error) {
+        if (isFetchError(error)) {
+            var localUser = performLocalCreateUser(payload);
+            if (localUser) return { success: true, user: localUser };
+        }
         return { success: false, error: error.message };
     }
 }
@@ -352,6 +359,10 @@ async function tryUpdateUser(id, payload) {
         const result = await apiRequest(`/users/${id}`, "PUT", payload, true);
         return { success: true, user: result.user };
     } catch (error) {
+        if (isFetchError(error)) {
+            var localUser = performLocalUpdateUser(id, payload);
+            if (localUser) return { success: true, user: localUser };
+        }
         return { success: false, error: error.message };
     }
 }
@@ -361,8 +372,81 @@ async function tryDeleteUser(id) {
         await apiRequest(`/users/${id}`, "DELETE", null, true);
         return { success: true };
     } catch (error) {
+        if (isFetchError(error)) {
+            var localResult = performLocalDeleteUser(id);
+            if (localResult) return { success: true };
+        }
         return { success: false, error: error.message };
     }
+}
+
+function getNextLocalUserId() {
+    var users = getUsers();
+    var maxId = 0;
+    users.forEach(function (u) {
+        var uid = Number(u.id || 0);
+        if (Number.isFinite(uid) && uid > maxId) maxId = uid;
+    });
+    return maxId + 1;
+}
+
+function performLocalCreateUser(payload) {
+    var users = getUsers();
+    var exists = users.some(function (u) { return normalizeEmail(u.user) === normalizeEmail(payload.email); });
+    if (exists) return null;
+    var newUser = {
+        id: getNextLocalUserId(),
+        name: payload.name || "",
+        firstName: payload.firstName || "",
+        lastNamePaternal: payload.lastNamePaternal || "",
+        lastNameMaternal: payload.lastNameMaternal || "",
+        user: normalizeEmail(payload.email),
+        role: payload.role || "user",
+        age: payload.age || null,
+        birthDate: payload.birthDate || "",
+        practiceDeporte: payload.practiceDeporte === true || payload.practiceDeporte === "si",
+        typeDeporte: payload.typeDeporte || "",
+        objectivePersonal: payload.objectivePersonal || "",
+        level: payload.level || "",
+        healthCondition: payload.healthCondition || payload.infoAdicional || "",
+        infoAdicional: payload.infoAdicional || "",
+        createdAt: new Date().toISOString(),
+        password: payload.password || "1234"
+    };
+    users.push(newUser);
+    saveUsers(users);
+    return newUser;
+}
+
+function performLocalUpdateUser(id, payload) {
+    var users = getUsers();
+    var user = users.find(function (u) { return String(u.id) === String(id); });
+    if (!user) return null;
+    user.name = payload.name || user.name;
+    user.firstName = payload.firstName !== undefined ? payload.firstName : user.firstName;
+    user.lastNamePaternal = payload.lastNamePaternal !== undefined ? payload.lastNamePaternal : user.lastNamePaternal;
+    user.lastNameMaternal = payload.lastNameMaternal !== undefined ? payload.lastNameMaternal : user.lastNameMaternal;
+    user.role = payload.role || user.role;
+    user.age = payload.age !== undefined ? payload.age : user.age;
+    user.birthDate = payload.birthDate !== undefined ? payload.birthDate : user.birthDate;
+    user.practiceDeporte = payload.practiceDeporte !== undefined ? (payload.practiceDeporte === true || payload.practiceDeporte === "si") : user.practiceDeporte;
+    user.typeDeporte = payload.typeDeporte !== undefined ? payload.typeDeporte : user.typeDeporte;
+    user.objectivePersonal = payload.objectivePersonal !== undefined ? payload.objectivePersonal : user.objectivePersonal;
+    user.level = payload.level !== undefined ? payload.level : user.level;
+    user.healthCondition = payload.healthCondition !== undefined ? payload.healthCondition : user.healthCondition;
+    user.infoAdicional = payload.infoAdicional !== undefined ? payload.infoAdicional : user.infoAdicional;
+    if (payload.password) user.password = payload.password;
+    saveUsers(users);
+    return user;
+}
+
+function performLocalDeleteUser(id) {
+    var users = getUsers();
+    var idx = users.findIndex(function (u) { return String(u.id) === String(id); });
+    if (idx === -1) return false;
+    users.splice(idx, 1);
+    saveUsers(users);
+    return true;
 }
 
 function performLocalLogin(inputEmail, inputPassword, messageElement) {
@@ -415,6 +499,7 @@ function performLocalRegister(payload, messageElement) {
     }
 
     const newUser = {
+        id: getNextLocalUserId(),
         name: payload.name || buildFullName(payload.firstName, payload.lastNamePaternal, payload.lastNameMaternal) || "Nuevo usuario",
         firstName: payload.firstName || "",
         lastNamePaternal: payload.lastNamePaternal || "",
