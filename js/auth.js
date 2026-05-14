@@ -693,35 +693,24 @@ function handleLoginPage() {
             return;
         }
 
-        const apiResult = await tryFetchLogin(inputEmail, inputPassword);
+        var apiResult;
+        try { apiResult = await tryFetchLogin(inputEmail, inputPassword); }
+        catch (e) { apiResult = { success: false, fallback: true, error: e.message }; }
 
         if (apiResult.success && apiResult.user) {
-            const sessionUser = {
-                user: {
-                    name: apiResult.user.name,
-                    user: normalizeEmail(apiResult.user.user),
-                    role: apiResult.user.role
-                },
-                token: apiResult.token || null
-            };
-            saveSession(sessionUser);
+            var userData = apiResult.user;
+            saveSession({ user: { name: userData.name, user: normalizeEmail(userData.user), role: userData.role }, token: apiResult.token || null });
             setMessage(messageElement, "Has ingresado correctamente.", "message-success");
-            window.setTimeout(function () {
-                redirectToDashboard(sessionUser.user.role);
-            }, 500);
+            window.setTimeout(function () { redirectToDashboard(userData.role); }, 500);
             return;
         }
 
-        if (apiResult.fallback) {
-            var localUser = performLocalLogin(inputEmail, inputPassword, messageElement);
-            if (localUser) {
-                saveSession({ user: localUser });
-                setMessage(messageElement, "Has ingresado correctamente.", "message-success");
-                window.setTimeout(function () {
-                    redirectToDashboard(localUser.role);
-                }, 500);
-                return;
-            }
+        var localUser = performLocalLogin(inputEmail, inputPassword, messageElement);
+        if (localUser) {
+            saveSession({ user: localUser });
+            setMessage(messageElement, "Has ingresado correctamente.", "message-success");
+            window.setTimeout(function () { redirectToDashboard(localUser.role); }, 500);
+            return;
         }
 
         setMessage(messageElement, "Credenciales incorrectas.", "message-error");
@@ -883,7 +872,7 @@ function handleRegisterPage() {
             }
         }
 
-        setMessage(messageElement, apiResult.error || "Error al registrarte. Revisa los datos.", "message-error");
+        setMessage(messageElement, "Error al registrarte. Revisa los datos.", "message-error");
     });
 
     [emailInput, passwordInput, confirmPasswordInput, firstNameInput, lastNamePaternalInput, lastNameMaternalInput, legacyNameInput, ageInput, birthDateInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput, healthConditionInput].forEach(function (input) {
