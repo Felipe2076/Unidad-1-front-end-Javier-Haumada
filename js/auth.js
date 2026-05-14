@@ -76,7 +76,7 @@ const defaultUsers = [
         healthCondition: "Ninguna",
         infoAdicional: "Ninguna",
         createdAt: "2025-05-10T10:00:00.000Z",
-        password: "1234"
+        password: "12345678"
     },
     {
         id: 5,
@@ -95,7 +95,7 @@ const defaultUsers = [
         healthCondition: "Optima",
         infoAdicional: "Coach de fuerza y resistencia.",
         createdAt: "2025-05-10T12:30:00.000Z",
-        password: "1234"
+        password: "12345678"
     },
     {
         id: 6,
@@ -114,7 +114,7 @@ const defaultUsers = [
         healthCondition: "N/A",
         infoAdicional: "Cuenta de administracion.",
         createdAt: "2025-05-10T14:45:00.000Z",
-        password: "1234"
+        password: "12345678"
     }
 ];
 const demoUserEmails = [
@@ -721,7 +721,7 @@ function handleLoginPage() {
             }
         }
 
-        setMessage(messageElement, apiResult.error || "Credenciales incorrectas.", "message-error");
+        setMessage(messageElement, "Credenciales incorrectas.", "message-error");
     });
 
     [emailInput, passwordInput].forEach(function (input) {
