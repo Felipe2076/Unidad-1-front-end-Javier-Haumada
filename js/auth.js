@@ -416,7 +416,7 @@ async function tryCreateUser(payload) {
     } catch (error) {
         var localUser = performLocalCreateUser(payload);
         if (localUser) return { success: true, user: localUser };
-        return { success: false, error: error.message };
+        return { success: false, error: "Error al crear el usuario. Verifica que el correo no esté duplicado." };
     }
 }
 
@@ -427,7 +427,7 @@ async function tryUpdateUser(id, payload) {
     } catch (error) {
         var localUser = performLocalUpdateUser(id, payload);
         if (localUser) return { success: true, user: localUser };
-        return { success: false, error: error.message };
+        return { success: false, error: "Error al actualizar el usuario." };
     }
 }
 
