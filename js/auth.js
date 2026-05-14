@@ -58,12 +58,72 @@ const defaultUsers = [
         infoAdicional: "Cuenta de administracion.",
         createdAt: "2025-05-10T14:45:00.000Z",
         password: "1234"
+    },
+    {
+        id: 4,
+        name: "Usuario Demo",
+        firstName: "Usuario",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "usuario1@demo.cl",
+        role: "user",
+        age: 28,
+        birthDate: "1995-02-12",
+        practiceDeporte: true,
+        typeDeporte: "running",
+        objectivePersonal: "Mejorar resistencia",
+        level: "intermedio",
+        healthCondition: "Ninguna",
+        infoAdicional: "Ninguna",
+        createdAt: "2025-05-10T10:00:00.000Z",
+        password: "1234"
+    },
+    {
+        id: 5,
+        name: "Coach Demo",
+        firstName: "Coach",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "coach1@demo.cl",
+        role: "coach",
+        age: 34,
+        birthDate: "1990-08-21",
+        practiceDeporte: true,
+        typeDeporte: "crossfit",
+        objectivePersonal: "Guiar a atletas",
+        level: "avanzado",
+        healthCondition: "Optima",
+        infoAdicional: "Coach de fuerza y resistencia.",
+        createdAt: "2025-05-10T12:30:00.000Z",
+        password: "1234"
+    },
+    {
+        id: 6,
+        name: "Admin Demo",
+        firstName: "Admin",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "admin1@demo.cl",
+        role: "admin",
+        age: 31,
+        birthDate: "1992-03-14",
+        practiceDeporte: false,
+        typeDeporte: "",
+        objectivePersonal: "Administrar el club",
+        level: "principiante",
+        healthCondition: "N/A",
+        infoAdicional: "Cuenta de administracion.",
+        createdAt: "2025-05-10T14:45:00.000Z",
+        password: "1234"
     }
 ];
 const demoUserEmails = [
     "user1@sportclub.cl",
     "coach1@sportclub.cl",
-    "admin1@sportclub.cl"
+    "admin1@sportclub.cl",
+    "usuario1@demo.cl",
+    "coach1@demo.cl",
+    "admin1@demo.cl"
 ];
 
 const roleRedirects = {
@@ -642,7 +702,7 @@ function handleLoginPage() {
                 token: apiResult.token || null
             };
             saveSession(sessionUser);
-            setMessage(messageElement, `Bienvenido ${sessionUser.user.name}. Redirigiendo...`, "message-success");
+            setMessage(messageElement, "Has ingresado correctamente.", "message-success");
             window.setTimeout(function () {
                 redirectToDashboard(sessionUser.user.role);
             }, 500);
@@ -653,7 +713,7 @@ function handleLoginPage() {
             var localUser = performLocalLogin(inputEmail, inputPassword, messageElement);
             if (localUser) {
                 saveSession({ user: localUser });
-                setMessage(messageElement, `Bienvenido ${localUser.name}. Redirigiendo...`, "message-success");
+                setMessage(messageElement, "Has ingresado correctamente.", "message-success");
                 window.setTimeout(function () {
                     redirectToDashboard(localUser.role);
                 }, 500);
