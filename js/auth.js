@@ -1175,14 +1175,6 @@ function normalizeAppPath(pathname) {
         return "/dashboard_usuario.html";
     }
 
-    if (path.endsWith("/dashboard_admin.html") || path.endsWith("/admin/usuarios")) {
-        return "/dashboard_admin.html";
-    }
-
-    if (path.endsWith("/dashboard_coach.html") || path.endsWith("/coach/reservas")) {
-        return "/dashboard_coach.html";
-    }
-
     if (path.endsWith("/clases")) return "/clases";
     if (path.endsWith("/reservas")) return "/reservas";
     if (path.endsWith("/progreso")) return "/progreso";
