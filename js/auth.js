@@ -400,6 +400,11 @@ async function tryFetchUser(id) {
         const result = await apiRequest(`/users/${id}`, "GET", null, true);
         return { success: true, user: result.user };
     } catch (error) {
+        if (isFetchError(error)) {
+            var users = getUsers();
+            var user = users.find(function (u) { return String(u.id) === String(id); });
+            if (user) return { success: true, user: user };
+        }
         return { success: false, error: error.message };
     }
 }
