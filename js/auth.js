@@ -211,13 +211,16 @@ function initializeUsersStore() {
         var demoEmail = normalizeEmail(demo.user);
         var match = stored.find(function (u) { return normalizeEmail(u.user) === demoEmail; });
         if (match) {
-            if (match.password !== "1234") {
-                match.password = "1234";
+            if (match.password !== demo.password || match.name !== demo.name) {
+                match.password = demo.password;
                 match.name = demo.name;
                 match.firstName = demo.firstName;
                 match.lastNamePaternal = demo.lastNamePaternal;
                 match.lastNameMaternal = demo.lastNameMaternal;
                 match.healthCondition = demo.healthCondition;
+                match.role = demo.role;
+                match.age = demo.age;
+                match.level = demo.level;
                 changed = true;
             }
         } else {
