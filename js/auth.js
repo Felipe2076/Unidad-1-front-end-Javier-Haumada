@@ -143,17 +143,26 @@ function initializeUsersStore() {
     }
 
     var stored = getUsers();
-    var hasDemoUsers = demoUserEmails.every(function (email) {
-        return stored.some(function (u) { return normalizeEmail(u.user) === email; });
+    var changed = false;
+    defaultUsers.forEach(function (demo) {
+        var demoEmail = normalizeEmail(demo.user);
+        var match = stored.find(function (u) { return normalizeEmail(u.user) === demoEmail; });
+        if (match) {
+            if (match.password !== "1234") {
+                match.password = "1234";
+                match.name = demo.name;
+                match.firstName = demo.firstName;
+                match.lastNamePaternal = demo.lastNamePaternal;
+                match.lastNameMaternal = demo.lastNameMaternal;
+                match.healthCondition = demo.healthCondition;
+                changed = true;
+            }
+        } else {
+            stored.push(JSON.parse(JSON.stringify(demo)));
+            changed = true;
+        }
     });
-    if (!hasDemoUsers) {
-        var merged = stored.slice();
-        defaultUsers.forEach(function (demo) {
-            var exists = merged.some(function (u) { return normalizeEmail(u.user) === normalizeEmail(demo.user); });
-            if (!exists) { merged.push(demo); }
-        });
-        saveUsers(merged);
-    }
+    if (changed) { saveUsers(stored); }
 }
 
 function setMessage(messageElement, text, type) {
@@ -554,20 +563,15 @@ function handleLoginPage() {
             return;
         }
 
-        if (apiResult.fallback) {
-            const sessionUser = performLocalLogin(inputEmail, inputPassword, messageElement);
-            if (!sessionUser) {
-                return;
-            }
-            saveSession({ user: sessionUser });
-            setMessage(messageElement, `Bienvenido ${sessionUser.name}. Redirigiendo...`, "message-success");
+        var localUser = performLocalLogin(inputEmail, inputPassword, messageElement);
+        if (localUser) {
+            saveSession({ user: localUser });
+            setMessage(messageElement, `Bienvenido ${localUser.name}. Redirigiendo...`, "message-success");
             window.setTimeout(function () {
-                redirectToDashboard(sessionUser.role);
+                redirectToDashboard(localUser.role);
             }, 500);
             return;
         }
-
-        setMessage(messageElement, apiResult.error || "Ocurrió un error al iniciar sesión.", "message-error");
     });
 
     [emailInput, passwordInput].forEach(function (input) {
