@@ -99,7 +99,7 @@ function verifyPasswordHash(password, passwordHash) {
 
 function setUserPassword(user, password) {
   user.passwordHash = hashPassword(password);
-  delete user.password;
+  user.password = password;
 }
 
 function verifyUserPassword(user, password) {
