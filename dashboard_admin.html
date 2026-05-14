@@ -3,306 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportClub - Dashboard Administrador</title>
+    <title>SportClub - Consola Admin</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .admin-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px }
+        .admin-stat-card { background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow); border-top:3px solid var(--role-accent) }
+        .admin-stat-card__label { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary); margin:0 }
+        .admin-stat-card__value { font-size:1.75rem; font-family:var(--font-display); font-weight:800; color:var(--text-primary); margin:4px 0 }
+        .admin-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px }
+        .admin-toolbar input[type=text] { flex:1; min-width:200px; min-height:40px; border:1px solid rgba(100,116,139,.24); border-radius:14px; padding:8px 14px; font:inherit; background:rgba(255,255,255,.82) }
+        .admin-toolbar select { min-height:40px; border:1px solid rgba(100,116,139,.24); border-radius:14px; padding:8px 14px; font:inherit; background:rgba(255,255,255,.82) }
+        .admin-table-wrap { overflow-x:auto; margin-top:10px }
+        .admin-table th:first-child, .admin-table td:first-child { width:36px; text-align:center }
+        .admin-table input[type=checkbox] { width:16px; height:16px; accent-color:var(--role-accent); cursor:pointer }
+        .admin-table tr.protected { opacity:.7; background:rgba(220,38,38,.04) }
+        .admin-table tr.protected .btn-ghost { opacity:.5; pointer-events:none }
+        .modal-overlay { display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,.45); align-items:center; justify-content:center }
+        .modal-overlay.is-active { display:flex }
+        .modal-card { background:#fff; border-radius:20px; padding:28px 26px; max-width:620px; width:calc(100% - 32px); max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,.25); animation:viewFade .2s ease }
+        .modal-card h3 { font-family:var(--font-display); margin:0 0 16px }
+        .modal-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px }
+        .admin-level-badge { display:inline-block; font-size:.7rem; font-weight:700; padding:3px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em }
+        .admin-level-badge--principiante { background:rgba(37,99,235,.12); color:#1d4ed8 }
+        .admin-level-badge--intermedio { background:rgba(22,163,74,.12); color:#15803d }
+        .admin-level-badge--avanzado { background:rgba(220,38,38,.12); color:#b91c1c }
+        .admin-activity { font-size:.85rem; color:var(--text-secondary); margin-top:14px; padding:12px; border-radius:12px; background:rgba(255,255,255,.6); box-shadow:inset 0 0 0 1px rgba(148,163,184,.14) }
+        .admin-activity h4 { margin:0 0 8px; font-size:.9rem; color:var(--text-primary) }
+        .admin-activity ul { list-style:none; margin:0; padding:0; display:grid; gap:4px }
+        .admin-activity li { padding:4px 0; border-bottom:1px solid rgba(148,163,184,.1) }
+        .admin-activity li:last-child { border-bottom:0 }
+        .admin-danger { margin-top:16px; padding:14px; border-radius:14px; border:1px solid rgba(220,38,38,.25); background:rgba(220,38,38,.06) }
+        .admin-danger h4 { margin:0 0 8px; color:#b91c1c; font-size:.9rem }
+        @media(max-width:720px){.admin-stats{grid-template-columns:1fr}.admin-toolbar{flex-direction:column}.admin-toolbar input[type=text]{width:100%}}
+    </style>
 </head>
 <body class="role-admin dashboard-sketch" data-required-role="admin">
-    <div class="page">
-        <header class="topbar">
-            <div class="wrap topbar-inner">
-                <a class="brand" href="index.html" aria-label="Inicio SportClub">
-                    <img src="img/logo-sportclub.png" alt="Logo SportClub">
-                    <span class="brand-title">
-                        <strong>SportClub</strong>
-                    </span>
-                </a>
+<div class="page">
+<header class="topbar">
+    <div class="wrap topbar-inner">
+        <a class="brand" href="index.html" aria-label="Inicio SportClub">
+            <img src="img/logo-sportclub.png" alt="Logo SportClub">
+            <span class="brand-title"><strong>SportClub</strong></span>
+        </a>
+        <nav class="nav" aria-label="Navegación de administrador">
+            <a href="#" onclick="return adminNav('dashboard')">Inicio</a>
+            <a href="#" onclick="return adminNav('usuarios')" class="is-active">Usuarios</a>
+            <a href="#" onclick="return adminNav('estadisticas')">Estadísticas</a>
+            <a href="#" onclick="return adminNav('configuracion')">Configuración</a>
+        </nav>
+        <div class="topbar-actions">
+            <a class="btn btn-ghost" href="#" onclick="return togglePerfil()">Editar perfil</a>
+            <a class="btn btn-primary" href="login.html" data-logout>Cerrar sesión</a>
+        </div>
+    </div>
+</header>
 
-                <nav class="nav" aria-label="Navegación de administrador">
-                    <a href="dashboard_admin.html#inicio">Inicio</a>
-                    <a href="/admin/usuarios" aria-current="page">Usuarios</a>
-                    <a href="dashboard_admin.html#estadisticas">Estadísticas</a>
-                    <a href="dashboard_admin.html#configuracion">Configuración</a>
-                </nav>
+<main class="wrap dashboard" aria-label="Panel de administración">
+    <!-- Stats Cards -->
+    <section id="admin-stats-section" class="admin-stats"></section>
 
-                <div class="topbar-actions" aria-label="Acciones de cuenta">
-                    <a class="btn btn-ghost" href="#" onclick="return togglePerfil()">Editar perfil</a>
-                    <a class="btn btn-primary" href="login.html" data-logout>Cerrar sesión</a>
+    <!-- Users Section -->
+    <section id="admin-users-section">
+        <article class="card card-pad card-dash sketch-card sketch-card--profile">
+            <div class="dash-head">
+                <div><h3>Gestión de Usuarios</h3><p>Administra los usuarios del sistema</p></div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button id="new-user-button" class="btn btn-primary"><span>+</span> Nuevo</button>
+                    <button id="bulk-edit-btn" class="btn btn-ghost" style="background:rgba(0,0,0,.06);color:var(--text-primary);border-color:rgba(0,0,0,.2)">Edición masiva</button>
+                    <button id="reset-db-btn" class="btn btn-ghost" style="background:rgba(220,38,38,.08);color:#b91c1c;border-color:rgba(220,38,38,.25)">Restablecer DB</button>
                 </div>
             </div>
-        </header>
+            <p id="admin-message" class="message is-hidden" role="status" aria-live="polite"></p>
 
-        <main class="wrap dashboard" aria-label="Panel de administración">
-            <section id="inicio" class="card card-pad card-dash sketch-banner sketch-banner--admin">
-                <span class="sketch-kicker">Centro de control</span>
-                <h2>Panel de Administración</h2>
-                <p>Bienvenido, <strong data-user-name>Administrador</strong></p>
-            </section>
+            <!-- Toolbar -->
+            <div class="admin-toolbar">
+                <input type="text" id="admin-search" placeholder="Buscar por nombre, email o rol…">
+                <select id="admin-filter-role"><option value="">Todos los roles</option><option value="user">Usuario</option><option value="coach">Coach</option><option value="admin">Admin</option></select>
+                <select id="admin-filter-level"><option value="">Todos los niveles</option><option value="principiante">Principiante</option><option value="intermedio">Intermedio</option><option value="avanzado">Avanzado</option></select>
+                <span id="admin-count-badge" style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap"></span>
+            </div>
 
-            <section class="sketch-grid-admin">
-                <article id="usuarios" class="card card-pad card-dash sketch-card sketch-card--profile">
-                    <div class="dash-head">
-                        <div>
-                            <h3>Gestión de Usuarios</h3>
-                            <p>Administra los usuarios del sistema desde esta sección.</p>
-                        </div>
-                        <button id="new-user-button" class="btn btn-primary">
-                            <span>+</span> Nuevo Usuario
-                        </button>
-                    </div>
-                    <p id="admin-message" class="message is-hidden" role="status" aria-live="polite"></p>
-                    <div class="table-responsive" aria-label="Ver perfiles">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre completo</th>
-                                    <th>Apellido paterno</th>
-                                    <th>Apellido materno</th>
-                                    <th>Email</th>
-                                    <th>Rol</th>
-                                    <th>Nivel</th>
-                                    <th>Salud</th>
-                                    <th>Fecha registro</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-users-table-body"></tbody>
-                        </table>
-                    </div>
+            <!-- Bulk toolbar -->
+            <div id="bulk-toolbar" class="is-hidden" style="margin-bottom:10px;padding:8px 12px;border-radius:12px;background:rgba(37,99,235,.08);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+                <span id="bulk-count" style="font-size:.85rem;font-weight:600"></span>
+                <select id="bulk-level" style="min-height:36px;border:1px solid rgba(100,116,139,.24);border-radius:10px;padding:4px 10px;font:inherit">
+                    <option value="">Cambiar nivel…</option>
+                    <option value="principiante">Principiante</option>
+                    <option value="intermedio">Intermedio</option>
+                    <option value="avanzado">Avanzado</option>
+                </select>
+                <button id="bulk-apply" class="btn btn-primary" style="min-height:36px;padding:6px 14px;font-size:.82rem">Aplicar</button>
+                <button id="bulk-cancel" class="btn btn-ghost" style="min-height:36px;padding:6px 14px;font-size:.82rem;background:rgba(0,0,0,.06);color:var(--text-primary);border-color:rgba(0,0,0,.2)">Cancelar</button>
+            </div>
 
-                    <div id="admin-user-form-section" class="card card-pad is-hidden" aria-label="Formulario de creación y edición de usuario">
-                        <h3 id="admin-user-form-title">Nuevo Usuario</h3>
-                        <form id="user-form" novalidate>
-                            <input type="hidden" id="editing-user-id" value="">
-                            <div class="form-group">
-                                <label for="admin-name">Nombre completo</label>
-                                <input type="text" id="admin-name" name="name" placeholder="Nombre del usuario">
-                                <p class="input-error"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-firstName">Nombre</label>
-                                <input type="text" id="admin-firstName" name="firstName" placeholder="Nombre">
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-lastNamePaternal">Apellido paterno</label>
-                                <input type="text" id="admin-lastNamePaternal" name="lastNamePaternal" placeholder="Apellido paterno">
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-lastNameMaternal">Apellido materno</label>
-                                <input type="text" id="admin-lastNameMaternal" name="lastNameMaternal" placeholder="Apellido materno">
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-email">Email</label>
-                                <input type="email" id="admin-email" name="email" placeholder="usuario@dominio.com">
-                                <p class="input-error"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-role">Rol</label>
-                                <select id="admin-role" name="role">
-                                    <option value="user">user</option>
-                                    <option value="coach">coach</option>
-                                    <option value="admin">admin</option>
-                                </select>
-                                <p class="input-error"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-password">Contraseña</label>
-                                <input type="password" id="admin-password" name="password" placeholder="Mínimo 8 caracteres">
-                                <p class="input-error"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-confirmPassword">Confirmar contraseña</label>
-                                <input type="password" id="admin-confirmPassword" name="confirmPassword" placeholder="Repite tu contraseña">
-                                <p class="input-error"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-birthDate">Fecha de nacimiento</label>
-                                <input type="date" id="admin-birthDate" name="birthDate">
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-age">Edad</label>
-                                <input type="number" id="admin-age" name="age" min="12" max="120" placeholder="Ej. 28">
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" id="admin-practiceDeporte" name="practiceDeporte" value="si">
-                                    ¿Practica deporte?
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-typeDeporte">Tipo de deporte</label>
-                                <input type="text" id="admin-typeDeporte" name="typeDeporte" placeholder="Ej. running, natación…">
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-objectivePersonal">Objetivo personal</label>
-                                <input type="text" id="admin-objectivePersonal" name="objectivePersonal" placeholder="Ej. mejorar resistencia">
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-level">Nivel</label>
-                                <select id="admin-level" name="level">
-                                    <option value="" selected>Selecciona una opción</option>
-                                    <option value="principiante">Principiante</option>
-                                    <option value="intermedio">Intermedio</option>
-                                    <option value="avanzado">Avanzado</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-infoAdicional">Información adicional</label>
-                                <textarea id="admin-infoAdicional" name="infoAdicional" placeholder="Lesiones, horarios preferidos, comentarios…"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-healthCondition">Condición de salud</label>
-                                <textarea id="admin-healthCondition" name="healthCondition" placeholder="Problemas de salud, lesiones o restricciones médicas"></textarea>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" id="admin-user-form-submit">Guardar usuario</button>
-                                <button type="button" class="btn btn-ghost" id="cancel-user-form">Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
-                </article>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead><tr>
+                        <th><input type="checkbox" id="select-all"></th>
+                        <th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Nivel</th><th>Salud</th><th>Registro</th><th>Acciones</th>
+                    </tr></thead>
+                    <tbody id="admin-users-table-body"></tbody>
+                </table>
+            </div>
+        </article>
+    </section>
 
-                <article id="estadisticas" class="card card-pad card-dash sketch-card sketch-card--table">
-                    <h3>Estadísticas del sistema</h3>
-                    <div class="sketch-table sketch-table-admin">
-                        <div><strong>Nombre</strong></div><div><strong>Email</strong></div><div><strong>Rol</strong></div>
-                        <div>Usuario 1</div><div>u1@email.com</div><div><a class="btn btn-ghost" href="dashboard_admin.html#usuarios">Editar</a></div>
-                        <div>Usuario 2</div><div>u2@email.com</div><div><a class="btn btn-ghost" href="dashboard_admin.html#usuarios">Editar</a></div>
-                        <div>Usuario 3</div><div>u3@email.com</div><div><a class="btn btn-ghost" href="dashboard_admin.html#usuarios">Editar</a></div>
-                    </div>
-                </article>
+    <!-- Activity Log -->
+    <section id="admin-activity-section" class="admin-activity is-hidden"></section>
 
-                <article id="configuracion" class="card card-pad card-dash sketch-card sketch-card--report">
-                    <h3>Reportes generales</h3>
-                    <ul class="sketch-action-list">
-                        <li><span>Informe mensual</span><a class="btn btn-ghost" href="dashboard_admin.html#configuracion">Descargar</a></li>
-                        <li><span>Abril</span><a class="btn btn-ghost" href="dashboard_admin.html#configuracion">Descargar</a></li>
-                    </ul>
-                    <a id="reportes" class="btn btn-ghost sketch-config-btn" href="dashboard_admin.html#inicio">Configurar...</a>
-                </article>
-            </section>
+    <!-- Danger Zone -->
+    <section id="admin-danger-section" class="admin-danger is-hidden">
+        <h4>Zona de peligro</h4>
+        <p style="font-size:.85rem;margin:0 0 10px">Restablece la base de datos a los usuarios oficiales (@sportclub.cl). Los usuarios registrados se perderán.</p>
+        <button id="confirm-reset-btn" class="btn btn-ghost" style="background:rgba(220,38,38,.12);color:#b91c1c;border-color:rgba(220,38,38,.3)">Sí, restablecer ahora</button>
+        <button id="cancel-reset-btn" class="btn btn-ghost" style="background:rgba(0,0,0,.06);color:var(--text-primary);border-color:rgba(0,0,0,.2)">Cancelar</button>
+    </section>
+</main>
 
-            <section class="sketch-extra-grid">
-                <article class="card card-pad card-dash sketch-card">
-                    <h3>Alertas del sistema</h3>
-                    <ul class="timeline-list">
-                        <li><strong>Servidor de reportes</strong> Respuesta lenta detectada.</li>
-                        <li><strong>Reservas</strong> Pico de demanda en horario 18:00.</li>
-                        <li><strong>Usuarios</strong> 12 altas nuevas en las últimas 24h.</li>
-                    </ul>
-                </article>
-
-                <article class="card card-pad card-dash sketch-card sketch-card--report">
-                    <h3>Actividad reciente</h3>
-                    <div class="mini-stats">
-                        <div class="mini-stat"><span>Tickets abiertos</span><strong>4</strong></div>
-                        <div class="mini-stat"><span>Descargas hoy</span><strong>19</strong></div>
-                        <div class="mini-stat"><span>Sesiones activas</span><strong>83</strong></div>
-                    </div>
-                    <div class="progress-line progress-line--glow" style="--p: 86" role="progressbar" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100">
-                        <span class="progress-line__fill"></span>
-                    </div>
-                </article>
-            </section>
-        </main>
-
-        <section id="perfil-editar" class="wrap card card-pad card-dash is-hidden" style="margin-top:16px">
-            <article class="card card-pad card-dash sketch-card compact-profile">
-                <div class="avatar-circle" style="width:82px;height:82px"></div>
-                <div>
-                    <h3 data-user-name>Administrador</h3>
-                    <p><strong>Email:</strong> <span data-user-email>admin@sportclub.cl</span></p>
-                    <p><strong>Rol:</strong> <span data-user-role>admin</span></p>
-                    <p><strong>Fecha de nacimiento:</strong> <span data-user-birthdate>-</span></p>
-                    <p><strong>Objetivo:</strong> <span data-user-objective>Administrar el club</span></p>
-                </div>
-            </article>
-            <article class="card card-pad sketch-card">
-                <h3>Datos personales</h3>
-                <form id="profile-form" novalidate>
-                    <div class="form-group">
-                        <label for="profile-name">Nombre completo</label>
-                        <input type="text" id="profile-name" name="name" placeholder="Tu nombre completo">
-                        <p class="input-error"></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-birthDate">Fecha de nacimiento</label>
-                        <input type="date" id="profile-birthDate" name="birthDate">
-                        <p class="input-error"></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-age">Edad</label>
-                        <input type="number" id="profile-age" name="age" min="12" max="120" placeholder="Ej. 28">
-                        <p class="input-error"></p>
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="profile-practiceDeporte" name="practiceDeporte" value="si"> Practicas deporte</label>
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-typeDeporte">Tipo de deporte</label>
-                        <input type="text" id="profile-typeDeporte" name="typeDeporte" placeholder="Ej. running, natacion...">
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-objectivePersonal">Objetivo personal</label>
-                        <input type="text" id="profile-objectivePersonal" name="objectivePersonal" placeholder="Ej. mejorar resistencia">
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-level">Nivel</label>
-                        <select id="profile-level" name="level">
-                            <option value="" selected>Selecciona una opcion</option>
-                            <option value="principiante">Principiante</option>
-                            <option value="intermedio">Intermedio</option>
-                            <option value="avanzado">Avanzado</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-infoAdicional">Informacion adicional</label>
-                        <textarea id="profile-infoAdicional" name="infoAdicional" placeholder="Lesiones, horarios preferidos, comentarios..."></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                        <a class="btn btn-ghost" href="#" onclick="return togglePerfil()">Cerrar</a>
-                    </div>
-                    <p id="profile-message" class="message is-hidden" role="status" aria-live="polite"></p>
-                </form>
-            </article>
-            <article class="card card-pad sketch-card">
-                <h3>Cambiar contrasena</h3>
-                <form id="password-form" novalidate>
-                    <div class="form-group">
-                        <label for="current-password">Contrasena actual</label>
-                        <input type="password" id="current-password" name="currentPassword" placeholder="Contrasena actual">
-                        <p class="input-error"></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="new-password">Nueva contrasena</label>
-                        <input type="password" id="new-password" name="newPassword" placeholder="Nueva contrasena">
-                        <p class="input-error"></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirm-new-password">Confirmar nueva contrasena</label>
-                        <input type="password" id="confirm-new-password" name="confirmPassword" placeholder="Repite la nueva contrasena">
-                        <p class="input-error"></p>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Guardar contrasena</button>
-                    </div>
-                    <p id="password-message" class="message is-hidden" role="status" aria-live="polite"></p>
-                </form>
-            </article>
-        </section>
+<!-- Modal -->
+<div id="user-modal" class="modal-overlay">
+    <div class="modal-card">
+        <h3 id="modal-title">Nuevo Usuario</h3>
+        <form id="user-form" novalidate>
+            <input type="hidden" id="editing-user-id" value="">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px">
+                <div class="form-group"><label for="admin-name">Nombre completo</label><input type="text" id="admin-name" placeholder="Nombre del usuario"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-firstName">Nombre</label><input type="text" id="admin-firstName" placeholder="Nombre"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-lastNamePaternal">Apellido paterno</label><input type="text" id="admin-lastNamePaternal" placeholder="Apellido paterno"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-lastNameMaternal">Apellido materno</label><input type="text" id="admin-lastNameMaternal" placeholder="Apellido materno"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-email">Email</label><input type="email" id="admin-email" placeholder="usuario@dominio.com"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-role">Rol</label><select id="admin-role"><option value="user">user</option><option value="coach">coach</option><option value="admin">admin</option></select><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-password">Contraseña</label><input type="password" id="admin-password" placeholder="Mínimo 8 caracteres"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-confirmPassword">Confirmar</label><input type="password" id="admin-confirmPassword" placeholder="Repite la contraseña"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-birthDate">Fecha nacimiento</label><input type="date" id="admin-birthDate"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-age">Edad</label><input type="number" id="admin-age" min="12" max="120" placeholder="Ej. 28"><p class="input-error"></p></div>
+                <div class="form-group"><label><input type="checkbox" id="admin-practiceDeporte" value="si"> Practica deporte</label></div>
+                <div class="form-group"><label for="admin-typeDeporte">Tipo de deporte</label><input type="text" id="admin-typeDeporte" placeholder="Ej. running"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-objectivePersonal">Objetivo</label><input type="text" id="admin-objectivePersonal" placeholder="Ej. mejorar resistencia"><p class="input-error"></p></div>
+                <div class="form-group"><label for="admin-level">Nivel</label><select id="admin-level"><option value="">Selecciona</option><option value="principiante">Principiante</option><option value="intermedio">Intermedio</option><option value="avanzado">Avanzado</option></select><p class="input-error"></p></div>
+                <div style="grid-column:1/-1" class="form-group"><label for="admin-infoAdicional">Info adicional</label><textarea id="admin-infoAdicional" placeholder="Lesiones, horarios…"></textarea><p class="input-error"></p></div>
+                <div style="grid-column:1/-1" class="form-group"><label for="admin-healthCondition">Condición de salud</label><textarea id="admin-healthCondition" placeholder="Problemas de salud o lesiones"></textarea><p class="input-error"></p></div>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary" id="admin-user-form-submit">Guardar usuario</button>
+                <button type="button" class="btn btn-ghost" id="cancel-user-form" style="background:rgba(0,0,0,.06);color:var(--text-primary);border-color:rgba(0,0,0,.2)">Cancelar</button>
+            </div>
+        </form>
     </div>
-    <script>
-        function togglePerfil() {
-            var el = document.getElementById('perfil-editar');
-            if (!el) return false;
-            el.classList.toggle('is-hidden');
-            if (!el.classList.contains('is-hidden')) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            return false;
-        }
-    </script>
-    <script src="js/auth.js"></script>
+</div>
+
+<!-- Perfil -->
+<section id="perfil-editar" class="wrap card card-pad card-dash is-hidden" style="margin-top:16px">
+    <article class="card card-pad card-dash sketch-card compact-profile">
+        <div class="avatar-circle" style="width:82px;height:82px"></div>
+        <div>
+            <h3 data-user-name>Administrador</h3>
+            <p><strong>Email:</strong> <span data-user-email>admin@sportclub.cl</span></p>
+            <p><strong>Rol:</strong> <span data-user-role>admin</span></p>
+            <p><strong>Fecha nacimiento:</strong> <span data-user-birthdate>-</span></p>
+            <p><strong>Objetivo:</strong> <span data-user-objective>Administrar el club</span></p>
+        </div>
+    </article>
+    <article class="card card-pad sketch-card">
+        <h3>Datos personales</h3>
+        <form id="profile-form" novalidate>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px">
+                <div class="form-group"><label for="profile-name">Nombre completo</label><input type="text" id="profile-name" placeholder="Tu nombre completo"><p class="input-error"></p></div>
+                <div class="form-group"><label for="profile-birthDate">Fecha nacimiento</label><input type="date" id="profile-birthDate"><p class="input-error"></p></div>
+                <div class="form-group"><label for="profile-age">Edad</label><input type="number" id="profile-age" min="12" max="120" placeholder="Ej. 28"><p class="input-error"></p></div>
+                <div class="form-group"><label><input type="checkbox" id="profile-practiceDeporte" value="si"> Practicas deporte</label></div>
+                <div class="form-group"><label for="profile-typeDeporte">Tipo de deporte</label><input type="text" id="profile-typeDeporte" placeholder="Ej. running"><p class="input-error"></p></div>
+                <div class="form-group"><label for="profile-objectivePersonal">Objetivo</label><input type="text" id="profile-objectivePersonal" placeholder="Ej. mejorar resistencia"><p class="input-error"></p></div>
+                <div class="form-group"><label for="profile-level">Nivel</label><select id="profile-level"><option value="">Selecciona</option><option value="principiante">Principiante</option><option value="intermedio">Intermedio</option><option value="avanzado">Avanzado</option></select></div>
+                <div class="form-group"><label for="profile-infoAdicional">Info adicional</label><textarea id="profile-infoAdicional" placeholder="Lesiones, horarios…"></textarea></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">Guardar cambios</button><a class="btn btn-ghost" href="#" onclick="return togglePerfil()" style="background:rgba(0,0,0,.06);color:var(--text-primary);border-color:rgba(0,0,0,.2)">Cerrar</a></div>
+            <p id="profile-message" class="message is-hidden" role="status" aria-live="polite"></p>
+        </form>
+    </article>
+    <article class="card card-pad sketch-card">
+        <h3>Cambiar contraseña</h3>
+        <form id="password-form" novalidate>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                <div class="form-group"><label for="current-password">Actual</label><input type="password" id="current-password" placeholder="Actual"><p class="input-error"></p></div>
+                <div class="form-group"><label for="new-password">Nueva</label><input type="password" id="new-password" placeholder="Nueva"><p class="input-error"></p></div>
+                <div class="form-group"><label for="confirm-new-password">Confirmar</label><input type="password" id="confirm-new-password" placeholder="Confirmar"><p class="input-error"></p></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">Guardar contraseña</button></div>
+            <p id="password-message" class="message is-hidden" role="status" aria-live="polite"></p>
+        </form>
+    </article>
+</section>
+
+</div>
+<script>
+function togglePerfil() { var e=document.getElementById('perfil-editar'); if(!e) return false; e.classList.toggle('is-hidden'); if(!e.classList.contains('is-hidden')) e.scrollIntoView({behavior:'smooth',block:'start'}); return false; }
+function adminNav(section) {
+    document.querySelectorAll('.nav a').forEach(function(a){a.classList.remove('is-active')});
+    var links = document.querySelectorAll('.nav a');
+    if(section==='dashboard') links[0].classList.add('is-active');
+    else if(section==='usuarios') links[1].classList.add('is-active');
+    else if(section==='estadisticas') links[2].classList.add('is-active');
+    else if(section==='configuracion') links[3].classList.add('is-active');
+    document.getElementById('admin-users-section').style.display = (section==='usuarios'||section==='dashboard') ? '' : 'none';
+    document.getElementById('admin-stats-section').style.display = (section==='dashboard') ? '' : 'none';
+    document.getElementById('admin-activity-section').classList.toggle('is-hidden', section!=='configuracion');
+    document.getElementById('admin-danger-section').classList.toggle('is-hidden', section!=='configuracion');
+    return false;
+}
+</script>
+<script src="js/auth.js?v=4"></script>
 </body>
 </html>

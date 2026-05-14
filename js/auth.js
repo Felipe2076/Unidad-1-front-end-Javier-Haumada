@@ -884,26 +884,47 @@ function handleRegisterPage() {
 }
 
 function handleAdminPage() {
-    const tableBody = document.querySelector("#admin-users-table-body");
+    var tableBody = document.querySelector("#admin-users-table-body");
     if (!tableBody) return;
 
-    const adminMessage = document.querySelector("#admin-message");
-    const adminFormSection = document.querySelector("#admin-user-form-section");
-    const adminForm = document.querySelector("#user-form");
-    const newUserButton = document.querySelector("#new-user-button");
-    const cancelUserFormButton = document.querySelector("#cancel-user-form");
-    const formTitle = document.querySelector("#admin-user-form-title");
-    const submitButton = document.querySelector("#admin-user-form-submit");
+    var adminMessage = document.querySelector("#admin-message");
+    var adminForm = document.querySelector("#user-form");
+    var modal = document.querySelector("#user-modal");
+    var newUserButton = document.querySelector("#new-user-button");
+    var cancelBtn = document.querySelector("#cancel-user-form");
+    var modalTitle = document.querySelector("#modal-title");
+    var submitBtn = document.querySelector("#admin-user-form-submit");
+    var searchInput = document.querySelector("#admin-search");
+    var filterRole = document.querySelector("#admin-filter-role");
+    var filterLevel = document.querySelector("#admin-filter-level");
+    var countBadge = document.querySelector("#admin-count-badge");
+    var selectAll = document.querySelector("#select-all");
+    var bulkToolbar = document.querySelector("#bulk-toolbar");
+    var bulkCount = document.querySelector("#bulk-count");
+    var bulkLevel = document.querySelector("#bulk-level");
+    var bulkApply = document.querySelector("#bulk-apply");
+    var bulkCancel = document.querySelector("#bulk-cancel");
+    var resetBtn = document.querySelector("#reset-db-btn");
+    var confirmReset = document.querySelector("#confirm-reset-btn");
+    var cancelReset = document.querySelector("#cancel-reset-btn");
+    var activitySection = document.querySelector("#admin-activity-section");
+    var statsSection = document.querySelector("#admin-stats-section");
 
-    let editingUserId = null;
+    var editingUserId = null;
+    var allUsers = [];
+    var filteredUsers = [];
+    var selectedIds = {};
+    var activityLog = [];
+
+    function capitalize(str) { return String(str || "").trim().replace(/^\w/, function(c) { return c.toUpperCase(); }); }
 
     function getUserFormData() {
         return {
             id: editingUserId,
-            name: document.querySelector("#admin-name").value.trim(),
-            firstName: document.querySelector("#admin-firstName").value.trim(),
-            lastNamePaternal: document.querySelector("#admin-lastNamePaternal").value.trim(),
-            lastNameMaternal: document.querySelector("#admin-lastNameMaternal").value.trim(),
+            name: capitalize(document.querySelector("#admin-name").value),
+            firstName: capitalize(document.querySelector("#admin-firstName").value),
+            lastNamePaternal: capitalize(document.querySelector("#admin-lastNamePaternal").value),
+            lastNameMaternal: capitalize(document.querySelector("#admin-lastNameMaternal").value),
             email: normalizeEmail(document.querySelector("#admin-email").value),
             role: document.querySelector("#admin-role").value,
             password: document.querySelector("#admin-password").value,
@@ -919,181 +940,303 @@ function handleAdminPage() {
         };
     }
 
-    function updateFormTitle() {
-        formTitle.textContent = editingUserId ? "Editar Usuario" : "Nuevo Usuario";
-        submitButton.textContent = editingUserId ? "Actualizar usuario" : "Crear usuario";
+    function formatLevelBadge(level) {
+        if (!level) return '<span class="admin-level-badge">-</span>';
+        var cls = "admin-level-badge--" + level;
+        var lbl = level.charAt(0).toUpperCase() + level.slice(1);
+        return '<span class="admin-level-badge ' + cls + '">' + lbl + '</span>';
     }
 
-    function resetAdminForm() {
-        editingUserId = null;
-        adminForm.reset();
-        document.querySelector("#editing-user-id").value = "";
-        updateFormTitle();
-        clearMessage(adminMessage);
-        clearInputErrors(adminForm);
-        if (adminFormSection) {
-            adminFormSection.classList.add("is-hidden");
-        }
+    function addActivity(action) {
+        activityLog.unshift({ action: action, time: new Date().toLocaleTimeString() });
+        if (activityLog.length > 20) activityLog.pop();
+        renderActivity();
     }
 
-    function fillAdminForm(user) {
-        editingUserId = user.id;
-        document.querySelector("#editing-user-id").value = user.id;
-        document.querySelector("#admin-name").value = user.name || "";
-        document.querySelector("#admin-firstName").value = user.firstName || "";
-        document.querySelector("#admin-lastNamePaternal").value = user.lastNamePaternal || "";
-        document.querySelector("#admin-lastNameMaternal").value = user.lastNameMaternal || "";
-        document.querySelector("#admin-email").value = user.user || "";
-        document.querySelector("#admin-role").value = user.role || "user";
-        document.querySelector("#admin-password").value = "";
-        document.querySelector("#admin-confirmPassword").value = "";
-        document.querySelector("#admin-birthDate").value = user.birthDate || "";
-        document.querySelector("#admin-age").value = user.age || "";
-        document.querySelector("#admin-practiceDeporte").checked = !!user.practiceDeporte;
-        document.querySelector("#admin-typeDeporte").value = user.typeDeporte || "";
-        document.querySelector("#admin-objectivePersonal").value = user.objectivePersonal || "";
-        document.querySelector("#admin-level").value = user.level || "";
-        document.querySelector("#admin-infoAdicional").value = user.infoAdicional || "";
-        document.querySelector("#admin-healthCondition").value = user.healthCondition || user.infoAdicional || "";
-        updateFormTitle();
-        adminFormSection.classList.remove("is-hidden");
+    function renderActivity() {
+        if (!activitySection) return;
+        if (activityLog.length === 0) { activitySection.innerHTML = ""; activitySection.classList.add("is-hidden"); return; }
+        activitySection.classList.remove("is-hidden");
+        activitySection.innerHTML = "<h4>Últimos cambios</h4><ul>" + activityLog.map(function(e) {
+            return "<li><strong>" + escapeHTML(e.time) + "</strong> — " + escapeHTML(e.action) + "</li>";
+        }).join("") + "</ul>";
+    }
+
+    function renderStats(users) {
+        if (!statsSection) return;
+        var total = users.length;
+        var riesgo = users.filter(function(u) {
+            var h = (u.healthCondition || u.infoAdicional || "").toLowerCase();
+            return h && h !== "ninguna" && h !== "n/a" && h !== "optima" && h !== "ninguno" && h !== "sin lesiones declaradas." && h !== "sin restricciones medicas.";
+        }).length;
+        var niveles = { principiante: 0, intermedio: 0, avanzado: 0 };
+        users.forEach(function(u) { if (niveles[u.level] !== undefined) niveles[u.level]++; });
+        statsSection.innerHTML =
+            '<div class="admin-stat-card"><p class="admin-stat-card__label">Total alumnos</p><p class="admin-stat-card__value">' + total + '</p></div>' +
+            '<div class="admin-stat-card"><p class="admin-stat-card__label">Con observaciones de salud</p><p class="admin-stat-card__value">' + riesgo + '</p></div>' +
+            '<div class="admin-stat-card"><p class="admin-stat-card__label">Distribución por nivel</p><p class="admin-stat-card__value" style="font-size:1rem">' +
+            'P: ' + niveles.principiante + ' · I: ' + niveles.intermedio + ' · A: ' + niveles.avanzado + '</p></div>';
     }
 
     function renderUsersTable(users) {
+        filteredUsers = users;
+        allUsers = users;
         if (!users || users.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan=10>No hay usuarios registrados.</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan=9>No hay usuarios registrados.</td></tr>";
+            if (countBadge) countBadge.textContent = "0 usuarios";
+            renderStats([]);
             return;
         }
+        tableBody.innerHTML = users.map(function(user) {
+            var userId = escapeHTML(user.id);
+            var userName = escapeHTML(user.name);
+            var userEmail = escapeHTML(user.user);
+            var userCreatedAt = escapeHTML(formatDate(user.createdAt));
+            var userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
+            var isProtected = user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl");
+            var checked = selectedIds[user.id] ? "checked" : "";
+            return '<tr class="' + (isProtected ? 'protected' : '') + '">' +
+                '<td><input type="checkbox" class="user-check" data-id="' + userId + '" ' + checked + '></td>' +
+                '<td>' + userId + '</td>' +
+                '<td><strong>' + userName + '</strong></td>' +
+                '<td>' + userEmail + '</td>' +
+                '<td>' + getRoleBadge(user.role) + '</td>' +
+                '<td>' + formatLevelBadge(user.level) + '</td>' +
+                '<td>' + userHealth + '</td>' +
+                '<td>' + userCreatedAt + '</td>' +
+                '<td>' +
+                (isProtected ? '<span style="font-size:.7rem;color:var(--text-secondary)">Protegido</span>' :
+                '<button type="button" data-edit-id="' + userId + '" class="btn btn-ghost admin-action-button" style="padding:4px 8px;font-size:.78rem">Editar</button>' +
+                ' <button type="button" data-delete-id="' + userId + '" class="btn btn-danger admin-action-button" style="padding:4px 8px;font-size:.78rem">Eliminar</button>') +
+                '</td></tr>';
+        }).join("");
+        if (countBadge) countBadge.textContent = users.length + " usuarios";
+        renderStats(users);
+    }
 
-        tableBody.innerHTML = users
-            .map(function (user) {
-                const userId = escapeHTML(user.id);
-                const userName = escapeHTML(user.name);
-                const userLastNamePaternal = escapeHTML(user.lastNamePaternal || "-");
-                const userLastNameMaternal = escapeHTML(user.lastNameMaternal || "-");
-                const userEmail = escapeHTML(user.user);
-                const userCreatedAt = escapeHTML(formatDate(user.createdAt));
-                const userLevel = escapeHTML(user.level || "-");
-                const userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
+    function applyFilters() {
+        var q = (searchInput ? searchInput.value : "").toLowerCase().trim();
+        var r = filterRole ? filterRole.value : "";
+        var l = filterLevel ? filterLevel.value : "";
+        var result = allUsers.filter(function(u) {
+            if (r && u.role !== r) return false;
+            if (l && u.level !== l) return false;
+            if (q) {
+                var name = (u.name || "").toLowerCase();
+                var email = (u.user || "").toLowerCase();
+                var role = u.role || "";
+                if (name.indexOf(q) === -1 && email.indexOf(q) === -1 && role.indexOf(q) === -1) return false;
+            }
+            return true;
+        });
+        filteredUsers = result;
+        tableBody.innerHTML = result.map(function(user) {
+            var userId = escapeHTML(user.id);
+            var userName = escapeHTML(user.name);
+            var userEmail = escapeHTML(user.user);
+            var userCreatedAt = escapeHTML(formatDate(user.createdAt));
+            var userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
+            var isProtected = user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl");
+            var checked = selectedIds[user.id] ? "checked" : "";
+            return '<tr class="' + (isProtected ? 'protected' : '') + '">' +
+                '<td><input type="checkbox" class="user-check" data-id="' + userId + '" ' + checked + '></td>' +
+                '<td>' + userId + '</td>' +
+                '<td><strong>' + userName + '</strong></td>' +
+                '<td>' + userEmail + '</td>' +
+                '<td>' + getRoleBadge(user.role) + '</td>' +
+                '<td>' + formatLevelBadge(user.level) + '</td>' +
+                '<td>' + userHealth + '</td>' +
+                '<td>' + userCreatedAt + '</td>' +
+                '<td>' +
+                (isProtected ? '<span style="font-size:.7rem;color:var(--text-secondary)">Protegido</span>' :
+                '<button type="button" data-edit-id="' + userId + '" class="btn btn-ghost admin-action-button" style="padding:4px 8px;font-size:.78rem">Editar</button>' +
+                ' <button type="button" data-delete-id="' + userId + '" class="btn btn-danger admin-action-button" style="padding:4px 8px;font-size:.78rem">Eliminar</button>') +
+                '</td></tr>';
+        }).join("");
+        if (countBadge) countBadge.textContent = result.length + " de " + allUsers.length + " usuarios";
+    }
 
-                return `
-                    <tr>
-                        <td>${userId}</td>
-                        <td>${userName}</td>
-                        <td>${userLastNamePaternal}</td>
-                        <td>${userLastNameMaternal}</td>
-                        <td>${userEmail}</td>
-                        <td>${getRoleBadge(user.role)}</td>
-                        <td>${userLevel}</td>
-                        <td>${userHealth}</td>
-                        <td>${userCreatedAt}</td>
-                        <td>
-                            <button type="button" data-edit-id="${userId}" class="btn btn-ghost admin-action-button">Editar</button>
-                            <button type="button" data-delete-id="${userId}" class="btn btn-danger admin-action-button">Eliminar</button>
-                        </td>
-                    </tr>
-                `;
-            })
-            .join("");
+    function openModal(editing) {
+        editingUserId = editing ? editing.id : null;
+        modalTitle.textContent = editing ? "Editar Usuario" : "Nuevo Usuario";
+        submitBtn.textContent = editing ? "Actualizar usuario" : "Crear usuario";
+        document.querySelector("#editing-user-id").value = editing ? editing.id : "";
+        if (editing) {
+            document.querySelector("#admin-name").value = editing.name || "";
+            document.querySelector("#admin-firstName").value = editing.firstName || "";
+            document.querySelector("#admin-lastNamePaternal").value = editing.lastNamePaternal || "";
+            document.querySelector("#admin-lastNameMaternal").value = editing.lastNameMaternal || "";
+            document.querySelector("#admin-email").value = editing.user || "";
+            document.querySelector("#admin-role").value = editing.role || "user";
+            document.querySelector("#admin-birthDate").value = editing.birthDate || "";
+            document.querySelector("#admin-age").value = editing.age || "";
+            document.querySelector("#admin-practiceDeporte").checked = !!editing.practiceDeporte;
+            document.querySelector("#admin-typeDeporte").value = editing.typeDeporte || "";
+            document.querySelector("#admin-objectivePersonal").value = editing.objectivePersonal || "";
+            document.querySelector("#admin-level").value = editing.level || "";
+            document.querySelector("#admin-infoAdicional").value = editing.infoAdicional || "";
+            document.querySelector("#admin-healthCondition").value = editing.healthCondition || editing.infoAdicional || "";
+            document.querySelector("#admin-password").value = "";
+            document.querySelector("#admin-confirmPassword").value = "";
+        } else {
+            adminForm.reset();
+            document.querySelector("#editing-user-id").value = "";
+        }
+        clearInputErrors(adminForm);
+        if (modal) modal.classList.add("is-active");
+    }
+
+    function closeModal() {
+        editingUserId = null;
+        if (modal) modal.classList.remove("is-active");
+        clearMessage(adminMessage);
     }
 
     async function loadAdminUsers() {
         clearMessage(adminMessage);
-
-        const result = await tryFetchUsers();
+        var result = await tryFetchUsers();
         if (result.success) {
-            renderUsersTable(result.users);
+            allUsers = result.users || [];
+            applyFilters();
             return;
         }
-
-        setMessage(adminMessage, result.error || "No se pudo cargar la lista de usuarios.", "message-error");
+        setMessage(adminMessage, result.error || "No se pudo cargar la lista.", "message-error");
     }
 
-    newUserButton.addEventListener("click", function () {
-        adminForm.reset();
-        editingUserId = null;
-        updateFormTitle();
-        clearInputErrors(adminForm);
-        adminFormSection.classList.remove("is-hidden");
-    });
+    // === EVENT LISTENERS ===
 
-    cancelUserFormButton.addEventListener("click", function () {
-        resetAdminForm();
-    });
+    if (newUserButton) newUserButton.addEventListener("click", function() { openModal(null); });
+    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+    if (modal) modal.addEventListener("click", function(e) { if (e.target === modal) closeModal(); });
 
-    adminForm.addEventListener("submit", async function (event) {
+    if (adminForm) adminForm.addEventListener("submit", async function(event) {
         event.preventDefault();
         clearInputErrors(adminForm);
         clearMessage(adminMessage);
-
-        const payload = getUserFormData();
-
-        if (!payload.name) {
-            setInputError(document.querySelector("#admin-name"), "El nombre es obligatorio.");
-            return;
-        }
-
-        if (!payload.email) {
-            setInputError(document.querySelector("#admin-email"), "El email es obligatorio.");
-            return;
-        }
-
-        if (!editingUserId && !payload.password) {
-            setInputError(document.querySelector("#admin-password"), "La contraseña es obligatoria para un nuevo usuario.");
-            return;
-        }
-
-        if (payload.password && payload.password.length < 8) {
-            setInputError(document.querySelector("#admin-password"), "La contraseña debe tener al menos 8 caracteres.");
-            return;
-        }
-
-        if (payload.password && payload.password !== payload.confirmPassword) {
-            setInputError(document.querySelector("#admin-confirmPassword"), "Las contraseñas no coinciden.");
-            return;
-        }
-
-        const result = editingUserId ? await tryUpdateUser(editingUserId, payload) : await tryCreateUser(payload);
-
-        if (!result.success) {
-            setMessage(adminMessage, result.error || "Error al guardar el usuario.", "message-error");
-            return;
-        }
-
+        var payload = getUserFormData();
+        if (!payload.name) { setInputError(document.querySelector("#admin-name"), "El nombre es obligatorio."); return; }
+        if (!payload.email) { setInputError(document.querySelector("#admin-email"), "El email es obligatorio."); return; }
+        if (!editingUserId && !payload.password) { setInputError(document.querySelector("#admin-password"), "La contraseña es obligatoria."); return; }
+        if (payload.password && payload.password.length < 8) { setInputError(document.querySelector("#admin-password"), "Mínimo 8 caracteres."); return; }
+        if (payload.password && payload.password !== payload.confirmPassword) { setInputError(document.querySelector("#admin-confirmPassword"), "No coinciden."); return; }
+        var result = editingUserId ? await tryUpdateUser(editingUserId, payload) : await tryCreateUser(payload);
+        if (!result.success) { setMessage(adminMessage, result.error || "Error.", "message-error"); return; }
         await loadAdminUsers();
-        setMessage(adminMessage, editingUserId ? "Usuario actualizado correctamente." : "Usuario creado correctamente.", "message-success");
-        resetAdminForm();
+        var action = editingUserId ? "actualizado" : "creado";
+        setMessage(adminMessage, "Usuario " + action + " correctamente.", "message-success");
+        addActivity("Usuario " + action + ": " + payload.email);
+        closeModal();
     });
 
-    tableBody.addEventListener("click", async function (event) {
-        const editButton = event.target.closest("[data-edit-id]");
-        const deleteButton = event.target.closest("[data-delete-id]");
-
-        if (editButton) {
-            const userId = editButton.dataset.editId;
-            const result = await tryFetchUser(userId);
-            if (!result.success) {
-                setMessage(adminMessage, result.error || "No se pudo cargar el usuario.", "message-error");
-                return;
-            }
-            fillAdminForm(result.user);
+    if (tableBody) tableBody.addEventListener("click", async function(event) {
+        var editBtn = event.target.closest("[data-edit-id]");
+        var deleteBtn = event.target.closest("[data-delete-id]");
+        if (editBtn) {
+            var userId = editBtn.dataset.editId;
+            var result = await tryFetchUser(userId);
+            if (!result.success) { setMessage(adminMessage, result.error || "Error.", "message-error"); return; }
+            openModal(result.user);
             return;
         }
-
-        if (deleteButton) {
-            const userId = deleteButton.dataset.deleteId;
-            const confirmDelete = window.confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.");
-            if (!confirmDelete) {
+        if (deleteBtn) {
+            var userId = deleteBtn.dataset.deleteId;
+            var user = allUsers.find(function(u) { return String(u.id) === userId; });
+            if (!user) return;
+            if (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl")) {
+                setMessage(adminMessage, "No puedes eliminar al administrador principal.", "message-error");
                 return;
             }
-            const result = await tryDeleteUser(userId);
-            if (!result.success) {
-                setMessage(adminMessage, result.error || "No se pudo eliminar el usuario.", "message-error");
-                return;
-            }
+            if (!window.confirm("¿Eliminar a " + (user.name || "este usuario") + "? Esta acción no se puede deshacer.")) return;
+            if (!window.confirm("Confirmación: ¿Estás seguro?")) return;
+            var result = await tryDeleteUser(userId);
+            if (!result.success) { setMessage(adminMessage, result.error || "Error.", "message-error"); return; }
             await loadAdminUsers();
-            setMessage(adminMessage, "Usuario eliminado correctamente.", "message-success");
+            setMessage(adminMessage, "Usuario eliminado.", "message-success");
+            addActivity("Usuario eliminado: " + user.email);
         }
+    });
+
+    // Search & filters
+    if (searchInput) searchInput.addEventListener("input", applyFilters);
+    if (filterRole) filterRole.addEventListener("change", applyFilters);
+    if (filterLevel) filterLevel.addEventListener("change", applyFilters);
+
+    // Select all
+    if (selectAll) selectAll.addEventListener("change", function() {
+        var checked = selectAll.checked;
+        selectedIds = {};
+        if (checked) {
+            filteredUsers.forEach(function(u) { selectedIds[u.id] = true; });
+        }
+        applyFilters();
+        updateBulkToolbar();
+    });
+
+    // Individual checkboxes via delegation
+    if (tableBody) tableBody.addEventListener("change", function(event) {
+        var cb = event.target.closest(".user-check");
+        if (!cb) return;
+        var id = parseInt(cb.dataset.id, 10);
+        if (cb.checked) selectedIds[id] = true;
+        else delete selectedIds[id];
+        updateBulkToolbar();
+    });
+
+    function updateBulkToolbar() {
+        var ids = Object.keys(selectedIds);
+        var count = ids.length;
+        if (count === 0) { if (bulkToolbar) bulkToolbar.classList.add("is-hidden"); return; }
+        if (bulkToolbar) { bulkToolbar.classList.remove("is-hidden"); }
+        if (bulkCount) bulkCount.textContent = count + " seleccionados";
+    }
+
+    if (bulkCancel) bulkCancel.addEventListener("click", function() {
+        selectedIds = {};
+        if (selectAll) selectAll.checked = false;
+        applyFilters();
+        updateBulkToolbar();
+    });
+
+    if (bulkApply) bulkApply.addEventListener("click", function() {
+        var newLevel = bulkLevel ? bulkLevel.value : "";
+        if (!newLevel) { setMessage(adminMessage, "Selecciona un nivel para aplicar.", "message-error"); return; }
+        var ids = Object.keys(selectedIds);
+        var count = 0;
+        ids.forEach(function(id) {
+            var user = allUsers.find(function(u) { return String(u.id) === id; });
+            if (!user) return;
+            if (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl")) return;
+            performLocalUpdateUser(id, { level: newLevel });
+            count++;
+        });
+        selectedIds = {};
+        if (selectAll) selectAll.checked = false;
+        updateBulkToolbar();
+        loadAdminUsers();
+        setMessage(adminMessage, "Nivel actualizado a " + count + " usuarios.", "message-success");
+        addActivity("Edición masiva: " + count + " usuarios cambiados a nivel " + newLevel);
+    });
+
+    // Reset database
+    if (resetBtn) resetBtn.addEventListener("click", function() {
+        document.querySelector("#admin-danger-section").classList.remove("is-hidden");
+    });
+    if (cancelReset) cancelReset.addEventListener("click", function() {
+        document.querySelector("#admin-danger-section").classList.add("is-hidden");
+    });
+    if (confirmReset) confirmReset.addEventListener("click", function() {
+        // Reset to default @sportclub.cl users
+        var officialEmails = ["user1@sportclub.cl", "coach1@sportclub.cl", "admin1@sportclub.cl"];
+        var officialUsers = defaultUsers.filter(function(u) {
+            return officialEmails.indexOf(normalizeEmail(u.user)) >= 0;
+        }).map(function(u) { return JSON.parse(JSON.stringify(u)); });
+        saveUsers(officialUsers);
+        allUsers = officialUsers;
+        selectedIds = {};
+        applyFilters();
+        document.querySelector("#admin-danger-section").classList.add("is-hidden");
+        setMessage(adminMessage, "Base de datos restablecida a usuarios oficiales.", "message-success");
+        addActivity("Base de datos restablecida");
     });
 
     loadAdminUsers();
