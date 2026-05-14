@@ -784,7 +784,8 @@ function handleRegisterPage() {
             return;
         }
 
-        const apiResult = await tryFetchRegister(payload);
+        var apiResult;
+        try { apiResult = await tryFetchRegister(payload); } catch (e) { apiResult = { fallback: true, error: e.message }; }
 
         if (apiResult.success && apiResult.user) {
             const sessionUser = {
@@ -803,20 +804,15 @@ function handleRegisterPage() {
             return;
         }
 
-        if (apiResult.fallback) {
-            const sessionUser = performLocalRegister(payload, messageElement);
-            if (!sessionUser) {
-                return;
-            }
-            saveSession({ user: sessionUser });
+        var localUser = performLocalRegister(payload, messageElement);
+        if (localUser) {
+            saveSession({ user: localUser });
             setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al dashboard...", "message-success");
             window.setTimeout(function () {
-                redirectToDashboard(sessionUser.role);
+                redirectToDashboard(localUser.role);
             }, 700);
             return;
         }
-
-        setMessage(messageElement, apiResult.error || "Ocurrió un error al registrarte.", "message-error");
     });
 
     [emailInput, passwordInput, confirmPasswordInput, firstNameInput, lastNamePaternalInput, lastNameMaternalInput, legacyNameInput, ageInput, birthDateInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput, healthConditionInput].forEach(function (input) {
