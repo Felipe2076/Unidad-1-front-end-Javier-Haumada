@@ -429,7 +429,8 @@ function performLocalRegister(payload, messageElement) {
         objectivePersonal: payload.objectivePersonal || "",
         level: payload.level || "",
         healthCondition: payload.healthCondition || payload.infoAdicional || "",
-        infoAdicional: payload.infoAdicional || payload.healthCondition || ""
+        infoAdicional: payload.infoAdicional || payload.healthCondition || "",
+        createdAt: new Date().toISOString()
     };
 
     users.push(newUser);
