@@ -391,6 +391,8 @@ async function tryFetchUsers() {
         const result = await apiRequest("/users", "GET", null, true);
         return { success: true, users: result.users };
     } catch (error) {
+        var users = getUsers();
+        if (users.length) return { success: true, users: users };
         return { success: false, error: error.message, fallback: isFetchError(error) };
     }
 }
@@ -400,11 +402,9 @@ async function tryFetchUser(id) {
         const result = await apiRequest(`/users/${id}`, "GET", null, true);
         return { success: true, user: result.user };
     } catch (error) {
-        if (isFetchError(error)) {
-            var users = getUsers();
-            var user = users.find(function (u) { return String(u.id) === String(id); });
-            if (user) return { success: true, user: user };
-        }
+        var users = getUsers();
+        var user = users.find(function (u) { return String(u.id) === String(id); });
+        if (user) return { success: true, user: user };
         return { success: false, error: error.message };
     }
 }
@@ -414,10 +414,8 @@ async function tryCreateUser(payload) {
         const result = await apiRequest("/users", "POST", payload, true);
         return { success: true, user: result.user };
     } catch (error) {
-        if (isFetchError(error)) {
-            var localUser = performLocalCreateUser(payload);
-            if (localUser) return { success: true, user: localUser };
-        }
+        var localUser = performLocalCreateUser(payload);
+        if (localUser) return { success: true, user: localUser };
         return { success: false, error: error.message };
     }
 }
@@ -427,10 +425,8 @@ async function tryUpdateUser(id, payload) {
         const result = await apiRequest(`/users/${id}`, "PUT", payload, true);
         return { success: true, user: result.user };
     } catch (error) {
-        if (isFetchError(error)) {
-            var localUser = performLocalUpdateUser(id, payload);
-            if (localUser) return { success: true, user: localUser };
-        }
+        var localUser = performLocalUpdateUser(id, payload);
+        if (localUser) return { success: true, user: localUser };
         return { success: false, error: error.message };
     }
 }
@@ -440,10 +436,8 @@ async function tryDeleteUser(id) {
         await apiRequest(`/users/${id}`, "DELETE", null, true);
         return { success: true };
     } catch (error) {
-        if (isFetchError(error)) {
-            var localResult = performLocalDeleteUser(id);
-            if (localResult) return { success: true };
-        }
+        var localResult = performLocalDeleteUser(id);
+        if (localResult) return { success: true };
         return { success: false, error: error.message };
     }
 }
@@ -1009,12 +1003,6 @@ function handleAdminPage() {
         const result = await tryFetchUsers();
         if (result.success) {
             renderUsersTable(result.users);
-            return;
-        }
-
-        if (result.fallback) {
-            renderUsersTable(getUsers());
-            setMessage(adminMessage, "Conexión al backend fallida. Se muestra la copia local.", "message-error");
             return;
         }
 
