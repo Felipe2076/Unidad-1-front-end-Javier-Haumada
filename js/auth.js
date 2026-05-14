@@ -649,15 +649,19 @@ function handleLoginPage() {
             return;
         }
 
-        var localUser = performLocalLogin(inputEmail, inputPassword, messageElement);
-        if (localUser) {
-            saveSession({ user: localUser });
-            setMessage(messageElement, `Bienvenido ${localUser.name}. Redirigiendo...`, "message-success");
-            window.setTimeout(function () {
-                redirectToDashboard(localUser.role);
-            }, 500);
-            return;
+        if (apiResult.fallback) {
+            var localUser = performLocalLogin(inputEmail, inputPassword, messageElement);
+            if (localUser) {
+                saveSession({ user: localUser });
+                setMessage(messageElement, `Bienvenido ${localUser.name}. Redirigiendo...`, "message-success");
+                window.setTimeout(function () {
+                    redirectToDashboard(localUser.role);
+                }, 500);
+                return;
+            }
         }
+
+        setMessage(messageElement, apiResult.error || "Credenciales incorrectas.", "message-error");
     });
 
     [emailInput, passwordInput].forEach(function (input) {
@@ -785,7 +789,7 @@ function handleRegisterPage() {
         }
 
         var apiResult;
-        try { apiResult = await tryFetchRegister(payload); } catch (e) { apiResult = { fallback: true, error: e.message }; }
+        try { apiResult = await tryFetchRegister(payload); } catch (e) { apiResult = { success: false, fallback: true, error: e.message }; }
 
         if (apiResult.success && apiResult.user) {
             const sessionUser = {
@@ -804,15 +808,19 @@ function handleRegisterPage() {
             return;
         }
 
-        var localUser = performLocalRegister(payload, messageElement);
-        if (localUser) {
-            saveSession({ user: localUser });
-            setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al dashboard...", "message-success");
-            window.setTimeout(function () {
-                redirectToDashboard(localUser.role);
-            }, 700);
-            return;
+        if (apiResult.fallback) {
+            var localUser = performLocalRegister(payload, messageElement);
+            if (localUser) {
+                saveSession({ user: localUser });
+                setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al dashboard...", "message-success");
+                window.setTimeout(function () {
+                    redirectToDashboard(localUser.role);
+                }, 700);
+                return;
+            }
         }
+
+        setMessage(messageElement, apiResult.error || "Error al registrarte. Revisa los datos.", "message-error");
     });
 
     [emailInput, passwordInput, confirmPasswordInput, firstNameInput, lastNamePaternalInput, lastNameMaternalInput, legacyNameInput, ageInput, birthDateInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput, healthConditionInput].forEach(function (input) {
