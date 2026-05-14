@@ -520,12 +520,6 @@ function handleLoginPage() {
     const form = document.querySelector("#login-form");
     if (!form) return;
 
-    const loggedUser = getLoggedUser();
-    if (loggedUser && roleRedirects[loggedUser.role]) {
-        window.location.href = roleRedirects[loggedUser.role];
-        return;
-    }
-
     const emailInput = document.querySelector("#email");
     const passwordInput = document.querySelector("#password");
     const messageElement = document.querySelector("#login-message");
