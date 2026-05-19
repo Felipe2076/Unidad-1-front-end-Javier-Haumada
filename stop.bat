@@ -1,20 +1,24 @@
 @echo off
-title Detener SportClub
+title SportClub - Deteniendo Servidor
 color 0C
+mode con: cols=60 lines=15
 
 echo.
-echo ========================================
-echo    Deteniendo SportClub Backend
-echo ========================================
+echo    ============================================
+echo         Deteniendo SportClub Backend
+echo    ============================================
 echo.
 
-taskkill /FI "WINDOWTITLE eq SportClub Backend*" /T /F >nul 2>&1
+taskkill /F /IM node.exe >nul 2>&1
 
 if %errorlevel% equ 0 (
-    echo  Servidor detenido correctamente.
+    echo    Servidor detenido correctamente.
 ) else (
-    echo  No se encontro el servidor corriendo.
+    echo    No se encontro el servidor corriendo.
+    echo    (Ya estaba detenido)
 )
 
 echo.
-pause
+echo    ============================================
+echo.
+timeout /t 2 /nobreak

@@ -2037,3 +2037,36 @@ main.wrap {
         text-align: center;
     }
 }
+
+/* Connected Notification */
+#connected-notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10001;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.notif-content {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}
+
+.notif-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.notif-text {
+    font-size: 1rem;
+    font-weight: 600;
+}
