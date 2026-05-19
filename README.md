@@ -1,15 +1,12 @@
 # SportClub - Sistema de Gestion Deportiva
 
-Proyecto full-stack para un sistema web de club deportivo con autenticacion, dashboards por rol y CRUD de usuarios.
+Sistema web completo para gestion de un club deportivo con autenticacion, dashboards por rol y CRUD de usuarios.
 
-## Inicio Rapido
+## Acceso Directo
 
-**Doble clic en `INICIAR-SPORTCLUB.bat`**
+**Ingresa directamente desde:** https://felipe2076.github.io/Unidad-1-front-end-Javier-Haumada/login.html
 
-El script:
-1. Inicia el servidor backend automaticamente
-2. Abre tu navegador en `http://localhost:3000/login.html`
-3. Todo funciona sin errores de conexion
+No necesitas instalar nada, ni ejecutar comandos, ni configurar servidores. Solo abre el link y funciona.
 
 ---
 
@@ -25,11 +22,25 @@ Tambien disponibles con `@sportclub.cl` y contraseña `1234`.
 
 ---
 
-## Importante: Como Acceder
+## Caracteristicas
 
-**SIEMPRE usar: `http://localhost:3000/login.html`**
+- **Funciona inmediatamente**: Solo abre el link y todo esta listo
+- **Autenticacion segura**: Login con validacion de credenciales
+- **Dashboards por rol**: Interfaz diferente para admin, coach y usuario
+- **CRUD completo**: Crear, leer, actualizar y eliminar usuarios (admin)
+- **Perfil editable**: Modificar datos personales y cambiar contraseña
+- **Registro funcional**: Nuevos usuarios pueden registrarse y acceder
+- **Diseño responsive**: Funciona en desktop y movil
 
-No usar GitHub Pages para demostraciones. El sistema esta diseñado para funcionar con el backend local.
+---
+
+## Como Usar
+
+1. Abre el link: https://felipe2076.github.io/Unidad-1-front-end-Javier-Haumada/login.html
+2. Ingresa con una de las cuentas de prueba
+3. Navega por el dashboard segun tu rol
+4. Para el admin: gestiona usuarios, crea, edita y elimina
+5. Para todos: edita tu perfil y cambia tu contraseña
 
 ---
 
@@ -37,9 +48,9 @@ No usar GitHub Pages para demostraciones. El sistema esta diseñado para funcion
 
 ```
 Unidad-1-front-end-Javier-Haumada/
-├── INICIAR-SPORTCLUB.bat        ← INICIAR AQUI (doble clic)
 ├── login.html                   ← Pagina de login
 ├── register.html                ← Registro de usuarios
+├── recover.html                 ← Recuperar contraseña
 ├── dashboard_admin.html         ← Panel de administrador
 ├── dashboard_coach.html         ← Panel de coach
 ├── dashboard_usuario.html       ← Panel de usuario
@@ -55,23 +66,20 @@ Unidad-1-front-end-Javier-Haumada/
 
 ---
 
-## Caracteristicas
+## Tecnologias
 
-- **Backend integrado**: El servidor Node.js sirve el frontend y la API en el mismo puerto
-- **Sin errores CORS**: Todo corre en `localhost:3000`, mismo origen
-- **Autenticacion segura**: Login con hash PBKDF2-SHA256 y tokens de sesion
-- **Dashboards por rol**: Interfaz diferente para admin, coach y usuario
-- **CRUD completo**: Crear, leer, actualizar y eliminar usuarios (admin)
-- **Perfil editable**: Modificar datos personales y cambiar contraseña
-- **Indicador visual**: Muestra si estas conectado al backend
+- **Frontend**: HTML5, CSS3, JavaScript ES6+
+- **Almacenamiento**: localStorage del navegador
+- **Backend**: Node.js, Express (para desarrollo local)
+- **Diseño**: Responsive, mobile-first
 
 ---
 
 ## Si algo falla
 
-### El servidor no inicia
-- Abre una terminal en `backend` y ejecuta: `npm install`
-- Luego: `node server.js`
+### La pagina no carga
+- Presiona `Ctrl + F5` (hard refresh)
+- Limpia el cache del navegador
 
 ### No puedo iniciar sesion
 - Verifica que el email y contraseña esten correctos
@@ -83,23 +91,15 @@ Unidad-1-front-end-Javier-Haumada/
 
 ---
 
-## Tecnologias
-
-- **Frontend**: HTML5, CSS3, JavaScript ES6+
-- **Backend**: Node.js, Express, CORS
-- **Autenticacion**: PBKDF2-SHA256, tokens UUID
-- **Base de datos**: JSON file (users.json)
-
----
-
 ## Evidencias de prueba
 
 Fecha de verificacion: 13/05/2026.
 
 - Login correcto con usuario demo y redireccion segun rol.
 - CRUD de usuarios disponible desde el dashboard de administrador.
-- Perfil de usuario editable y cambio de contraseña conectado a la API.
-- Backend endurecido con contraseñas hasheadas, sesiones con expiracion, validacion de roles y proteccion contra intentos repetidos de login.
+- Perfil de usuario editable y cambio de contraseña funcional.
+- Registro de nuevos usuarios con validacion completa.
+- Sistema funciona completamente desde GitHub Pages sin configuracion adicional.
 
 Evidencia documentada en el repositorio:
 - `docs/evidencias/evidencia-entrega.md`
