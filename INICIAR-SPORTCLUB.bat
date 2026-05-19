@@ -21,8 +21,8 @@ if %errorlevel% equ 0 (
 )
 
 echo.
-echo    [2/2] Abriendo navegador...
-start "" "%~dp0login.html"
+echo    [2/2] Abriendo navegador en http://localhost:3000/login.html
+start "" "http://localhost:3000/login.html"
 
 echo.
 echo    ========================================
@@ -34,8 +34,8 @@ echo      Admin:   admin1@demo.cl / 12345678
 echo      Coach:   coach1@demo.cl / 12345678
 echo      User:    usuario1@demo.cl / 12345678
 echo.
-echo    El indicador verde en la esquina confirma
-echo    que los datos se guardan en el backend.
+echo    El indicador verde confirma conexion al backend.
+echo    NO usar GitHub Pages para demostraciones.
 echo.
 echo    ========================================
 echo.

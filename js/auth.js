@@ -1,7 +1,12 @@
 ﻿const API_BASE_URL = "http://localhost:3000/api";
 const SESSION_STORAGE_KEY = "sportclub_session";
 const USERS_STORAGE_KEY = "sportclub_users";
-let backendAvailable = false;
+
+// Detectar si estamos en GitHub Pages o en localhost
+const isGitHubPages = window.location.hostname.includes('github.io');
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isServedFromBackend = isLocalhost && window.location.port === '3000';
+let backendAvailable = isServedFromBackend;
 
 const defaultUsers = [
     { id: 1, name: "Usuario Demo", firstName: "Usuario", lastNamePaternal: "Demo", lastNameMaternal: "Sport", user: "user1@sportclub.cl", role: "user", age: 28, birthDate: "1995-02-12", practiceDeporte: true, typeDeporte: "running", objectivePersonal: "Mejorar resistencia", level: "intermedio", healthCondition: "Ninguna", infoAdicional: "Ninguna", createdAt: "2025-05-10T10:00:00.000Z", password: "1234" },
@@ -64,48 +69,47 @@ function formatDate(value) {
 function escapeHTML(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]); }
 function getRoleBadge(role) { return `<span class="badge badge-${role}">${escapeHTML(role)}</span>`; }
 
-// ==================== INDICADOR DE CONEXION ====================
+// ==================== INDICADOR DE MODO ====================
 
-function createConnectionIndicator() {
-    let indicator = document.getElementById("connection-indicator");
+function createModeIndicator() {
+    let indicator = document.getElementById("mode-indicator");
     if (indicator) return;
     
     indicator = document.createElement("div");
-    indicator.id = "connection-indicator";
-    indicator.innerHTML = `
-        <span class="connection-dot"></span>
-        <span class="connection-text">Verificando servidor...</span>
-    `;
+    indicator.id = "mode-indicator";
     document.body.appendChild(indicator);
+    updateModeIndicator();
 }
 
-function updateConnectionIndicator(connected) {
-    const indicator = document.getElementById("connection-indicator");
+function updateModeIndicator() {
+    const indicator = document.getElementById("mode-indicator");
     if (!indicator) return;
     
-    const dot = indicator.querySelector(".connection-dot");
-    const text = indicator.querySelector(".connection-text");
-    
-    if (connected) {
-        dot.className = "connection-dot connected";
-        text.textContent = "Backend conectado";
-        backendAvailable = true;
+    if (isGitHubPages) {
+        indicator.className = "mode-indicator mode-demo";
+        indicator.innerHTML = `<span class="mode-dot"></span><span class="mode-text">Modo demostración</span>`;
+    } else if (isServedFromBackend || backendAvailable) {
+        indicator.className = "mode-indicator mode-backend";
+        indicator.innerHTML = `<span class="mode-dot"></span><span class="mode-text">Backend conectado</span>`;
     } else {
-        dot.className = "connection-dot disconnected";
-        text.textContent = "Modo local (backend no disponible)";
-        backendAvailable = false;
+        indicator.className = "mode-indicator mode-local";
+        indicator.innerHTML = `<span class="mode-dot"></span><span class="mode-text">Modo local</span>`;
     }
 }
 
 async function checkBackendConnection() {
+    if (isGitHubPages || isServedFromBackend) return;
+    
     try {
         const response = await fetch(`${API_BASE_URL}/health`, { method: "GET" });
         if (response.ok) {
-            updateConnectionIndicator(true);
+            backendAvailable = true;
+            updateModeIndicator();
             return true;
         }
     } catch (e) {}
-    updateConnectionIndicator(false);
+    backendAvailable = false;
+    updateModeIndicator();
     return false;
 }
 
@@ -224,6 +228,20 @@ function handleLoginPage() {
             return;
         }
 
+        // Si estamos en GitHub Pages, usar localStorage directamente
+        if (isGitHubPages) {
+            const users = getUsers();
+            const matchedUser = users.find(u => normalizeEmail(u.user) === inputEmail && u.password === inputPassword);
+            if (!matchedUser) {
+                setMessage(messageElement, "Credenciales incorrectas.", "message-error");
+                return;
+            }
+            saveSession({ user: { name: matchedUser.name, user: normalizeEmail(matchedUser.user), role: matchedUser.role }, token: "demo-" + Date.now() });
+            setMessage(messageElement, "Has ingresado correctamente.", "message-success");
+            setTimeout(() => redirectToDashboard(matchedUser.role), 500);
+            return;
+        }
+
         // Intentar backend primero
         try {
             const result = await apiLogin(inputEmail, inputPassword);
@@ -238,12 +256,10 @@ function handleLoginPage() {
         // Fallback localStorage
         const users = getUsers();
         const matchedUser = users.find(u => normalizeEmail(u.user) === inputEmail && u.password === inputPassword);
-
         if (!matchedUser) {
             setMessage(messageElement, "Credenciales incorrectas.", "message-error");
             return;
         }
-
         saveSession({ user: { name: matchedUser.name, user: normalizeEmail(matchedUser.user), role: matchedUser.role }, token: "local-" + Date.now() });
         setMessage(messageElement, "Has ingresado correctamente.", "message-success");
         setTimeout(() => redirectToDashboard(matchedUser.role), 500);
@@ -310,6 +326,27 @@ function handleRegisterPage() {
         if (!payload.level) { setInputError(levelInput, "Selecciona tu nivel actual."); return; }
         if (!payload.healthCondition) { setInputError(healthConditionInput, "Indica tu condicion de salud o escribe 'Ninguna'."); return; }
 
+        // Si estamos en GitHub Pages, usar localStorage directamente
+        if (isGitHubPages) {
+            const users = getUsers();
+            if (users.some(u => normalizeEmail(u.user) === payload.email)) {
+                setMessage(messageElement, "Ese correo ya está registrado.", "message-error");
+                return;
+            }
+            users.push({
+                id: getNextLocalUserId(), name: fullName, firstName, lastNamePaternal, lastNameMaternal,
+                user: payload.email, password: payload.password, role: "user", age: payload.age,
+                practiceDeporte: payload.practiceDeporte === "si", level: payload.level,
+                healthCondition: payload.healthCondition, infoAdicional: payload.infoAdicional,
+                createdAt: new Date().toISOString()
+            });
+            saveUsers(users);
+            setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al login...", "message-success");
+            form.reset();
+            setTimeout(() => { window.location.href = "login.html"; }, 1500);
+            return;
+        }
+
         // Intentar backend primero
         try {
             await apiRegister(payload);
@@ -327,7 +364,6 @@ function handleRegisterPage() {
             setMessage(messageElement, "Ese correo ya está registrado.", "message-error");
             return;
         }
-
         users.push({
             id: getNextLocalUserId(), name: fullName, firstName, lastNamePaternal, lastNameMaternal,
             user: payload.email, password: payload.password, role: "user", age: payload.age,
@@ -468,7 +504,6 @@ function handleAdminPage() {
             return true;
         });
         filteredUsers = result;
-        // Re-render with filtered results
         tableBody.innerHTML = result.map(user => {
             const isProtected = user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl");
             const checked = selectedIds[user.id] ? "checked" : "";
@@ -518,30 +553,55 @@ function handleAdminPage() {
 
     async function loadAdminUsers() {
         clearMessage(adminMessage);
-        const token = getAuthToken();
         
-        // Intentar backend primero
-        if (token && token.startsWith("local-") === false) {
+        // Si estamos en GitHub Pages, usar localStorage directamente
+        if (isGitHubPages) {
+            allUsers = getUsers();
+            applyFilters();
+            return;
+        }
+        
+        const token = getAuthToken();
+        if (token && !token.startsWith("local-") && !token.startsWith("demo-")) {
             try {
                 allUsers = await apiGetUsers(token);
                 applyFilters();
                 return;
-            } catch (e) {
-                // Fallback a localStorage
-            }
+            } catch (e) {}
         }
         
-        // Fallback localStorage
         allUsers = getUsers();
         applyFilters();
     }
 
     async function handleCreateOrUpdateUser(payload) {
         clearMessage(adminMessage);
-        const token = getAuthToken();
         
-        // Intentar backend primero
-        if (token && !token.startsWith("local-")) {
+        // Si estamos en GitHub Pages, usar localStorage directamente
+        if (isGitHubPages) {
+            const users = getUsers();
+            if (editingUserId) {
+                const user = users.find(u => String(u.id) === String(editingUserId));
+                if (!user) { setMessage(adminMessage, "Usuario no encontrado.", "message-error"); return; }
+                Object.assign(user, { name: payload.name, firstName: payload.firstName, lastNamePaternal: payload.lastNamePaternal, lastNameMaternal: payload.lastNameMaternal, user: payload.email, role: payload.role, birthDate: payload.birthDate, age: payload.age, practiceDeporte: payload.practiceDeporte, typeDeporte: payload.typeDeporte, objectivePersonal: payload.objectivePersonal, level: payload.level, infoAdicional: payload.infoAdicional, healthCondition: payload.healthCondition });
+                if (payload.password) user.password = payload.password;
+                saveUsers(users);
+                setMessage(adminMessage, "Usuario actualizado correctamente.", "message-success");
+                addActivity("Usuario actualizado: " + payload.email);
+            } else {
+                if (users.some(u => normalizeEmail(u.user) === payload.email)) { setMessage(adminMessage, "Ese correo ya está registrado.", "message-error"); return; }
+                users.push({ id: getNextLocalUserId(), name: payload.name, firstName: payload.firstName, lastNamePaternal: payload.lastNamePaternal, lastNameMaternal: payload.lastNameMaternal, user: payload.email, role: payload.role, password: payload.password || "1234", birthDate: payload.birthDate, age: payload.age, practiceDeporte: payload.practiceDeporte, typeDeporte: payload.typeDeporte, objectivePersonal: payload.objectivePersonal, level: payload.level, infoAdicional: payload.infoAdicional, healthCondition: payload.healthCondition, createdAt: new Date().toISOString() });
+                saveUsers(users);
+                setMessage(adminMessage, "Usuario creado correctamente.", "message-success");
+                addActivity("Usuario creado: " + payload.email);
+            }
+            loadAdminUsers();
+            closeModal();
+            return;
+        }
+        
+        const token = getAuthToken();
+        if (token && !token.startsWith("local-") && !token.startsWith("demo-")) {
             try {
                 if (editingUserId) {
                     await apiUpdateUser(editingUserId, payload, token);
@@ -561,7 +621,6 @@ function handleAdminPage() {
             }
         }
         
-        // Fallback localStorage
         const users = getUsers();
         if (editingUserId) {
             const user = users.find(u => String(u.id) === String(editingUserId));
@@ -589,10 +648,21 @@ function handleAdminPage() {
         if (!confirm("¿Eliminar a " + (user.name || "este usuario") + "?")) return;
         if (!confirm("Confirmación: ¿Estás seguro?")) return;
         
-        const token = getAuthToken();
+        // Si estamos en GitHub Pages, usar localStorage directamente
+        if (isGitHubPages) {
+            const users = getUsers();
+            const idx = users.findIndex(u => String(u.id) === String(userId));
+            if (idx === -1) return;
+            users.splice(idx, 1);
+            saveUsers(users);
+            loadAdminUsers();
+            setMessage(adminMessage, "Usuario eliminado.", "message-success");
+            addActivity("Usuario eliminado: " + user.name);
+            return;
+        }
         
-        // Intentar backend primero
-        if (token && !token.startsWith("local-")) {
+        const token = getAuthToken();
+        if (token && !token.startsWith("local-") && !token.startsWith("demo-")) {
             try {
                 await apiDeleteUser(userId, token);
                 await loadAdminUsers();
@@ -605,7 +675,6 @@ function handleAdminPage() {
             }
         }
         
-        // Fallback localStorage
         const users = getUsers();
         const idx = users.findIndex(u => String(u.id) === String(userId));
         if (idx === -1) return;
@@ -620,17 +689,9 @@ function handleAdminPage() {
         if (!newLevel) { setMessage(adminMessage, "Selecciona un nivel.", "message-error"); return; }
         const ids = Object.keys(selectedIds);
         let count = 0;
-        const token = getAuthToken();
         
-        // Intentar backend primero
-        if (token && !token.startsWith("local-")) {
-            for (const id of ids) {
-                const user = allUsers.find(u => String(u.id) === id);
-                if (!user || (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl"))) continue;
-                try { await apiUpdateUser(id, { level: newLevel }, token); count++; } catch (e) {}
-            }
-        } else {
-            // Fallback localStorage
+        // Si estamos en GitHub Pages, usar localStorage directamente
+        if (isGitHubPages) {
             const users = getUsers();
             ids.forEach(id => {
                 const user = users.find(u => String(u.id) === id);
@@ -638,6 +699,23 @@ function handleAdminPage() {
                 user.level = newLevel; count++;
             });
             saveUsers(users);
+        } else {
+            const token = getAuthToken();
+            if (token && !token.startsWith("local-") && !token.startsWith("demo-")) {
+                for (const id of ids) {
+                    const user = allUsers.find(u => String(u.id) === id);
+                    if (!user || (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl"))) continue;
+                    try { await apiUpdateUser(id, { level: newLevel }, token); count++; } catch (e) {}
+                }
+            } else {
+                const users = getUsers();
+                ids.forEach(id => {
+                    const user = users.find(u => String(u.id) === id);
+                    if (!user || (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl"))) return;
+                    user.level = newLevel; count++;
+                });
+                saveUsers(users);
+            }
         }
         
         selectedIds = {};
@@ -719,19 +797,24 @@ function handleProfilePage() {
     async function loadProfile() {
         const loggedUser = getLoggedUser();
         if (!loggedUser) return;
-        const token = getAuthToken();
+        
         let user;
         
-        // Intentar backend primero
-        if (token && !token.startsWith("local-")) {
-            try { user = await apiGetProfile(token); } catch (e) {}
-        }
-        
-        // Fallback localStorage
-        if (!user) {
+        // Si estamos en GitHub Pages, usar localStorage directamente
+        if (isGitHubPages) {
             const users = getUsers();
             user = users.find(u => normalizeEmail(u.user) === loggedUser.user);
+        } else {
+            const token = getAuthToken();
+            if (token && !token.startsWith("local-") && !token.startsWith("demo-")) {
+                try { user = await apiGetProfile(token); } catch (e) {}
+            }
+            if (!user) {
+                const users = getUsers();
+                user = users.find(u => normalizeEmail(u.user) === loggedUser.user);
+            }
         }
+        
         if (!user) return;
 
         if (profileName) profileName.textContent = user.name || "-";
@@ -754,7 +837,7 @@ function handleProfilePage() {
             clearInputErrors(profileForm); clearMessage(profileMessage);
             const loggedUser = getLoggedUser();
             if (!loggedUser) { setMessage(profileMessage, "No hay sesión activa.", "message-error"); return; }
-            const token = getAuthToken();
+            
             const payload = {
                 name: document.querySelector("#profile-name").value.trim(),
                 birthDate: document.querySelector("#profile-birthDate").value,
@@ -766,8 +849,21 @@ function handleProfilePage() {
                 infoAdicional: document.querySelector("#profile-infoAdicional").value.trim()
             };
 
-            // Intentar backend primero
-            if (token && !token.startsWith("local-")) {
+            // Si estamos en GitHub Pages, usar localStorage directamente
+            if (isGitHubPages) {
+                const users = getUsers();
+                const user = users.find(u => normalizeEmail(u.user) === loggedUser.user);
+                if (!user) { setMessage(profileMessage, "Usuario no encontrado.", "message-error"); return; }
+                Object.assign(user, payload);
+                saveUsers(users);
+                setMessage(profileMessage, "Perfil actualizado correctamente.", "message-success");
+                const session = getSession();
+                if (session) { session.user.name = user.name; saveSession(session); }
+                return;
+            }
+
+            const token = getAuthToken();
+            if (token && !token.startsWith("local-") && !token.startsWith("demo-")) {
                 try {
                     const updatedUser = await apiUpdateProfile(payload, token);
                     setMessage(profileMessage, "Perfil actualizado correctamente.", "message-success");
@@ -777,7 +873,6 @@ function handleProfilePage() {
                 } catch (error) { setMessage(profileMessage, error.message, "message-error"); return; }
             }
 
-            // Fallback localStorage
             const users = getUsers();
             const user = users.find(u => normalizeEmail(u.user) === loggedUser.user);
             if (!user) { setMessage(profileMessage, "Usuario no encontrado.", "message-error"); return; }
@@ -795,7 +890,7 @@ function handleProfilePage() {
             clearInputErrors(passwordForm); clearMessage(passwordMessage);
             const loggedUser = getLoggedUser();
             if (!loggedUser) { setMessage(passwordMessage, "No hay sesión activa.", "message-error"); return; }
-            const token = getAuthToken();
+            
             const currentPassword = document.querySelector("#current-password").value;
             const newPassword = document.querySelector("#new-password").value;
             const confirmPassword = document.querySelector("#confirm-new-password").value;
@@ -804,8 +899,21 @@ function handleProfilePage() {
             if (newPassword.length < 8) { setInputError(document.querySelector("#new-password"), "Mínimo 8 caracteres."); return; }
             if (newPassword !== confirmPassword) { setInputError(document.querySelector("#confirm-new-password"), "No coinciden."); return; }
 
-            // Intentar backend primero
-            if (token && !token.startsWith("local-")) {
+            // Si estamos en GitHub Pages, usar localStorage directamente
+            if (isGitHubPages) {
+                const users = getUsers();
+                const user = users.find(u => normalizeEmail(u.user) === loggedUser.user);
+                if (!user) { setMessage(passwordMessage, "Usuario no encontrado.", "message-error"); return; }
+                if (user.password !== currentPassword) { setMessage(passwordMessage, "La contraseña actual es incorrecta.", "message-error"); return; }
+                user.password = newPassword;
+                saveUsers(users);
+                setMessage(passwordMessage, "Contraseña actualizada correctamente.", "message-success");
+                passwordForm.reset();
+                return;
+            }
+
+            const token = getAuthToken();
+            if (token && !token.startsWith("local-") && !token.startsWith("demo-")) {
                 try {
                     await apiChangePassword({ currentPassword, newPassword, confirmPassword }, token);
                     setMessage(passwordMessage, "Contraseña actualizada correctamente.", "message-success");
@@ -814,7 +922,6 @@ function handleProfilePage() {
                 } catch (error) { setMessage(passwordMessage, error.message, "message-error"); return; }
             }
 
-            // Fallback localStorage
             const users = getUsers();
             const user = users.find(u => normalizeEmail(u.user) === loggedUser.user);
             if (!user) { setMessage(passwordMessage, "Usuario no encontrado.", "message-error"); return; }
@@ -846,9 +953,11 @@ function protectDashboard() {
 // ==================== INIT ====================
 
 document.addEventListener("DOMContentLoaded", function() {
-    createConnectionIndicator();
-    checkBackendConnection();
-    setInterval(checkBackendConnection, 10000);
+    createModeIndicator();
+    if (!isGitHubPages && !isServedFromBackend) {
+        checkBackendConnection();
+        setInterval(checkBackendConnection, 10000);
+    }
     protectDashboard();
     handleLoginPage();
     handleRegisterPage();

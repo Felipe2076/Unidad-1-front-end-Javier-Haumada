@@ -1948,8 +1948,8 @@ main.wrap {
     }
 }
 
-/* Indicador de conexion al backend */
-#connection-indicator {
+/* Indicador de modo (GitHub Pages / Backend / Local) */
+#mode-indicator {
     position: fixed;
     bottom: 12px;
     right: 12px;
@@ -1959,7 +1959,6 @@ main.wrap {
     gap: 8px;
     padding: 8px 14px;
     border-radius: 20px;
-    background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(8px);
     color: white;
     font-size: 0.75rem;
@@ -1968,21 +1967,31 @@ main.wrap {
     transition: all 0.3s ease;
 }
 
-.connection-dot {
+#mode-indicator.mode-demo {
+    background: rgba(59, 130, 246, 0.85);
+}
+
+#mode-indicator.mode-backend {
+    background: rgba(16, 185, 129, 0.85);
+}
+
+#mode-indicator.mode-local {
+    background: rgba(245, 158, 11, 0.85);
+}
+
+.mode-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #f59e0b;
-    animation: pulse 1.5s ease-in-out infinite;
+    background: white;
 }
 
-.connection-dot.connected {
-    background: #10b981;
-    animation: none;
+#mode-indicator.mode-demo .mode-dot {
+    animation: pulse 2s ease-in-out infinite;
 }
 
-.connection-dot.disconnected {
-    background: #ef4444;
+#mode-indicator.mode-backend .mode-dot,
+#mode-indicator.mode-local .mode-dot {
     animation: none;
 }
 
@@ -1992,14 +2001,14 @@ main.wrap {
 }
 
 @media (max-width: 640px) {
-    #connection-indicator {
+    #mode-indicator {
         bottom: 8px;
         right: 8px;
         padding: 6px 10px;
         font-size: 0.7rem;
     }
     
-    .connection-text {
+    .mode-text {
         display: none;
     }
 }

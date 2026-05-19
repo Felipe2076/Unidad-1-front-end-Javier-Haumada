@@ -39,9 +39,36 @@ app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "no-referrer");
   next();
 });
+
+// Servir archivos estáticos del frontend
 app.use("/css", express.static(path.join(FRONTEND_PATH, "css")));
 app.use("/js", express.static(path.join(FRONTEND_PATH, "js")));
 app.use("/img", express.static(path.join(FRONTEND_PATH, "img")));
+
+// Servir archivos HTML directamente
+const htmlFiles = ["index.html", "login.html", "register.html", "recover.html", "dashboard_usuario.html", "dashboard_coach.html", "dashboard_admin.html"];
+htmlFiles.forEach(file => {
+  app.get(`/${file}`, (req, res) => {
+    res.sendFile(path.join(FRONTEND_PATH, file));
+  });
+});
+
+// Rutas SPA
+app.get(["/", "/index.html"], (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "index.html"));
+});
+
+app.get(["/clases", "/reservas", "/progreso", "/perfil/editar"], (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "dashboard_usuario.html"));
+});
+
+app.get(["/admin/usuarios"], (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "dashboard_admin.html"));
+});
+
+app.get(["/coach/reservas"], (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "dashboard_coach.html"));
+});
 
 function normalizeEmail(value) {
   return String(value || "").trim().toLowerCase();
