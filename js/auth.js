@@ -1,5 +1,123 @@
 ﻿const API_BASE_URL = "http://localhost:3000/api";
 const SESSION_STORAGE_KEY = "sportclub_session";
+const USERS_STORAGE_KEY = "sportclub_users";
+
+const defaultUsers = [
+    {
+        id: 1,
+        name: "Usuario Demo",
+        firstName: "Usuario",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "user1@sportclub.cl",
+        role: "user",
+        age: 28,
+        birthDate: "1995-02-12",
+        practiceDeporte: true,
+        typeDeporte: "running",
+        objectivePersonal: "Mejorar resistencia",
+        level: "intermedio",
+        healthCondition: "Ninguna",
+        infoAdicional: "Ninguna",
+        createdAt: "2025-05-10T10:00:00.000Z",
+        password: "1234"
+    },
+    {
+        id: 2,
+        name: "Coach Demo",
+        firstName: "Coach",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "coach1@sportclub.cl",
+        role: "coach",
+        age: 34,
+        birthDate: "1990-08-21",
+        practiceDeporte: true,
+        typeDeporte: "crossfit",
+        objectivePersonal: "Guiar a atletas",
+        level: "avanzado",
+        healthCondition: "Optima",
+        infoAdicional: "Coach de fuerza y resistencia.",
+        createdAt: "2025-05-10T12:30:00.000Z",
+        password: "1234"
+    },
+    {
+        id: 3,
+        name: "Admin Demo",
+        firstName: "Admin",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "admin1@sportclub.cl",
+        role: "admin",
+        age: 31,
+        birthDate: "1992-03-14",
+        practiceDeporte: false,
+        typeDeporte: "",
+        objectivePersonal: "Administrar el club",
+        level: "principiante",
+        healthCondition: "N/A",
+        infoAdicional: "Cuenta de administracion.",
+        createdAt: "2025-05-10T14:45:00.000Z",
+        password: "1234"
+    },
+    {
+        id: 4,
+        name: "Usuario Demo",
+        firstName: "Usuario",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "usuario1@demo.cl",
+        role: "user",
+        age: 28,
+        birthDate: "1995-02-12",
+        practiceDeporte: true,
+        typeDeporte: "running",
+        objectivePersonal: "Mejorar resistencia",
+        level: "intermedio",
+        healthCondition: "Ninguna",
+        infoAdicional: "Ninguna",
+        createdAt: "2025-05-10T10:00:00.000Z",
+        password: "12345678"
+    },
+    {
+        id: 5,
+        name: "Coach Demo",
+        firstName: "Coach",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "coach1@demo.cl",
+        role: "coach",
+        age: 34,
+        birthDate: "1990-08-21",
+        practiceDeporte: true,
+        typeDeporte: "crossfit",
+        objectivePersonal: "Guiar a atletas",
+        level: "avanzado",
+        healthCondition: "Optima",
+        infoAdicional: "Coach de fuerza y resistencia.",
+        createdAt: "2025-05-10T12:30:00.000Z",
+        password: "12345678"
+    },
+    {
+        id: 6,
+        name: "Admin Demo",
+        firstName: "Admin",
+        lastNamePaternal: "Demo",
+        lastNameMaternal: "Sport",
+        user: "admin1@demo.cl",
+        role: "admin",
+        age: 31,
+        birthDate: "1992-03-14",
+        practiceDeporte: false,
+        typeDeporte: "",
+        objectivePersonal: "Administrar el club",
+        level: "principiante",
+        healthCondition: "N/A",
+        infoAdicional: "Cuenta de administracion.",
+        createdAt: "2025-05-10T14:45:00.000Z",
+        password: "12345678"
+    }
+];
 
 const roleRedirects = {
     user: "dashboard_usuario.html",
@@ -26,13 +144,8 @@ function buildFullName(firstName, lastNamePaternal, lastNameMaternal) {
 
 function getSession() {
     const stored = localStorage.getItem(SESSION_STORAGE_KEY);
-    if (!stored) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(stored);
-    } catch (error) {
+    if (!stored) return null;
+    try { return JSON.parse(stored); } catch (e) {
         localStorage.removeItem(SESSION_STORAGE_KEY);
         return null;
     }
@@ -56,6 +169,35 @@ function getAuthToken() {
     return session && session.token ? session.token : null;
 }
 
+function getUsers() {
+    const stored = localStorage.getItem(USERS_STORAGE_KEY);
+    if (!stored) {
+        saveUsers(defaultUsers);
+        return defaultUsers.slice();
+    }
+    try {
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed : defaultUsers.slice();
+    } catch (e) {
+        saveUsers(defaultUsers);
+        return defaultUsers.slice();
+    }
+}
+
+function saveUsers(usersList) {
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(usersList));
+}
+
+function getNextLocalUserId() {
+    const users = getUsers();
+    let maxId = 0;
+    users.forEach(function (u) {
+        const uid = Number(u.id || 0);
+        if (Number.isFinite(uid) && uid > maxId) maxId = uid;
+    });
+    return maxId + 1;
+}
+
 function setMessage(messageElement, text, type) {
     if (!messageElement) return;
     messageElement.textContent = text;
@@ -72,14 +214,12 @@ function setInputError(inputElement, text) {
     if (!inputElement) return;
     const container = inputElement.closest(".form-group");
     if (!container) return;
-
     let errorElement = container.querySelector(".input-error");
     if (!errorElement) {
         errorElement = document.createElement("p");
         errorElement.className = "input-error";
         container.appendChild(errorElement);
     }
-
     errorElement.textContent = text;
     inputElement.classList.add("input-invalid");
 }
@@ -95,68 +235,24 @@ function clearInputErrors(container) {
 }
 
 function formatDate(value) {
-    if (!value) {
-        return "-";
-    }
-
+    if (!value) return "-";
     const date = new Date(value);
-    if (Number.isNaN(date.valueOf())) {
-        return value;
-    }
-
+    if (Number.isNaN(date.valueOf())) return value;
     return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 }
 
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, function (character) {
-        return {
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        }[character];
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character];
     });
-}
-
-async function apiRequest(endpoint, method = "GET", payload = null, requireAuth = false) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const headers = {
-        "Content-Type": "application/json"
-    };
-
-    if (requireAuth) {
-        const token = getAuthToken();
-        if (token) {
-            headers["Authorization"] = `Bearer ${token}`;
-        }
-    }
-
-    const options = {
-        method,
-        headers
-    };
-
-    if (payload) {
-        options.body = JSON.stringify(payload);
-    }
-
-    const response = await fetch(url, options);
-    const contentType = response.headers.get("content-type") || "";
-    const data = contentType.includes("application/json") ? await response.json() : null;
-
-    if (!response.ok) {
-        const error = data && data.error ? data.error : `Error ${response.status}`;
-        throw new Error(error);
-    }
-
-    return data;
 }
 
 function getRoleBadge(role) {
     const className = role === "admin" ? "badge-admin" : role === "coach" ? "badge-coach" : "badge-user";
     return `<span class="badge ${className}">${escapeHTML(role)}</span>`;
 }
+
+// ==================== LOGIN ====================
 
 function handleLoginPage() {
     const form = document.querySelector("#login-form");
@@ -177,34 +273,56 @@ function handleLoginPage() {
             return;
         }
 
+        // Intentar API primero
         try {
-            const result = await apiRequest("/auth/login", "POST", { email: inputEmail, password: inputPassword });
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: inputEmail, password: inputPassword })
+            });
             
-            if (result.user && result.token) {
-                const userData = result.user;
-                saveSession({ 
-                    user: { 
-                        name: userData.name, 
-                        user: normalizeEmail(userData.user), 
-                        role: userData.role 
-                    }, 
-                    token: result.token 
-                });
-                setMessage(messageElement, "Has ingresado correctamente.", "message-success");
-                window.setTimeout(function () { redirectToDashboard(userData.role); }, 500);
+            if (response.ok) {
+                const result = await response.json();
+                if (result.user && result.token) {
+                    saveSession({
+                        user: { name: result.user.name, user: normalizeEmail(result.user.user), role: result.user.role },
+                        token: result.token
+                    });
+                    setMessage(messageElement, "Has ingresado correctamente.", "message-success");
+                    setTimeout(function () { redirectToDashboard(result.user.role); }, 500);
+                    return;
+                }
             }
         } catch (error) {
-            setMessage(messageElement, error.message || "Credenciales incorrectas.", "message-error");
+            // API no disponible, usar localStorage
         }
+
+        // Fallback a localStorage
+        const users = getUsers();
+        const matchedUser = users.find(function (u) {
+            return normalizeEmail(u.user) === inputEmail && u.password === inputPassword;
+        });
+
+        if (!matchedUser) {
+            setMessage(messageElement, "Credenciales incorrectas.", "message-error");
+            return;
+        }
+
+        saveSession({
+            user: { name: matchedUser.name, user: normalizeEmail(matchedUser.user), role: matchedUser.role },
+            token: "local-" + Date.now()
+        });
+        setMessage(messageElement, "Has ingresado correctamente.", "message-success");
+        setTimeout(function () { redirectToDashboard(matchedUser.role); }, 500);
     });
 
     [emailInput, passwordInput].forEach(function (input) {
         if (!input) return;
-        input.addEventListener("input", function () {
-            clearMessage(messageElement);
-        });
+        input.addEventListener("input", function () { clearMessage(messageElement); });
     });
 }
+
+// ==================== REGISTRO ====================
 
 function handleRegisterPage() {
     const form = document.querySelector("#register-form");
@@ -216,22 +334,15 @@ function handleRegisterPage() {
     const firstNameInput = document.querySelector("#firstName");
     const lastNamePaternalInput = document.querySelector("#lastNamePaternal");
     const lastNameMaternalInput = document.querySelector("#lastNameMaternal");
-    const legacyNameInput = document.querySelector("#name");
     const ageInput = document.querySelector("#age");
-    const birthDateInput = document.querySelector("#birthDate");
     const practiceDeporteInput = document.querySelector("#practiceDeporte");
-    const typeDeporteInput = document.querySelector("#typeDeporte");
-    const objectivePersonalInput = document.querySelector("#objectivePersonal");
     const levelInput = document.querySelector("#level");
-    const infoAdicionalInput = document.querySelector("#infoAdicional");
     const healthConditionInput = document.querySelector("#healthCondition");
     const messageElement = document.querySelector("#register-message");
 
     if (practiceDeporteInput && levelInput) {
         practiceDeporteInput.addEventListener("change", function () {
-            if (practiceDeporteInput.value === "no") {
-                levelInput.value = "principiante";
-            }
+            if (practiceDeporteInput.value === "no") levelInput.value = "principiante";
         });
     }
 
@@ -242,7 +353,7 @@ function handleRegisterPage() {
         const firstName = firstNameInput ? firstNameInput.value.trim() : "";
         const lastNamePaternal = lastNamePaternalInput ? lastNamePaternalInput.value.trim() : "";
         const lastNameMaternal = lastNameMaternalInput ? lastNameMaternalInput.value.trim() : "";
-        const fullName = legacyNameInput ? legacyNameInput.value.trim() : buildFullName(firstName, lastNamePaternal, lastNameMaternal);
+        const fullName = buildFullName(firstName, lastNamePaternal, lastNameMaternal);
 
         const payload = {
             email: normalizeEmail(emailInput.value),
@@ -253,131 +364,111 @@ function handleRegisterPage() {
             lastNamePaternal,
             lastNameMaternal,
             age: ageInput.value ? Number(ageInput.value) : null,
-            birthDate: birthDateInput ? String(birthDateInput.value || "").trim() : "",
             practiceDeporte: practiceDeporteInput ? practiceDeporteInput.value : "",
-            typeDeporte: typeDeporteInput ? String(typeDeporteInput.value || "").trim() : "",
-            objectivePersonal: objectivePersonalInput ? String(objectivePersonalInput.value || "").trim() : "",
             level: String(levelInput.value || "").trim(),
             healthCondition: healthConditionInput ? String(healthConditionInput.value || "").trim() : "",
-            infoAdicional: infoAdicionalInput ? String(infoAdicionalInput.value || "").trim() : ""
+            infoAdicional: healthConditionInput ? String(healthConditionInput.value || "").trim() : ""
         };
 
-        if (firstNameInput && !payload.firstName) {
-            setInputError(firstNameInput, "El nombre es obligatorio.");
-            return;
-        }
+        // Validaciones
+        if (!payload.firstName) { setInputError(firstNameInput, "El nombre es obligatorio."); return; }
+        if (!payload.lastNamePaternal) { setInputError(lastNamePaternalInput, "El apellido paterno es obligatorio."); return; }
+        if (!payload.lastNameMaternal) { setInputError(lastNameMaternalInput, "El apellido materno es obligatorio."); return; }
+        if (!payload.age || payload.age < 12 || payload.age > 120) { setInputError(ageInput, "La edad debe estar entre 12 y 120."); return; }
+        if (!payload.email) { setInputError(emailInput, "El email es obligatorio."); return; }
+        if (!payload.password || payload.password.length < 8) { setInputError(passwordInput, "La contraseña debe tener al menos 8 caracteres."); return; }
+        if (payload.password !== payload.confirmPassword) { setInputError(confirmPasswordInput, "Las contraseñas no coinciden."); return; }
+        if (!payload.practiceDeporte) { setInputError(practiceDeporteInput, "Selecciona si haces deporte."); return; }
+        if (!payload.level) { setInputError(levelInput, "Selecciona tu nivel actual."); return; }
+        if (!payload.healthCondition) { setInputError(healthConditionInput, "Indica tu condicion de salud o escribe 'Ninguna'."); return; }
 
-        if (lastNamePaternalInput && !payload.lastNamePaternal) {
-            setInputError(lastNamePaternalInput, "El apellido paterno es obligatorio.");
-            return;
-        }
-
-        if (lastNameMaternalInput && !payload.lastNameMaternal) {
-            setInputError(lastNameMaternalInput, "El apellido materno es obligatorio.");
-            return;
-        }
-
-        if (!payload.age) {
-            setInputError(ageInput, "La edad es obligatoria.");
-            return;
-        }
-
-        if (payload.age < 12 || payload.age > 120) {
-            setInputError(ageInput, "La edad debe estar entre 12 y 120.");
-            return;
-        }
-
-        if (!payload.email) {
-            setInputError(emailInput, "El email es obligatorio.");
-            return;
-        }
-
-        if (!payload.password) {
-            setInputError(passwordInput, "La contraseña es obligatoria.");
-            return;
-        }
-
-        if (payload.password.length < 8) {
-            setInputError(passwordInput, "La contraseña debe tener al menos 8 caracteres.");
-            return;
-        }
-
-        if (payload.password !== payload.confirmPassword) {
-            setInputError(confirmPasswordInput, "Las contraseñas no coinciden.");
-            return;
-        }
-
-        if (practiceDeporteInput && !payload.practiceDeporte) {
-            setInputError(practiceDeporteInput, "Selecciona si haces deporte.");
-            return;
-        }
-
-        if (!payload.level) {
-            setInputError(levelInput, "Selecciona tu nivel actual.");
-            return;
-        }
-
-        if (healthConditionInput && !payload.healthCondition) {
-            setInputError(healthConditionInput, "Indica tu condicion de salud o escribe 'Ninguna'.");
-            return;
-        }
-
+        // Intentar API primero
         try {
-            const result = await apiRequest("/auth/register", "POST", payload);
-            
-            if (result.user && result.token) {
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            if (response.ok) {
                 setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al login...", "message-success");
                 form.reset();
-                window.setTimeout(function () {
-                    window.location.href = "login.html";
-                }, 1500);
+                setTimeout(function () { window.location.href = "login.html"; }, 1500);
+                return;
             }
         } catch (error) {
-            setMessage(messageElement, error.message || "Error al registrarte. Revisa los datos.", "message-error");
+            // API no disponible, usar localStorage
         }
+
+        // Fallback a localStorage
+        const users = getUsers();
+        const alreadyExists = users.some(function (u) { return normalizeEmail(u.user) === payload.email; });
+        if (alreadyExists) {
+            setMessage(messageElement, "Ese correo ya está registrado. Intenta iniciar sesión.", "message-error");
+            return;
+        }
+
+        const newUser = {
+            id: getNextLocalUserId(),
+            name: fullName,
+            firstName,
+            lastNamePaternal,
+            lastNameMaternal,
+            user: payload.email,
+            password: payload.password,
+            role: "user",
+            age: payload.age,
+            practiceDeporte: payload.practiceDeporte === "si",
+            level: payload.level,
+            healthCondition: payload.healthCondition,
+            infoAdicional: payload.infoAdicional,
+            createdAt: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        saveUsers(users);
+
+        setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al login...", "message-success");
+        form.reset();
+        setTimeout(function () { window.location.href = "login.html"; }, 1500);
     });
 
-    [emailInput, passwordInput, confirmPasswordInput, firstNameInput, lastNamePaternalInput, lastNameMaternalInput, legacyNameInput, ageInput, birthDateInput, practiceDeporteInput, typeDeporteInput, objectivePersonalInput, levelInput, infoAdicionalInput, healthConditionInput].forEach(function (input) {
+    [emailInput, passwordInput, confirmPasswordInput, firstNameInput, lastNamePaternalInput, lastNameMaternalInput, ageInput, practiceDeporteInput, levelInput, healthConditionInput].forEach(function (input) {
         if (!input) return;
-        input.addEventListener("input", function () {
-            clearMessage(messageElement);
-            clearInputErrors(form);
-        });
+        input.addEventListener("input", function () { clearMessage(messageElement); clearInputErrors(form); });
     });
 }
 
+// ==================== ADMIN CRUD ====================
+
 function handleAdminPage() {
-    var tableBody = document.querySelector("#admin-users-table-body");
+    const tableBody = document.querySelector("#admin-users-table-body");
     if (!tableBody) return;
 
-    var adminMessage = document.querySelector("#admin-message");
-    var adminForm = document.querySelector("#user-form");
-    var modal = document.querySelector("#user-modal");
-    var newUserButton = document.querySelector("#new-user-button");
-    var cancelBtn = document.querySelector("#cancel-user-form");
-    var modalTitle = document.querySelector("#modal-title");
-    var submitBtn = document.querySelector("#admin-user-form-submit");
-    var searchInput = document.querySelector("#admin-search");
-    var filterRole = document.querySelector("#admin-filter-role");
-    var filterLevel = document.querySelector("#admin-filter-level");
-    var countBadge = document.querySelector("#admin-count-badge");
-    var selectAll = document.querySelector("#select-all");
-    var bulkToolbar = document.querySelector("#bulk-toolbar");
-    var bulkCount = document.querySelector("#bulk-count");
-    var bulkLevel = document.querySelector("#bulk-level");
-    var bulkApply = document.querySelector("#bulk-apply");
-    var bulkCancel = document.querySelector("#bulk-cancel");
-    var resetBtn = document.querySelector("#reset-db-btn");
-    var confirmReset = document.querySelector("#confirm-reset-btn");
-    var cancelReset = document.querySelector("#cancel-reset-btn");
-    var activitySection = document.querySelector("#admin-activity-section");
-    var statsSection = document.querySelector("#admin-stats-section");
+    const adminMessage = document.querySelector("#admin-message");
+    const adminForm = document.querySelector("#user-form");
+    const modal = document.querySelector("#user-modal");
+    const newUserButton = document.querySelector("#new-user-button");
+    const cancelBtn = document.querySelector("#cancel-user-form");
+    const modalTitle = document.querySelector("#modal-title");
+    const submitBtn = document.querySelector("#admin-user-form-submit");
+    const searchInput = document.querySelector("#admin-search");
+    const filterRole = document.querySelector("#admin-filter-role");
+    const filterLevel = document.querySelector("#admin-filter-level");
+    const countBadge = document.querySelector("#admin-count-badge");
+    const selectAll = document.querySelector("#select-all");
+    const bulkToolbar = document.querySelector("#bulk-toolbar");
+    const bulkCount = document.querySelector("#bulk-count");
+    const bulkLevel = document.querySelector("#bulk-level");
+    const bulkApply = document.querySelector("#bulk-apply");
+    const bulkCancel = document.querySelector("#bulk-cancel");
+    const activitySection = document.querySelector("#admin-activity-section");
+    const statsSection = document.querySelector("#admin-stats-section");
 
-    var editingUserId = null;
-    var allUsers = [];
-    var filteredUsers = [];
-    var selectedIds = {};
-    var activityLog = [];
+    let editingUserId = null;
+    let allUsers = [];
+    let filteredUsers = [];
+    let selectedIds = {};
+    let activityLog = [];
 
     function capitalize(str) { return String(str || "").trim().replace(/^\w/, function(c) { return c.toUpperCase(); }); }
 
@@ -405,8 +496,8 @@ function handleAdminPage() {
 
     function formatLevelBadge(level) {
         if (!level) return '<span class="admin-level-badge">-</span>';
-        var cls = "admin-level-badge--" + level;
-        var lbl = level.charAt(0).toUpperCase() + level.slice(1);
+        const cls = "admin-level-badge--" + level;
+        const lbl = level.charAt(0).toUpperCase() + level.slice(1);
         return '<span class="admin-level-badge ' + cls + '">' + lbl + '</span>';
     }
 
@@ -427,12 +518,12 @@ function handleAdminPage() {
 
     function renderStats(users) {
         if (!statsSection) return;
-        var total = users.length;
-        var riesgo = users.filter(function(u) {
-            var h = (u.healthCondition || u.infoAdicional || "").toLowerCase();
-            return h && h !== "ninguna" && h !== "n/a" && h !== "optima" && h !== "ninguno" && h !== "sin lesiones declaradas." && h !== "sin restricciones medicas.";
+        const total = users.length;
+        const riesgo = users.filter(function(u) {
+            const h = (u.healthCondition || u.infoAdicional || "").toLowerCase();
+            return h && h !== "ninguna" && h !== "n/a" && h !== "optima" && h !== "ninguno";
         }).length;
-        var niveles = { principiante: 0, intermedio: 0, avanzado: 0 };
+        const niveles = { principiante: 0, intermedio: 0, avanzado: 0 };
         users.forEach(function(u) { if (niveles[u.level] !== undefined) niveles[u.level]++; });
         statsSection.innerHTML =
             '<div class="admin-stat-card"><p class="admin-stat-card__label">Total alumnos</p><p class="admin-stat-card__value">' + total + '</p></div>' +
@@ -451,13 +542,13 @@ function handleAdminPage() {
             return;
         }
         tableBody.innerHTML = users.map(function(user) {
-            var userId = escapeHTML(user.id);
-            var userName = escapeHTML(user.name);
-            var userEmail = escapeHTML(user.user);
-            var userCreatedAt = escapeHTML(formatDate(user.createdAt));
-            var userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
-            var isProtected = user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl");
-            var checked = selectedIds[user.id] ? "checked" : "";
+            const userId = escapeHTML(user.id);
+            const userName = escapeHTML(user.name);
+            const userEmail = escapeHTML(user.user);
+            const userCreatedAt = escapeHTML(formatDate(user.createdAt));
+            const userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
+            const isProtected = user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl");
+            const checked = selectedIds[user.id] ? "checked" : "";
             return '<tr class="' + (isProtected ? 'protected' : '') + '">' +
                 '<td><input type="checkbox" class="user-check" data-id="' + userId + '" ' + checked + '></td>' +
                 '<td>' + userId + '</td>' +
@@ -478,29 +569,29 @@ function handleAdminPage() {
     }
 
     function applyFilters() {
-        var q = (searchInput ? searchInput.value : "").toLowerCase().trim();
-        var r = filterRole ? filterRole.value : "";
-        var l = filterLevel ? filterLevel.value : "";
-        var result = allUsers.filter(function(u) {
+        const q = (searchInput ? searchInput.value : "").toLowerCase().trim();
+        const r = filterRole ? filterRole.value : "";
+        const l = filterLevel ? filterLevel.value : "";
+        const result = allUsers.filter(function(u) {
             if (r && u.role !== r) return false;
             if (l && u.level !== l) return false;
             if (q) {
-                var name = (u.name || "").toLowerCase();
-                var email = (u.user || "").toLowerCase();
-                var role = u.role || "";
+                const name = (u.name || "").toLowerCase();
+                const email = (u.user || "").toLowerCase();
+                const role = u.role || "";
                 if (name.indexOf(q) === -1 && email.indexOf(q) === -1 && role.indexOf(q) === -1) return false;
             }
             return true;
         });
         filteredUsers = result;
         tableBody.innerHTML = result.map(function(user) {
-            var userId = escapeHTML(user.id);
-            var userName = escapeHTML(user.name);
-            var userEmail = escapeHTML(user.user);
-            var userCreatedAt = escapeHTML(formatDate(user.createdAt));
-            var userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
-            var isProtected = user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl");
-            var checked = selectedIds[user.id] ? "checked" : "";
+            const userId = escapeHTML(user.id);
+            const userName = escapeHTML(user.name);
+            const userEmail = escapeHTML(user.user);
+            const userCreatedAt = escapeHTML(formatDate(user.createdAt));
+            const userHealth = escapeHTML(user.healthCondition || user.infoAdicional || "-");
+            const isProtected = user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl");
+            const checked = selectedIds[user.id] ? "checked" : "";
             return '<tr class="' + (isProtected ? 'protected' : '') + '">' +
                 '<td><input type="checkbox" class="user-check" data-id="' + userId + '" ' + checked + '></td>' +
                 '<td>' + userId + '</td>' +
@@ -555,157 +646,180 @@ function handleAdminPage() {
         clearMessage(adminMessage);
     }
 
-    async function loadAdminUsers() {
+    function loadAdminUsers() {
         clearMessage(adminMessage);
-        try {
-            const result = await apiRequest("/users", "GET", null, true);
-            allUsers = result.users || [];
-            applyFilters();
-        } catch (error) {
-            setMessage(adminMessage, error.message || "No se pudo cargar la lista.", "message-error");
-        }
+        allUsers = getUsers();
+        applyFilters();
     }
 
-    async function handleCreateOrUpdateUser(payload) {
+    function handleCreateOrUpdateUser(payload) {
         clearMessage(adminMessage);
-        try {
-            let result;
-            if (editingUserId) {
-                result = await apiRequest(`/users/${editingUserId}`, "PUT", payload, true);
-            } else {
-                result = await apiRequest("/users", "POST", payload, true);
-            }
-            await loadAdminUsers();
-            var action = editingUserId ? "actualizado" : "creado";
-            setMessage(adminMessage, "Usuario " + action + " correctamente.", "message-success");
-            addActivity("Usuario " + action + ": " + payload.email);
-            closeModal();
-        } catch (error) {
-            setMessage(adminMessage, error.message || "Error al guardar el usuario.", "message-error");
+        const users = getUsers();
+        
+        if (editingUserId) {
+            // Editar
+            const user = users.find(function (u) { return String(u.id) === String(editingUserId); });
+            if (!user) { setMessage(adminMessage, "Usuario no encontrado.", "message-error"); return; }
+            
+            user.name = payload.name;
+            user.firstName = payload.firstName;
+            user.lastNamePaternal = payload.lastNamePaternal;
+            user.lastNameMaternal = payload.lastNameMaternal;
+            user.user = payload.email;
+            user.role = payload.role;
+            user.birthDate = payload.birthDate;
+            user.age = payload.age;
+            user.practiceDeporte = payload.practiceDeporte;
+            user.typeDeporte = payload.typeDeporte;
+            user.objectivePersonal = payload.objectivePersonal;
+            user.level = payload.level;
+            user.infoAdicional = payload.infoAdicional;
+            user.healthCondition = payload.healthCondition;
+            if (payload.password) user.password = payload.password;
+            
+            saveUsers(users);
+            setMessage(adminMessage, "Usuario actualizado correctamente.", "message-success");
+            addActivity("Usuario actualizado: " + payload.email);
+        } else {
+            // Crear
+            const alreadyExists = users.some(function (u) { return normalizeEmail(u.user) === payload.email; });
+            if (alreadyExists) { setMessage(adminMessage, "Ese correo ya está registrado.", "message-error"); return; }
+            
+            const newUser = {
+                id: getNextLocalUserId(),
+                name: payload.name,
+                firstName: payload.firstName,
+                lastNamePaternal: payload.lastNamePaternal,
+                lastNameMaternal: payload.lastNameMaternal,
+                user: payload.email,
+                role: payload.role,
+                password: payload.password || "1234",
+                birthDate: payload.birthDate,
+                age: payload.age,
+                practiceDeporte: payload.practiceDeporte,
+                typeDeporte: payload.typeDeporte,
+                objectivePersonal: payload.objectivePersonal,
+                level: payload.level,
+                infoAdicional: payload.infoAdicional,
+                healthCondition: payload.healthCondition,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            saveUsers(users);
+            setMessage(adminMessage, "Usuario creado correctamente.", "message-success");
+            addActivity("Usuario creado: " + payload.email);
         }
+        
+        loadAdminUsers();
+        closeModal();
     }
 
-    async function handleDeleteUser(userId, user) {
+    function handleDeleteUser(userId, user) {
         if (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl")) {
             setMessage(adminMessage, "No puedes eliminar al administrador principal.", "message-error");
             return;
         }
-        if (!window.confirm("¿Eliminar a " + (user.name || "este usuario") + "? Esta acción no se puede deshacer.")) return;
+        if (!window.confirm("¿Eliminar a " + (user.name || "este usuario") + "?")) return;
         if (!window.confirm("Confirmación: ¿Estás seguro?")) return;
         
-        try {
-            await apiRequest(`/users/${userId}`, "DELETE", null, true);
-            await loadAdminUsers();
-            setMessage(adminMessage, "Usuario eliminado.", "message-success");
-            addActivity("Usuario eliminado: " + user.email);
-        } catch (error) {
-            setMessage(adminMessage, error.message || "Error al eliminar el usuario.", "message-error");
-        }
+        const users = getUsers();
+        const idx = users.findIndex(function (u) { return String(u.id) === String(userId); });
+        if (idx === -1) return;
+        
+        users.splice(idx, 1);
+        saveUsers(users);
+        loadAdminUsers();
+        setMessage(adminMessage, "Usuario eliminado.", "message-success");
+        addActivity("Usuario eliminado: " + user.name);
     }
 
-    async function handleBulkUpdateLevel(newLevel) {
-        if (!newLevel) { 
-            setMessage(adminMessage, "Selecciona un nivel para aplicar.", "message-error"); 
-            return; 
-        }
-        var ids = Object.keys(selectedIds);
-        var count = 0;
+    function handleBulkUpdateLevel(newLevel) {
+        if (!newLevel) { setMessage(adminMessage, "Selecciona un nivel para aplicar.", "message-error"); return; }
+        const ids = Object.keys(selectedIds);
+        let count = 0;
+        const users = getUsers();
         
-        for (var i = 0; i < ids.length; i++) {
-            var id = ids[i];
-            var user = allUsers.find(function(u) { return String(u.id) === id; });
-            if (!user) continue;
-            if (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl")) continue;
-            
-            try {
-                await apiRequest(`/users/${id}`, "PUT", { level: newLevel }, true);
-                count++;
-            } catch (error) {
-                console.error("Error updating user " + id, error);
-            }
-        }
+        ids.forEach(function (id) {
+            const user = users.find(function (u) { return String(u.id) === id; });
+            if (!user) return;
+            if (user.role === "admin" && (user.user === "admin1@sportclub.cl" || user.user === "admin1@demo.cl")) return;
+            user.level = newLevel;
+            count++;
+        });
         
+        saveUsers(users);
         selectedIds = {};
         if (selectAll) selectAll.checked = false;
         applyFilters();
         updateBulkToolbar();
-        await loadAdminUsers();
+        loadAdminUsers();
         setMessage(adminMessage, "Nivel actualizado a " + count + " usuarios.", "message-success");
         addActivity("Edición masiva: " + count + " usuarios cambiados a nivel " + newLevel);
     }
 
-    // === EVENT LISTENERS ===
+    function updateBulkToolbar() {
+        const ids = Object.keys(selectedIds);
+        const count = ids.length;
+        if (count === 0) { if (bulkToolbar) bulkToolbar.classList.add("is-hidden"); return; }
+        if (bulkToolbar) bulkToolbar.classList.remove("is-hidden");
+        if (bulkCount) bulkCount.textContent = count + " seleccionados";
+    }
 
+    // Event Listeners
     if (newUserButton) newUserButton.addEventListener("click", function() { openModal(null); });
     if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
     if (modal) modal.addEventListener("click", function(e) { if (e.target === modal) closeModal(); });
 
-    if (adminForm) adminForm.addEventListener("submit", async function(event) {
+    if (adminForm) adminForm.addEventListener("submit", function(event) {
         event.preventDefault();
         clearInputErrors(adminForm);
         clearMessage(adminMessage);
-        var payload = getUserFormData();
+        const payload = getUserFormData();
         if (!payload.name) { setInputError(document.querySelector("#admin-name"), "El nombre es obligatorio."); return; }
         if (!payload.email) { setInputError(document.querySelector("#admin-email"), "El email es obligatorio."); return; }
         if (!editingUserId && !payload.password) { setInputError(document.querySelector("#admin-password"), "La contraseña es obligatoria."); return; }
         if (payload.password && payload.password.length < 8) { setInputError(document.querySelector("#admin-password"), "Mínimo 8 caracteres."); return; }
         if (payload.password && payload.password !== payload.confirmPassword) { setInputError(document.querySelector("#admin-confirmPassword"), "No coinciden."); return; }
-        await handleCreateOrUpdateUser(payload);
+        handleCreateOrUpdateUser(payload);
     });
 
-    if (tableBody) tableBody.addEventListener("click", async function(event) {
-        var editBtn = event.target.closest("[data-edit-id]");
-        var deleteBtn = event.target.closest("[data-delete-id]");
+    if (tableBody) tableBody.addEventListener("click", function(event) {
+        const editBtn = event.target.closest("[data-edit-id]");
+        const deleteBtn = event.target.closest("[data-delete-id]");
         if (editBtn) {
-            var userId = editBtn.dataset.editId;
-            var user = allUsers.find(function(u) { return String(u.id) === userId; });
-            if (user) {
-                openModal(user);
-            }
+            const userId = editBtn.dataset.editId;
+            const user = allUsers.find(function (u) { return String(u.id) === userId; });
+            if (user) openModal(user);
             return;
         }
         if (deleteBtn) {
-            var userId = deleteBtn.dataset.deleteId;
-            var user = allUsers.find(function(u) { return String(u.id) === userId; });
-            if (user) {
-                await handleDeleteUser(userId, user);
-            }
+            const userId = deleteBtn.dataset.deleteId;
+            const user = allUsers.find(function (u) { return String(u.id) === userId; });
+            if (user) handleDeleteUser(userId, user);
         }
     });
 
-    // Search & filters
     if (searchInput) searchInput.addEventListener("input", applyFilters);
     if (filterRole) filterRole.addEventListener("change", applyFilters);
     if (filterLevel) filterLevel.addEventListener("change", applyFilters);
 
-    // Select all
     if (selectAll) selectAll.addEventListener("change", function() {
-        var checked = selectAll.checked;
+        const checked = selectAll.checked;
         selectedIds = {};
-        if (checked) {
-            filteredUsers.forEach(function(u) { selectedIds[u.id] = true; });
-        }
+        if (checked) filteredUsers.forEach(function (u) { selectedIds[u.id] = true; });
         applyFilters();
         updateBulkToolbar();
     });
 
-    // Individual checkboxes via delegation
     if (tableBody) tableBody.addEventListener("change", function(event) {
-        var cb = event.target.closest(".user-check");
+        const cb = event.target.closest(".user-check");
         if (!cb) return;
-        var id = parseInt(cb.dataset.id, 10);
+        const id = parseInt(cb.dataset.id, 10);
         if (cb.checked) selectedIds[id] = true;
         else delete selectedIds[id];
         updateBulkToolbar();
     });
-
-    function updateBulkToolbar() {
-        var ids = Object.keys(selectedIds);
-        var count = ids.length;
-        if (count === 0) { if (bulkToolbar) bulkToolbar.classList.add("is-hidden"); return; }
-        if (bulkToolbar) { bulkToolbar.classList.remove("is-hidden"); }
-        if (bulkCount) bulkCount.textContent = count + " seleccionados";
-    }
 
     if (bulkCancel) bulkCancel.addEventListener("click", function() {
         selectedIds = {};
@@ -715,32 +829,19 @@ function handleAdminPage() {
     });
 
     if (bulkApply) bulkApply.addEventListener("click", function() {
-        var newLevel = bulkLevel ? bulkLevel.value : "";
-        handleBulkUpdateLevel(newLevel);
-    });
-
-    // Reset database
-    if (resetBtn) resetBtn.addEventListener("click", function() {
-        document.querySelector("#admin-danger-section").classList.remove("is-hidden");
-    });
-    if (cancelReset) cancelReset.addEventListener("click", function() {
-        document.querySelector("#admin-danger-section").classList.add("is-hidden");
-    });
-    if (confirmReset) confirmReset.addEventListener("click", async function() {
-        setMessage(adminMessage, "Funcionalidad deshabilitada en modo API. Contacta al administrador del backend.", "message-error");
-        document.querySelector("#admin-danger-section").classList.add("is-hidden");
+        handleBulkUpdateLevel(bulkLevel ? bulkLevel.value : "");
     });
 
     loadAdminUsers();
 }
 
+// ==================== PERFIL ====================
+
 function handleProfilePage() {
     const profileForm = document.querySelector("#profile-form");
     const passwordForm = document.querySelector("#password-form");
-    if (!profileForm || !passwordForm) return;
+    if (!profileForm && !passwordForm) return;
 
-    const profileEditSection = document.querySelector("#profile-edit-section");
-    const passwordChangeSection = document.querySelector("#password-change-section");
     const profileName = document.querySelector("[data-user-name]");
     const profileEmail = document.querySelector("[data-user-email]");
     const profileRole = document.querySelector("[data-user-role]");
@@ -749,192 +850,110 @@ function handleProfilePage() {
     const profileMessage = document.querySelector("#profile-message");
     const passwordMessage = document.querySelector("#password-message");
 
-    async function loadProfile() {
-        try {
-            const result = await apiRequest("/auth/me", "GET", null, true);
-            const user = result.user;
-            if (profileName) profileName.textContent = user.name || "-";
-            if (profileEmail) profileEmail.textContent = user.user || "-";
-            if (profileRole) profileRole.textContent = user.role || "-";
-            if (profileBirthDate) profileBirthDate.textContent = formatDate(user.birthDate);
-            if (profileObjective) profileObjective.textContent = user.objectivePersonal || "-";
+    function loadProfile() {
+        const loggedUser = getLoggedUser();
+        if (!loggedUser) return;
 
-            const profileInputs = {
-                "profile-name": user.name || "",
-                "profile-birthDate": user.birthDate || "",
-                "profile-age": user.age || "",
-                "profile-practiceDeporte": user.practiceDeporte || false,
-                "profile-typeDeporte": user.typeDeporte || "",
-                "profile-objectivePersonal": user.objectivePersonal || "",
-                "profile-level": user.level || "",
-                "profile-infoAdicional": user.infoAdicional || ""
-            };
+        const users = getUsers();
+        const user = users.find(function (u) { return normalizeEmail(u.user) === loggedUser.user; });
+        if (!user) return;
 
-            Object.keys(profileInputs).forEach(function(id) {
-                const input = document.querySelector("#" + id);
-                if (!input) return;
-                if (input.type === "checkbox") {
-                    input.checked = profileInputs[id];
-                } else {
-                    input.value = profileInputs[id];
-                }
-            });
-        } catch (error) {
-            setMessage(profileMessage, "Error al cargar el perfil: " + error.message, "message-error");
-        }
-    }
+        if (profileName) profileName.textContent = user.name || "-";
+        if (profileEmail) profileEmail.textContent = user.user || "-";
+        if (profileRole) profileRole.textContent = user.role || "-";
+        if (profileBirthDate) profileBirthDate.textContent = formatDate(user.birthDate);
+        if (profileObjective) profileObjective.textContent = user.objectivePersonal || "-";
 
-    profileForm.addEventListener("submit", async function(event) {
-        event.preventDefault();
-        clearInputErrors(profileForm);
-        clearMessage(profileMessage);
-
-        const payload = {
-            name: document.querySelector("#profile-name").value.trim(),
-            birthDate: document.querySelector("#profile-birthDate").value,
-            age: document.querySelector("#profile-age").value ? Number(document.querySelector("#profile-age").value) : null,
-            practiceDeporte: document.querySelector("#profile-practiceDeporte").checked,
-            typeDeporte: document.querySelector("#profile-typeDeporte").value.trim(),
-            objectivePersonal: document.querySelector("#profile-objectivePersonal").value.trim(),
-            level: document.querySelector("#profile-level").value,
-            infoAdicional: document.querySelector("#profile-infoAdicional").value.trim()
+        const inputs = {
+            "profile-name": user.name || "",
+            "profile-birthDate": user.birthDate || "",
+            "profile-age": user.age || "",
+            "profile-practiceDeporte": user.practiceDeporte || false,
+            "profile-typeDeporte": user.typeDeporte || "",
+            "profile-objectivePersonal": user.objectivePersonal || "",
+            "profile-level": user.level || "",
+            "profile-infoAdicional": user.infoAdicional || ""
         };
 
-        if (!payload.name) {
-            setInputError(document.querySelector("#profile-name"), "El nombre es obligatorio.");
-            return;
-        }
+        Object.keys(inputs).forEach(function (id) {
+            const input = document.querySelector("#" + id);
+            if (!input) return;
+            if (input.type === "checkbox") input.checked = inputs[id];
+            else input.value = inputs[id];
+        });
+    }
 
-        try {
-            const result = await apiRequest("/auth/me", "PUT", payload, true);
+    if (profileForm) {
+        profileForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            clearInputErrors(profileForm);
+            clearMessage(profileMessage);
+
+            const loggedUser = getLoggedUser();
+            if (!loggedUser) { setMessage(profileMessage, "No hay sesión activa.", "message-error"); return; }
+
+            const users = getUsers();
+            const user = users.find(function (u) { return normalizeEmail(u.user) === loggedUser.user; });
+            if (!user) { setMessage(profileMessage, "Usuario no encontrado.", "message-error"); return; }
+
+            user.name = document.querySelector("#profile-name").value.trim() || user.name;
+            user.birthDate = document.querySelector("#profile-birthDate").value || user.birthDate;
+            user.age = document.querySelector("#profile-age").value ? Number(document.querySelector("#profile-age").value) : user.age;
+            user.practiceDeporte = document.querySelector("#profile-practiceDeporte").checked;
+            user.typeDeporte = document.querySelector("#profile-typeDeporte").value.trim();
+            user.objectivePersonal = document.querySelector("#profile-objectivePersonal").value.trim();
+            user.level = document.querySelector("#profile-level").value;
+            user.infoAdicional = document.querySelector("#profile-infoAdicional").value.trim();
+
+            saveUsers(users);
             setMessage(profileMessage, "Perfil actualizado correctamente.", "message-success");
             
             const session = getSession();
-            if (session) {
-                session.user.name = result.user.name;
-                saveSession(session);
+            if (session) { session.user.name = user.name; saveSession(session); }
+        });
+    }
+
+    if (passwordForm) {
+        passwordForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            clearInputErrors(passwordForm);
+            clearMessage(passwordMessage);
+
+            const loggedUser = getLoggedUser();
+            if (!loggedUser) { setMessage(passwordMessage, "No hay sesión activa.", "message-error"); return; }
+
+            const users = getUsers();
+            const user = users.find(function (u) { return normalizeEmail(u.user) === loggedUser.user; });
+            if (!user) { setMessage(passwordMessage, "Usuario no encontrado.", "message-error"); return; }
+
+            const currentPassword = document.querySelector("#current-password").value;
+            const newPassword = document.querySelector("#new-password").value;
+            const confirmPassword = document.querySelector("#confirm-new-password").value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                setMessage(passwordMessage, "Completa todos los campos.", "message-error"); return;
             }
-        } catch (error) {
-            setMessage(profileMessage, error.message || "Error al actualizar el perfil.", "message-error");
-        }
-    });
+            if (user.password !== currentPassword) {
+                setMessage(passwordMessage, "La contraseña actual es incorrecta.", "message-error"); return;
+            }
+            if (newPassword.length < 8) {
+                setInputError(document.querySelector("#new-password"), "Mínimo 8 caracteres."); return;
+            }
+            if (newPassword !== confirmPassword) {
+                setInputError(document.querySelector("#confirm-new-password"), "No coinciden."); return;
+            }
 
-    passwordForm.addEventListener("submit", async function(event) {
-        event.preventDefault();
-        clearInputErrors(passwordForm);
-        clearMessage(passwordMessage);
-
-        const currentPassword = document.querySelector("#current-password").value;
-        const newPassword = document.querySelector("#new-password").value;
-        const confirmPassword = document.querySelector("#confirm-new-password").value;
-
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            setMessage(passwordMessage, "Completa todos los campos de contraseña.", "message-error");
-            return;
-        }
-
-        if (newPassword.length < 8) {
-            setInputError(document.querySelector("#new-password"), "La nueva contraseña debe tener al menos 8 caracteres.");
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            setInputError(document.querySelector("#confirm-new-password"), "Las contraseñas no coinciden.");
-            return;
-        }
-
-        try {
-            await apiRequest("/auth/me/password", "PUT", {
-                currentPassword,
-                newPassword,
-                confirmPassword
-            }, true);
+            user.password = newPassword;
+            saveUsers(users);
             setMessage(passwordMessage, "Contraseña actualizada correctamente.", "message-success");
             passwordForm.reset();
-        } catch (error) {
-            setMessage(passwordMessage, error.message || "Error al cambiar la contraseña.", "message-error");
-        }
-    });
+        });
+    }
 
     loadProfile();
 }
 
-function handleCoachPage() {
-    const reservationsList = document.querySelector("#coach-reservations-list");
-    if (!reservationsList) return;
-
-    const messageElement = document.querySelector("#coach-message");
-
-    async function loadReservations() {
-        try {
-            const result = await apiRequest("/reservations", "GET", null, true);
-            const reservations = result.reservations || [];
-            
-            if (reservations.length === 0) {
-                reservationsList.innerHTML = "<p>No hay reservas registradas.</p>";
-                return;
-            }
-
-            reservationsList.innerHTML = reservations.map(function(res) {
-                return '<div class="reservation-item">' +
-                    '<strong>' + escapeHTML(res.user_name || "Usuario") + '</strong>' +
-                    '<span>' + escapeHTML(res.class_name || "Clase") + '</span>' +
-                    '<span class="reservation-date">' + formatDate(res.date) + '</span>' +
-                    '</div>';
-            }).join("");
-        } catch (error) {
-            setMessage(messageElement, "Error al cargar reservas: " + error.message, "message-error");
-        }
-    }
-
-    loadReservations();
-}
-
-function handleUserDashboard() {
-    const reservationsSection = document.querySelector("#user-reservations");
-    const progressSection = document.querySelector("#user-progress");
-    
-    if (!reservationsSection && !progressSection) return;
-
-    const messageElement = document.querySelector("#user-message");
-
-    async function loadDashboard() {
-        try {
-            if (reservationsSection) {
-                const result = await apiRequest("/reservations", "GET", null, true);
-                const reservations = result.reservations || [];
-                
-                if (reservations.length === 0) {
-                    reservationsSection.innerHTML = "<p>No tienes reservas activas.</p>";
-                } else {
-                    reservationsSection.innerHTML = reservations.map(function(res) {
-                        return '<div class="reservation-item">' +
-                            '<strong>' + escapeHTML(res.class_name || "Clase") + '</strong>' +
-                            '<span>' + formatDate(res.date) + '</span>' +
-                            '</div>';
-                    }).join("");
-                }
-            }
-
-            if (progressSection) {
-                const result = await apiRequest("/progress", "GET", null, true);
-                const progress = result.progress || {};
-                
-                const percentage = progress.percentage || 0;
-                progressSection.innerHTML = 
-                    '<div class="progress-donut--hero" style="--pct: ' + percentage + '">' +
-                    '<div class="progress-donut__label">' +
-                    '<strong>' + percentage + '%</strong>' +
-                    '<small>Progreso</small>' +
-                    '</div></div>';
-            }
-        } catch (error) {
-            setMessage(messageElement, "Error al cargar el dashboard: " + error.message, "message-error");
-        }
-    }
-
-    loadDashboard();
-}
+// ==================== PROTECCION DE DASHBOARD ====================
 
 function protectDashboard() {
     const body = document.body;
@@ -942,18 +961,14 @@ function protectDashboard() {
     if (!requiredRole) return;
 
     const user = getLoggedUser();
-    if (!user) {
-        window.location.href = "login.html";
-        return;
-    }
+    if (!user) { window.location.href = "login.html"; return; }
 
-    if (user.role !== requiredRole && !(requiredRole === "admin" && user.role === "admin")) {
+    if (user.role !== requiredRole) {
         window.location.href = roleRedirects[user.role] || "login.html";
         return;
     }
 
-    const logoutLinks = document.querySelectorAll("[data-logout]");
-    logoutLinks.forEach(function(link) {
+    document.querySelectorAll("[data-logout]").forEach(function(link) {
         link.addEventListener("click", function(event) {
             event.preventDefault();
             clearSession();
@@ -962,12 +977,12 @@ function protectDashboard() {
     });
 }
 
+// ==================== INIT ====================
+
 document.addEventListener("DOMContentLoaded", function() {
     protectDashboard();
     handleLoginPage();
     handleRegisterPage();
     handleAdminPage();
     handleProfilePage();
-    handleCoachPage();
-    handleUserDashboard();
 });
