@@ -16,7 +16,8 @@
     "healthCondition": "Ninguna",
     "infoAdicional": "Ninguna",
     "createdAt": "2025-05-10T10:00:00.000Z",
-    "password": "1234"
+    "password": "1234",
+    "passwordHash": "pbkdf2_sha256$120000$3a77a82fedbf1aac668147bd65661bd4$50f1200494ca81e3f239c8acbf6cc881c594da0b3de716f3fa8e2e99a4e072f3aa6cda8cf5c3992aabf4937a5790c22650c2b045c04f7bc74c6840936a0aa180"
   },
   {
     "id": 2,
@@ -35,7 +36,8 @@
     "healthCondition": "Optima",
     "infoAdicional": "Coach de fuerza y resistencia.",
     "createdAt": "2025-05-10T12:30:00.000Z",
-    "password": "1234"
+    "password": "1234",
+    "passwordHash": "pbkdf2_sha256$120000$0e034374f767b9b1961947205936afaf$6481e69ce71b39229a84afa52f54b59628729302d08231ab114715fb8ea5b2ccfb7d5affe9688380a619ad6b60fd70ca114bc9ded65af1180ef64a947d2330be"
   },
   {
     "id": 3,
@@ -54,7 +56,8 @@
     "healthCondition": "N/A",
     "infoAdicional": "Cuenta de administracion.",
     "createdAt": "2025-05-10T14:45:00.000Z",
-    "password": "1234"
+    "password": "1234",
+    "passwordHash": "pbkdf2_sha256$120000$00d6361111723e7b79a7e0d816ee6732$7ce5b5ed8ddefc0f9b0f55daa11e7bc9ca29c8b681ab3acef36ff7225f54c47f4d837feca41db67b92dddd4c0ada6bf2d10b939a808d05befddb4d3c8451ad1c"
   },
   {
     "id": 4,
@@ -73,7 +76,8 @@
     "healthCondition": "Ninguna",
     "infoAdicional": "Ninguna",
     "createdAt": "2025-05-10T10:00:00.000Z",
-    "password": "12345678"
+    "password": "12345678",
+    "passwordHash": "pbkdf2_sha256$120000$e778b14fce60afce8bbdada870d12d35$b72d68c4047a8d5e86acc0609a0057f4932976024ff40bf71bfeb701ac57271e6e79ac1212c5e4c8459135716062708d9118a231627502eb9670f736c08893ff"
   },
   {
     "id": 5,
@@ -92,7 +96,8 @@
     "healthCondition": "Optima",
     "infoAdicional": "Coach de fuerza y resistencia.",
     "createdAt": "2025-05-10T12:30:00.000Z",
-    "password": "12345678"
+    "password": "12345678",
+    "passwordHash": "pbkdf2_sha256$120000$11a1377801119860cd30eb42a34dc83e$ad5f98a7db6037bf7faf0cfdfc87c300640eae338b1114a4afb049a7856e27cac78eafcf17cadd59b2f4d205e07143189c05d799df41878be8d41e2b0813a83d"
   },
   {
     "id": 6,
@@ -111,6 +116,7 @@
     "healthCondition": "N/A",
     "infoAdicional": "Cuenta de administracion.",
     "createdAt": "2025-05-10T14:45:00.000Z",
-    "password": "12345678"
+    "password": "12345678",
+    "passwordHash": "pbkdf2_sha256$120000$141ac8001b38e0f85c493a95abada237$cf8071d604e4ebb3684ecdbbd5246dcdc632426bef76d9240adb17cea494be71781ca2cab62ca5cc81032534a1a383ec4922c8dec71e637639327094762fc875"
   }
 ]
