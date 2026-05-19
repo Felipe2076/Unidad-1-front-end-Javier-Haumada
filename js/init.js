@@ -28,8 +28,9 @@ function showConnectionBanner() {
             <div class="banner-content">
                 <div class="banner-spinner"></div>
                 <div class="banner-text">
-                    <h3>🔄 Conectando automáticamente con el Servidor SportClub...</h3>
-                    <p>Por favor, asegúrate de haber ejecutado <code>npm run dev</code> en la terminal de tu backend.</p>
+                    <h3>Servidor SportClub no detectado</h3>
+                    <p>Para iniciar el sistema, haz doble clic en el archivo <strong>start.bat</strong> en la carpeta del proyecto.</p>
+                    <p class="banner-sub">O ejecuta en la terminal: <code>cd backend && node server.js</code></p>
                 </div>
                 <button class="banner-retry" onclick="checkServerConnection()">Reintentar</button>
             </div>
@@ -68,5 +69,5 @@ function isServerConnected() {
 
 document.addEventListener("DOMContentLoaded", () => {
     checkServerConnection();
-    setInterval(checkServerConnection, 30000);
+    setInterval(checkServerConnection, 15000);
 });
