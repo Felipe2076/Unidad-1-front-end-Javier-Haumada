@@ -1,17 +1,19 @@
 const API_BASE_URL = "http://localhost:3000/api";
 let serverConnected = false;
 let retryCount = 0;
-const MAX_RETRIES = 20;
+let initialCheckDone = false;
+const MAX_RETRIES = 30;
 
 async function checkServerConnection() {
     try {
-        const response = await fetch(`${API_BASE_URL}/health`);
+        const response = await fetch(`${API_BASE_URL}/health`, { method: "GET" });
         if (response.ok) {
-            if (!serverConnected) {
-                serverConnected = true;
-                retryCount = 0;
-                hideConnectionBanner();
-                enableForms();
+            serverConnected = true;
+            retryCount = 0;
+            hideConnectionBanner();
+            enableForms();
+            if (!initialCheckDone) {
+                initialCheckDone = true;
                 showConnectedNotification();
             }
             return true;
@@ -21,8 +23,14 @@ async function checkServerConnection() {
     }
     
     retryCount++;
-    showConnectionBanner();
-    disableForms();
+    
+    if (retryCount > 3) {
+        showConnectionBanner();
+        if (initialCheckDone) {
+            disableForms();
+        }
+    }
+    
     return false;
 }
 
@@ -31,13 +39,14 @@ function showConnectionBanner() {
     if (!banner) {
         banner = document.createElement("div");
         banner.id = "server-connection-banner";
+        banner.className = "banner-error";
         banner.innerHTML = `
             <div class="banner-content">
-                <div class="banner-spinner"></div>
+                <div class="banner-icon">!</div>
                 <div class="banner-text">
-                    <h3>Conectando con el servidor SportClub...</h3>
-                    <p>Si el servidor no inicia automaticamente, haz doble clic en <strong>start.bat</strong> en la carpeta del proyecto.</p>
-                    <p class="banner-sub">Reintento automatico <span id="retry-count">0</span>/${MAX_RETRIES}</p>
+                    <h3>Servidor no detectado</h3>
+                    <p>Haz doble clic en <strong>START.BAT</strong> en la carpeta del proyecto para iniciar el sistema.</p>
+                    <p class="banner-sub">Reintento automatico en 5 segundos...</p>
                 </div>
                 <button class="banner-retry" onclick="forceReconnect()">Reintentar ahora</button>
             </div>
@@ -45,11 +54,6 @@ function showConnectionBanner() {
         document.body.insertBefore(banner, document.body.firstChild);
     }
     banner.style.display = "block";
-    
-    const retryEl = document.getElementById("retry-count");
-    if (retryEl) {
-        retryEl.textContent = retryCount;
-    }
 }
 
 function hideConnectionBanner() {
@@ -60,28 +64,30 @@ function hideConnectionBanner() {
 }
 
 function showConnectedNotification() {
-    let notif = document.getElementById("connected-notification");
-    if (!notif) {
-        notif = document.createElement("div");
-        notif.id = "connected-notification";
-        notif.innerHTML = `
-            <div class="notif-content">
-                <span class="notif-icon">✓</span>
-                <span class="notif-text">Servidor conectado!</span>
-            </div>
-        `;
-        document.body.insertBefore(notif, document.body.firstChild);
-        
-        setTimeout(() => {
-            notif.style.opacity = "0";
-            notif.style.transform = "translateY(-100%)";
-            setTimeout(() => notif.remove(), 500);
-        }, 3000);
-    }
+    let existing = document.getElementById("connected-notification");
+    if (existing) return;
+    
+    const notif = document.createElement("div");
+    notif.id = "connected-notification";
+    notif.innerHTML = `
+        <div class="notif-content">
+            <span class="notif-icon">✓</span>
+            <span class="notif-text">Servidor conectado - Sistema listo</span>
+        </div>
+    `;
+    document.body.insertBefore(notif, document.body.firstChild);
+    
+    setTimeout(() => {
+        notif.style.opacity = "0";
+        notif.style.transform = "translateY(-100%)";
+        setTimeout(() => notif.remove(), 500);
+    }, 2000);
 }
 
 function forceReconnect() {
     retryCount = 0;
+    hideConnectionBanner();
+    enableForms();
     checkServerConnection();
 }
 
@@ -89,7 +95,7 @@ function disableForms() {
     const forms = document.querySelectorAll("form");
     forms.forEach(form => {
         form.style.pointerEvents = "none";
-        form.style.opacity = "0.5";
+        form.style.opacity = "0.4";
     });
 }
 
@@ -106,6 +112,7 @@ function isServerConnected() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    enableForms();
     checkServerConnection();
     setInterval(checkServerConnection, 5000);
 });
