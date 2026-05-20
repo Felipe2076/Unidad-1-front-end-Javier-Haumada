@@ -35,10 +35,36 @@ function getAuthToken() { const s = getSession(); return s && s.token ? s.token 
 function getUsers() {
     try {
         const stored = localStorage.getItem(USERS_STORAGE_KEY);
-        if (!stored) { saveUsers(defaultUsers); return defaultUsers.slice(); }
+        if (!stored) {
+            saveUsers(defaultUsers);
+            return JSON.parse(JSON.stringify(defaultUsers));
+        }
         const parsed = JSON.parse(stored);
-        return Array.isArray(parsed) ? parsed : defaultUsers.slice();
-    } catch (e) { saveUsers(defaultUsers); return defaultUsers.slice(); }
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+            saveUsers(defaultUsers);
+            return JSON.parse(JSON.stringify(defaultUsers));
+        }
+        
+        // Verificar que existan los usuarios por defecto
+        const defaultEmails = defaultUsers.map(u => normalizeEmail(u.user));
+        const hasAllDefaults = defaultEmails.every(email => parsed.some(u => normalizeEmail(u.user) === email));
+        
+        if (!hasAllDefaults) {
+            // Agregar usuarios faltantes
+            defaultUsers.forEach(defaultUser => {
+                const email = normalizeEmail(defaultUser.user);
+                if (!parsed.some(u => normalizeEmail(u.user) === email)) {
+                    parsed.push(JSON.parse(JSON.stringify(defaultUser)));
+                }
+            });
+            saveUsers(parsed);
+        }
+        
+        return parsed;
+    } catch (e) {
+        saveUsers(defaultUsers);
+        return JSON.parse(JSON.stringify(defaultUsers));
+    }
 }
 function saveUsers(list) { localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(list)); }
 function getNextLocalUserId() {
@@ -139,12 +165,17 @@ function handleLoginPage() {
         }
 
         if (useLocalStorage) {
+            // Asegurar que los usuarios existan
+            getUsers();
+            
             const users = getUsers();
             const matchedUser = users.find(u => normalizeEmail(u.user) === inputEmail && u.password === inputPassword);
+            
             if (!matchedUser) {
                 setMessage(messageElement, "Credenciales incorrectas.", "message-error");
                 return;
             }
+            
             saveSession({ user: { name: matchedUser.name, user: normalizeEmail(matchedUser.user), role: matchedUser.role }, token: "session-" + Date.now() });
             setMessage(messageElement, "Has ingresado correctamente.", "message-success");
             setTimeout(() => redirectToDashboard(matchedUser.role), 500);
@@ -165,7 +196,6 @@ function handleLoginPage() {
             
             const result = await response.json();
             
-            // BLINDAJE DE ROLES: Verificar rol antes de guardar sesión
             if (!result.user || !result.user.role) {
                 throw new Error("Error de autenticación");
             }
@@ -678,9 +708,7 @@ function protectDashboard() {
     const user = getLoggedUser();
     if (!user) { window.location.href = "login.html"; return; }
     
-    // BLINDAJE DE ROLES: Verificar que el usuario tenga el rol correcto
     if (user.role !== requiredRole) {
-        // Si intenta acceder a admin sin ser admin, borrar sesión y redirigir
         if (requiredRole === "admin") {
             clearSession();
             window.location.href = "login.html";
