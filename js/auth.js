@@ -6,9 +6,6 @@ const USERS_STORAGE_KEY = "sportclub_users";
 const isGitHubPages = window.location.hostname.includes('github.io');
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const isServedFromBackend = isLocalhost && window.location.port === '3000';
-
-// En GitHub Pages usamos localStorage exclusivamente
-// En localhost:3000 usamos el backend
 const useLocalStorage = isGitHubPages || !isServedFromBackend;
 
 const defaultUsers = [
@@ -72,32 +69,52 @@ function formatDate(value) {
 function escapeHTML(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]); }
 function getRoleBadge(role) { return `<span class="badge badge-${role}">${escapeHTML(role)}</span>`; }
 
-// ==================== INDICADOR DE MODO ====================
+// ==================== SEMÁFORO DE CONEXIÓN ====================
 
-function createModeIndicator() {
-    let indicator = document.getElementById("mode-indicator");
+function createTrafficLight() {
+    let indicator = document.getElementById("traffic-light");
     if (indicator) return;
     
     indicator = document.createElement("div");
-    indicator.id = "mode-indicator";
+    indicator.id = "traffic-light";
+    indicator.innerHTML = `<span class="light-dot"></span><span class="light-text">Verificando...</span>`;
     document.body.appendChild(indicator);
-    updateModeIndicator();
 }
 
-function updateModeIndicator() {
-    const indicator = document.getElementById("mode-indicator");
+function updateTrafficLight(status) {
+    const indicator = document.getElementById("traffic-light");
     if (!indicator) return;
     
-    if (isGitHubPages) {
-        indicator.className = "mode-indicator mode-demo";
-        indicator.innerHTML = `<span class="mode-dot"></span><span class="mode-text">SportClub</span>`;
-    } else if (isServedFromBackend) {
-        indicator.className = "mode-indicator mode-backend";
-        indicator.innerHTML = `<span class="mode-dot"></span><span class="mode-text">Backend conectado</span>`;
+    const dot = indicator.querySelector(".light-dot");
+    const text = indicator.querySelector(".light-text");
+    
+    if (status === 'connected') {
+        dot.className = "light-dot green";
+        text.textContent = "Servidor Activo";
+    } else if (status === 'disconnected') {
+        dot.className = "light-dot red";
+        text.textContent = "Servidor Desconectado";
     } else {
-        indicator.className = "mode-indicator mode-local";
-        indicator.innerHTML = `<span class="mode-dot"></span><span class="mode-text">Modo local</span>`;
+        dot.className = "light-dot yellow";
+        text.textContent = "Verificando...";
     }
+}
+
+async function checkServerConnection() {
+    if (useLocalStorage) {
+        updateTrafficLight('connected');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/health`, { method: "GET" });
+        if (response.ok) {
+            updateTrafficLight('connected');
+            return true;
+        }
+    } catch (e) {}
+    updateTrafficLight('disconnected');
+    return false;
 }
 
 // ==================== LOGIN ====================
@@ -121,7 +138,6 @@ function handleLoginPage() {
             return;
         }
 
-        // Si estamos en GitHub Pages o no hay backend, usar localStorage
         if (useLocalStorage) {
             const users = getUsers();
             const matchedUser = users.find(u => normalizeEmail(u.user) === inputEmail && u.password === inputPassword);
@@ -135,15 +151,25 @@ function handleLoginPage() {
             return;
         }
 
-        // Intentar backend
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: inputEmail, password: inputPassword })
             });
-            if (!response.ok) throw new Error("Credenciales incorrectas");
+            
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({ error: "Credenciales incorrectas" }));
+                throw new Error(err.error || "Credenciales incorrectas");
+            }
+            
             const result = await response.json();
+            
+            // BLINDAJE DE ROLES: Verificar rol antes de guardar sesión
+            if (!result.user || !result.user.role) {
+                throw new Error("Error de autenticación");
+            }
+            
             saveSession({ user: { name: result.user.name, user: normalizeEmail(result.user.user), role: result.user.role }, token: result.token });
             setMessage(messageElement, "Has ingresado correctamente.", "message-success");
             setTimeout(() => redirectToDashboard(result.user.role), 500);
@@ -213,7 +239,6 @@ function handleRegisterPage() {
         if (!payload.level) { setInputError(levelInput, "Selecciona tu nivel actual."); return; }
         if (!payload.healthCondition) { setInputError(healthConditionInput, "Indica tu condicion de salud o escribe 'Ninguna'."); return; }
 
-        // Si estamos en GitHub Pages, guardar en localStorage
         if (useLocalStorage) {
             const users = getUsers();
             if (users.some(u => normalizeEmail(u.user) === payload.email)) {
@@ -234,17 +259,18 @@ function handleRegisterPage() {
             return;
         }
 
-        // Intentar backend
         try {
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
+            
             if (!response.ok) {
                 const err = await response.json().catch(() => ({ error: "Error en el servidor" }));
                 throw new Error(err.error || "Error al registrar");
             }
+            
             setMessage(messageElement, "Perfil creado correctamente. Redirigiendo al login...", "message-success");
             form.reset();
             setTimeout(() => { window.location.href = "login.html"; }, 1500);
@@ -642,15 +668,28 @@ function handleProfilePage() {
     loadProfile();
 }
 
-// ==================== PROTECCION ====================
+// ==================== PROTECCION DE DASHBOARD ====================
 
 function protectDashboard() {
     const body = document.body;
     const requiredRole = body.dataset.requiredRole;
     if (!requiredRole) return;
+    
     const user = getLoggedUser();
     if (!user) { window.location.href = "login.html"; return; }
-    if (user.role !== requiredRole) { window.location.href = roleRedirects[user.role] || "login.html"; return; }
+    
+    // BLINDAJE DE ROLES: Verificar que el usuario tenga el rol correcto
+    if (user.role !== requiredRole) {
+        // Si intenta acceder a admin sin ser admin, borrar sesión y redirigir
+        if (requiredRole === "admin") {
+            clearSession();
+            window.location.href = "login.html";
+            return;
+        }
+        window.location.href = roleRedirects[user.role] || "login.html";
+        return;
+    }
+    
     document.querySelectorAll("[data-logout]").forEach(link => {
         link.addEventListener("click", function(event) { event.preventDefault(); clearSession(); window.location.href = "login.html"; });
     });
@@ -659,7 +698,11 @@ function protectDashboard() {
 // ==================== INIT ====================
 
 document.addEventListener("DOMContentLoaded", function() {
-    createModeIndicator();
+    createTrafficLight();
+    checkServerConnection();
+    if (!useLocalStorage) {
+        setInterval(checkServerConnection, 5000);
+    }
     protectDashboard();
     handleLoginPage();
     handleRegisterPage();

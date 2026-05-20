@@ -1948,67 +1948,72 @@ main.wrap {
     }
 }
 
-/* Indicador de modo (GitHub Pages / Backend / Local) */
-#mode-indicator {
+/* Semáforo de Conexión en Tiempo Real */
+#traffic-light {
     position: fixed;
-    bottom: 12px;
+    top: 12px;
     right: 12px;
     z-index: 9999;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 20px;
-    backdrop-filter: blur(8px);
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 24px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
     color: white;
-    font-size: 0.75rem;
-    font-weight: 500;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
 }
 
-#mode-indicator.mode-demo {
-    background: rgba(59, 130, 246, 0.85);
-}
-
-#mode-indicator.mode-backend {
-    background: rgba(16, 185, 129, 0.85);
-}
-
-#mode-indicator.mode-local {
-    background: rgba(245, 158, 11, 0.85);
-}
-
-.mode-dot {
-    width: 8px;
-    height: 8px;
+.light-dot {
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: white;
+    background: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
-#mode-indicator.mode-demo .mode-dot {
-    animation: pulse 2s ease-in-out infinite;
-}
-
-#mode-indicator.mode-backend .mode-dot,
-#mode-indicator.mode-local .mode-dot {
+.light-dot.green {
+    background: #28a745;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.8);
     animation: none;
 }
 
+.light-dot.red {
+    background: #dc3545;
+    box-shadow: 0 0 12px rgba(220, 53, 69, 0.8);
+    animation: none;
+}
+
+.light-dot.yellow {
+    background: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.9); }
 }
 
 @media (max-width: 640px) {
-    #mode-indicator {
-        bottom: 8px;
+    #traffic-light {
+        top: 8px;
         right: 8px;
-        padding: 6px 10px;
+        padding: 8px 12px;
         font-size: 0.7rem;
     }
     
-    .mode-text {
+    .light-text {
         display: none;
+    }
+    
+    .light-dot {
+        width: 10px;
+        height: 10px;
     }
 }
